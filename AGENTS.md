@@ -1,35 +1,27 @@
-# AGENTS.md
+# FASTENgine
 
-## Overview
+High-performance C++ Engine.
 
-[Project description and high-level goals]
-
-## Rules & Guidelines
-
+## Core Rules
 - **Language**: All artifacts (code, documentation, comments, commit messages, etc.) must be created in English.
 
-## Commands
+## Quick Commands
+- **Build**: `[Insert Build Command, e.g., cmake --build build]`
+- **Test**: `[Insert Test Command, e.g., ctest --test-dir build]`
+- **Lint**: `[Insert Lint Command, e.g., clang-format -i src/*.cpp]`
 
-### Build
+## Detailed Guidelines
 
-`[command to build the project]`
+For specific guidelines and specialized workflows, please refer to the following documentation:
 
-### Test
+### Development Standards
+- [Code Style & Patterns](.kilo/agent/style.md)
+- [Testing Strategy](.kilo/agent/testing.md)
+- [Git & PR Workflow](.kilo/agent/git.md)
 
-`[command to run tests]`
+## Available Skills
 
-### Lint
-
-`[command to run linter]`
-
-## Code Style
-
-[Guidelines for coding standards and patterns]
-
-## Testing
-
-[Information about testing strategy and requirements]
-
-## Pull Request & Commit Guidelines
-
-[Rules for commits and PRs]
+For specialized workflows and automated tasks, refer to:
+- [Agent MD Refactor](.kilo/agent/agent-md-refactor.md) - For organizing instructions.
+- [Research & Execution (Surf)](.kilo/command/surf.md) - For deep web research.
+- [Skill Creator](.kilo/agent/skill-creator/SKILL.md) - For creating or updating new skills.
