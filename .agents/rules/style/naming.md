@@ -1,5 +1,63 @@
 # Naming Conventions
 
+## Naming prefixes and their combinations
+
+### Variable prefixes
+
+- `c_`: const/constexpr variable
+- `s_`: static variable
+- `sc_`: static const/constexpr variable
+
+### Macro prefixes
+
+- `macro_`: Object-like or function-like macro
+
+### Enum prefixes
+
+- `e_`: enum variable
+- `ce_`: const/constexpr enum variable
+- `se_`: static enum variable
+- `sce_`: static const/constexpr enum variable
+
+### Pointer prefixes
+
+- `p_`: pointer
+- `pc_`: pointer to const/constexpr object
+- `cp_`: const/constexpr pointer
+- `cpc_`: const/constexpr pointer to const/constexpr object
+- `sp_`: static pointer
+- `spc_`: static pointer to const/constexpr object
+- `scp_`: static const/constexpr pointer
+- `scpc_`: static const/constexpr pointer to const/constexpr object
+
+### Reference prefixes
+
+- `r_`: reference
+- `rc_`: reference to const/constexpr object
+- `cr_`: constexpr reference (can only refer to an object that is usable in constant expressions)
+- `sr_`: static reference
+- `src_`: static reference to const/constexpr object
+- `scr_`: static constexpr reference (can only refer to an object that is usable in constant expressions)
+
+### Type prefixes
+
+- `C_`: class
+- `S_`: struct
+- `E_`: enum class
+
+### Type alias (`using`/`typedef`) prefixes
+
+- `TA_`: some type alias
+
+### Template parameter prefixes
+
+- `T_`: type parameter
+- `TP_`: type parameter pack
+- `NT_`: non-type parameter
+- `NTP_`: non-type parameter pack
+- `TT_`: template template parameter
+- `TTP_`: template template parameter pack
+
 ## Files
 
 | Entity | Convention | Example |
@@ -11,15 +69,15 @@
 
 | Entity | Convention | Example |
 |--------|------------|---------|
-| Class name | noun in `Class_PascalCase` style-form | `Class_FrameRenderer` |
-| Struct name | noun in `Struct_PascalCase` style-form | `Struct_ProfileInfo` |
-| Enum-class name | noun in `Enum_PascalCase` style-form | `Enum_FileType` |
+| Class name | noun in `C_PascalCase` style-form | `C_FrameRenderer` |
+| Struct name | noun in `S_PascalCase` style-form | `S_ProfileInfo` |
+| Enum-class name | noun in `E_PascalCase` style-form | `E_FileType` |
 
 ## Macros
 
 | Entity | Convention | Example |
 |--------|------------|---------|
-| Basic macro name | noun in `macro_UPPER_SNAKE_CASE` style-form | `macro_MAX_BUFFER_SIZE` |
+| Object-like macro name | noun in `macro_UPPER_SNAKE_CASE` style-form | `macro_MAX_BUFFER_SIZE` |
 | Function-like macro name | imperative verb in `macro_camelCase()` style-form | `macro_saveData()` |
 
 ## Functions/Methods
@@ -27,15 +85,13 @@
 | Entity | Convention | Example |
 |--------|------------|---------|
 | Function/Method name | imperative verb in `camelCase()` style-form | `sendRequest()` |
-| Function/Method non-const && non-ref && non-ptr parameter name | noun in `camelCase` style-form | `firstArg` |
-| Function/Method const && non-ref && non-ptr parameter name | noun in `const_camelCase` style-form | `const_secondArg` |
-| Function/Method non-const-ref-to-non-const parameter name | noun in `ref_camelCase` style-form | `ref_thirdArg` |
-| Function/Method const-ref-to-non-const parameter name | noun in `cRef_camelCase` style-form | `cRef_fourthArg` |
-| Function/Method non-const-ref-to-const parameter name | noun in `refToC_camelCase` style-form | `refToC_fifthArg` |
-| Function/Method const-ref-to-const parameter name | noun in `cRefToC_camelCase` style-form | `cRefToC_sixthArg` |
-| Function/Method non-const-ptr-to-non-const parameter name | noun in `ptr_camelCase` style-form | `ptr_seventhArg` |
-| Function/Method const-ptr-to-non-const parameter name | noun in `cPtr_camelCase` style-form | `cPtr_eighthArg` |
-| Function/Method non-const-ptr-to-const parameter name | noun in `ptrToC_camelCase` style-form | `ptrToC_ninthArg` |
+| Function/Method non-const && non-reference && non-pointer parameter name | noun in `camelCase` style-form | `firstArg` |
+| Function/Method const && non-reference && non-pointer parameter name | noun in `c_camelCase` style-form | `c_secondArg` |
+| Function/Method reference-to-data parameter name | noun in `r_camelCase` style-form | `r_thirdArg` |
+| Function/Method reference-to-const-data parameter name | noun in `rс_camelCase` style-form | `rc_fifthArg` |
+| Function/Method pointer-to-data parameter name | noun in `p_camelCase` style-form | `p_seventhArg` |
+| Function/Method const-pointer-to-data parameter name | noun in `cp_camelCase` style-form | `cp_eighthArg` |
+| Function/Method const-pointer-to-const-data parameter name | noun in `cpc_camelCase` style-form | `cpc_ninthArg` |
 | Function/Method const-ptr-to-const parameter name | noun in `cPtrToC_camelCase` style-form | `cPtrToC_tenthArg` |
 
 ## Compile-time constants
@@ -51,8 +107,8 @@
 
 | Entity | Convention | Example |
 |--------|------------|---------|
-| Local run-time const variable name | noun in `const_camelCase` style-form | `const_userName` |
-| Global run-time const variable name | noun in `const_PascalCase` style-form | `const_UserName` |
+| Local run-time const variable name | noun in `c_camelCase` style-form | `c_userName` |
+| Global run-time const variable name | noun in `c_PascalCase` style-form | `c_UserName` |
 | Local run-time const pointer name | noun in `cPtr_camelCase` style-form | `cPtr_userName` |
 | Global run-time const pointer name | noun in `cPtr_PascalCase` style-form | `cPtr_UserName` |
 
