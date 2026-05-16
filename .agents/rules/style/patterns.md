@@ -11,6 +11,7 @@
 - Use `const` whenever possible.
 - Avoid `using namespace std;` in headers.
 - Minimize use of macros; prefer `constexpr` or inline functions.
+- Use enum-classes instead traditional enums.
 - **Strict Rule**: Throwing exceptions is strictly forbidden. Use error codes or other non-exception-based error handling mechanisms (e.g., `std::optional`, `std::expected`).
 
 ## Polymorphism
