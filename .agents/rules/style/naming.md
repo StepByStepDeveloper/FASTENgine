@@ -80,27 +80,27 @@
 - `gsrc_`: `global` scope `static` `reference` to `const/constexpr` object (`gsrc` - global static reference const)
 - `nsrc_`: `namespace` scope `static` `reference` to `const/constexpr` object (`nsrc` - namespace static reference const)
 - `scr_`: `static` `constexpr` `reference`, can only refer to an object that is usable in constant expressions (`scr` - static constexpr reference)
-- `gscr_`: `global` scope `static` `constexpr` `reference`, can only refer to an object that is usable in constant expressions (`gscp` - global static constexpr reference)
-- `nscr_`: `namespace` scope `static` `constexpr` `reference`, can only refer to an object that is usable in constant expressions (`nscp` - namespace static constexpr reference)
+- `gscr_`: `global` scope `static` `constexpr` `reference`, can only refer to an object that is usable in constant expressions (`gscr` - global static constexpr reference)
+- `nscr_`: `namespace` scope `static` `constexpr` `reference`, can only refer to an object that is usable in constant expressions (`nscr` - namespace static constexpr reference)
 
 ### Function parameter prefixes
 
-- `f_`: `function` parameter (`f` - function)
-- `cf_`: `const` `function` parameter (`cf` - const function)
-- `pf_`: `pointer` `function` parameter (`pf` - pointer function)
-- `pcf_`: `pointer` to `const` object `function` parameter (`pcf` - pointer const function)
-- `cpf_`: `const` `pointer` `function` parameter (`cpf` - const pointer function)
-- `cpcf_`: `const` `pointer` to `const/constexpr` object `function` parameter (`cpcf` - const pointer const function)
-- `rf_`: `reference` `function` parameter (`rf` - reference function)
-- `rcf_`: `reference` to `const/constexpr` object `function` parameter (`rcf` - reference const function)
-- `ef_`: `enum` `function` parameter (`ef` - enum function)
-- `cef_`: `const` `enum` `function` parameter (`cef` - const enum function)
+- `f_`: `function` parameter (`f` - func-param)
+- `cf_`: `const` `function` parameter (`cf` - const func-param)
+- `pf_`: `pointer` `function` parameter (`pf` - pointer func-param)
+- `pcf_`: `pointer` to `const` object `function` parameter (`pcf` - pointer const func-param)
+- `cpf_`: `const` `pointer` `function` parameter (`cpf` - const pointer func-param)
+- `cpcf_`: `const` `pointer` to `const/constexpr` object `function` parameter (`cpcf` - const pointer const func-param)
+- `rf_`: `reference` `function` parameter (`rf` - reference func-param)
+- `rcf_`: `reference` to `const/constexpr` object `function` parameter (`rcf` - reference const func-param)
+- `ef_`: `enum` `function` parameter (`ef` - enum func-param)
+- `cef_`: `const` `enum` `function` parameter (`cef` - const enum func-param)
 
 ### Type prefixes
 
 - `C_`: `class` (`C` - Class)
 - `S_`: `struct` (`S` - Struct)
-- `E_`: `enum` class (`E` - Enum)
+- `E_`: `enum` or `enum class` (`E` - Enum)
 
 ### Type alias (`using`/`typedef`) prefixes
 
@@ -159,6 +159,16 @@
 | Function/Method parameter name                                                                 | noun in `[function-parameter-prefix]_camelCase` style-form | `cpcf_someArg`       |
 | Local && non-func-param && non-const && non-reference && non-pointer && non-enum variable name | noun in `camelCase` style-form                             | `userName`           |
 | Other variable name                                                                            | noun in `[variable-prefix]_camelCase` style-form           | `gsc_userName`       |
+| Enum class member variable name                                                                | noun in `[enum-variable-prefix]_camelCase_` style-form     | `gsce_operatingMode_`|
+| Pointer class member variable name                                                             | noun in `[pointer-prefix]_camelCase_` style-form           | `gscpc_userName_`    |
+| Reference class member variable name                                                           | noun in `[reference-prefix]_camelCase_` style-form         | `gscr_userName_`     |
+| Non-const && non-reference && non-pointer && non-enum class member variable name               | noun in `camelCase_` style-form                            | `userName_`          |
+| Other class member variable name                                                               | noun in `[variable-prefix]_camelCase_` style-form          | `gsc_userName_`      |
+| Enum struct member variable name                                                               | noun in `[enum-variable-prefix]_camelCase` style-form      | `gsce_operatingMode` |
+| Pointer struct member variable name                                                            | noun in `[pointer-prefix]_camelCase` style-form            | `gscpc_userName`     |
+| Reference struct member variable name                                                          | noun in `[reference-prefix]_camelCase` style-form          | `gscr_userName`      |
+| Non-const && non-reference && non-pointer && non-enum struct member variable name              | noun in `camelCase` style-form                             | `userName`           |
+| Other struct member variable name                                                              | noun in `[variable-prefix]_camelCase` style-form           | `gsc_userName`       |
 
 ## Template parameters
 
@@ -216,13 +226,21 @@ void processData(int f_param, const int cf_param, int* pf_ptr,
 void pointerExample() {
     C_Object obj;
     
-    C_Object* p_obj = &obj;                         // pointer: p_camelCase
-    const C_Object* pc_ptrToConst = &obj;           // pointer to const: pc_camelCase
-    C_Object* const cp_constPtr = &obj;             // const pointer: cp_camelCase
+    C_Object* p_obj = &obj;                           // pointer: p_camelCase
+    const C_Object* pc_ptrToConst = &obj;             // pointer to const: pc_camelCase
+    C_Object* const cp_constPtr = &obj;               // const pointer: cp_camelCase
     const C_Object* const cpc_constPtrToConst = &obj; // const pointer to const: cpc_camelCase
 
-    C_Object& r_ref = obj;                          // reference: r_camelCase
-    const C_Object& rc_refToConst = obj;            // reference to const: rc_camelCase
+    static C_Object* sp_staticPtr = &obj;                             // static pointer: sp_camelCase
+    static const C_Object* spc_staticPtrToConst = &obj;               // static pointer to const: spc_camelCase
+    static C_Object* const scp_staticConstPtr = &obj;                 // static const pointer: scp_camelCase
+    static const C_Object* const scpc_staticConstPtrToConst = &obj;   // static const pointer to const: scpc_camelCase
+
+    C_Object& r_ref = obj;                            // reference: r_camelCase
+    const C_Object& rc_refToConst = obj;              // reference to const: rc_camelCase
+
+    static C_Object& sr_staticRef = obj;                              // static reference: sr_camelCase
+    static const C_Object& src_staticRefToConst = obj;                // static reference to const: src_camelCase
 }
 
 } // namespace fast_engine
@@ -235,22 +253,28 @@ namespace fast_engine {
 
 enum class E_Color { enum_RED, enum_BLUE };       // enum class: E_PascalCase
 
-enum MyEnum { enum_VAL1, enum_VAL2 };            // enum field: enum_UPPER_SNAKE_CASE
+enum E_MyEnum { enum_VAL1, enum_VAL2 };           // enum field: enum_UPPER_SNAKE_CASE
 
-struct S_Transform {                             // struct: S_PascalCase
+struct S_Transform {                              // struct: S_PascalCase
     float x, y, z;
 };
 
-class C_FrameRenderer {                         // class: C_PascalCase
+class C_FrameRenderer {                           // class: C_PascalCase
 public:
-    void render() {}                             // method: camelCase
+    void render() {}                              // method: camelCase
+    int gsce_operatingMode_;                      // enum class member variable (with _): gsce_camelCase_
+};
+
+struct S_TransformWithEnum {                      // struct: S_PascalCase
+    float x, y, z;
+    int gsce_operatingMode;                       // enum struct member variable (without _): gsce_camelCase
 };
 
 using TA_ProfileInfo = int;                       // type alias: TA_PascalCase
 
-void enumExample() {
+void callEnumExample() {
     E_Color ce_constEnum = E_Color::enum_RED;     // const enum variable: ce_camelCase
-    MyEnum ne_namespaceEnum = enum_VAL1;          // namespace enum variable: ne_camelCase (inside namespace)
+    E_MyEnum ne_namespaceEnum = enum_VAL1;        // namespace enum variable: ne_camelCase (inside namespace)
 }
 
 } // namespace fast_engine
@@ -266,20 +290,28 @@ namespace fast_engine {
 
 template <typename T_ValueType>                   // type template parameter: T_PascalCase
 class C_Container {
-    T_ValueType m_data;
+    T_ValueType data_;
 };
 
 template <int NT_BufferSize>                      // non-type template parameter: NT_PascalCase
 class C_Buffer {};
 
+template <int... NTP_Sizes>                       // non-type template parameter pack: NTP_PascalCase
+class C_MultiBuffer {};
+
 template <typename... TP_Args>                    // type pack template parameter: TP_PascalCase
 void processPack(TP_Args... args) {}
 
-void macroExample() {
+template <typename T_ValueType, template <typename> class TT_TemplateParam> // template template parameter: TT_PascalCase
+class C_NestedContainer {
+    T_ValueType data_;
+    TT_TemplateParam<T_ValueType> nestedData_;
+};
+
+void callMacroExample() {
     int sum = macro_calculateSum(10, 20);
     int size = macro_MAX_BUFFER_SIZE;
 }
 
 } // namespace fast_engine
 ```
-

@@ -21,7 +21,6 @@ Static polymorphism is preferred over dynamic polymorphism. Dynamic polymorphism
 **Strict Rules:**
 
 - **NO virtual functions.**
-- **NO abstract classes or interfaces (interface classes).**
 - **NO `dynamic_cast`.**
 
 ### Allowed Mechanisms
