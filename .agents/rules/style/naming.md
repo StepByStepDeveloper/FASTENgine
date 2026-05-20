@@ -147,7 +147,7 @@
 | Entity                 | Convention                                           | Example                  |
 |:---------------------- | ---------------------------------------------------- | ------------------------ |
 | Object-like macro name | noun in `[macro-prefix]_UPPER_SNAKE_CASE` style-form | `macro_MAX_BUFFER_SIZE`  |
-| Enum-field name        | any name in `enumerator_UPPER_SNAKE_CASE` style-form | `enumerator_DEEP_PURPLE` |
+| Enum-field name        | any name in `enum_UPPER_SNAKE_CASE` style-form | `enum_DEEP_PURPLE` |
 
 ## Variables
 
@@ -165,3 +165,121 @@
 | Entity                  | Convention                                                  | Example               |
 |:----------------------- | ----------------------------------------------------------- | --------------------- |
 | Template parameter name | noun in `[template-parameter-prefix]_PascalCase` style-form | `NTP_GreenVegetables` |
+
+## Examples
+
+### Variables and Scopes
+
+```cpp
+// Global scope (outside any namespace)
+int g_globalCount = 0;
+const int gc_globalConst = 100;
+static const int gsc_globalStaticConst = 200;
+
+namespace fast_engine {
+
+namespace renderer {
+    // Namespace scope
+    int n_namespaceVar = 42;
+    const int nc_namespaceConst = 100;
+    static int ns_namespaceStatic = 7;
+}
+
+class C_Renderer {
+public:
+    void update() {
+        // Local variables
+        int userName = 0;
+        const int c_maxFrames = 1000;
+        static int s_counter = 0;
+        static const int sc_limit = 5000;
+
+        s_counter++;
+    }
+};
+
+} // namespace fast_engine
+```
+
+### Pointers and References
+
+```cpp
+namespace fast_engine {
+
+class C_Object {};
+
+void processData(int f_param, const int cf_param, int* pf_ptr, 
+                 const int* pcf_ptr, int& rf_ref, const int& rcf_ref) {
+    // Implementation...
+}
+
+void pointerExample() {
+    C_Object obj;
+    
+    C_Object* p_obj = &obj;                         // pointer: p_camelCase
+    const C_Object* pc_ptrToConst = &obj;           // pointer to const: pc_camelCase
+    C_Object* const cp_constPtr = &obj;             // const pointer: cp_camelCase
+    const C_Object* const cpc_constPtrToConst = &obj; // const pointer to const: cpc_camelCase
+
+    C_Object& r_ref = obj;                          // reference: r_camelCase
+    const C_Object& rc_refToConst = obj;            // reference to const: rc_camelCase
+}
+
+} // namespace fast_engine
+```
+
+### Enums and Types
+
+```cpp
+namespace fast_engine {
+
+enum class E_Color { enum_RED, enum_BLUE };       // enum class: E_PascalCase
+
+enum MyEnum { enum_VAL1, enum_VAL2 };            // enum field: enum_UPPER_SNAKE_CASE
+
+struct S_Transform {                             // struct: S_PascalCase
+    float x, y, z;
+};
+
+class C_FrameRenderer {                         // class: C_PascalCase
+public:
+    void render() {}                             // method: camelCase
+};
+
+using TA_ProfileInfo = int;                       // type alias: TA_PascalCase
+
+void enumExample() {
+    E_Color ce_constEnum = E_Color::enum_RED;     // const enum variable: ce_camelCase
+    MyEnum ne_namespaceEnum = enum_VAL1;          // namespace enum variable: ne_camelCase (inside namespace)
+}
+
+} // namespace fast_engine
+```
+
+### Macros and Templates
+
+```cpp
+#define macro_MAX_BUFFER_SIZE 1024                // object-like macro: macro_UPPER_SNAKE_CASE
+#define macro_calculateSum(a, b) ((a) + (b))      // function-like macro: macro_camelCase()
+
+namespace fast_engine {
+
+template <typename T_ValueType>                   // type template parameter: T_PascalCase
+class C_Container {
+    T_ValueType m_data;
+};
+
+template <int NT_BufferSize>                      // non-type template parameter: NT_PascalCase
+class C_Buffer {};
+
+template <typename... TP_Args>                    // type pack template parameter: TP_PascalCase
+void processPack(TP_Args... args) {}
+
+void macroExample() {
+    int sum = macro_calculateSum(10, 20);
+    int size = macro_MAX_BUFFER_SIZE;
+}
+
+} // namespace fast_engine
+```
+
