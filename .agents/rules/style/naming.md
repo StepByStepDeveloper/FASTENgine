@@ -144,31 +144,32 @@
 
 ## Constants
 
-| Entity                 | Convention                                           | Example                  |
-|:---------------------- | ---------------------------------------------------- | ------------------------ |
-| Object-like macro name | noun in `[macro-prefix]_UPPER_SNAKE_CASE` style-form | `macro_MAX_BUFFER_SIZE`  |
-| Enum-field name        | any name in `enum_UPPER_SNAKE_CASE` style-form | `enum_DEEP_PURPLE` |
+| Entity                              | Convention                                           | Example                 |
+|:----------------------------------- | ---------------------------------------------------- | ----------------------- |
+| Object-like macro name              | noun in `[macro-prefix]_UPPER_SNAKE_CASE` style-form | `macro_MAX_BUFFER_SIZE` |
+| Enumerator name for enum-class type | any name in `UPPER_SNAKE_CASE` style-form            | `E_Color::DEEP_PURPLE`  |
+| Enumerator name for enum type       | any name in `enum_UPPER_SNAKE_CASE` style-form       | `enum_DEEP_PURPLE`      |
 
 ## Variables
 
-| Entity                                                                                         | Convention                                                 | Example              |
-|:---------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | -------------------- |
-| Enum variable name                                                                             | noun in `[enum-variable-prefix]_camelCase` style-form      | `gsce_operatingMode` |
-| Pointer variable name                                                                          | noun in `[pointer-prefix]_camelCase` style-form            | `gscpc_userName`     |
-| Reference variable name                                                                        | noun in `[reference-prefix]_camelCase` style-form          | `gscr_userName`      |
-| Function/Method parameter name                                                                 | noun in `[function-parameter-prefix]_camelCase` style-form | `cpcf_someArg`       |
-| Local && non-func-param && non-const && non-reference && non-pointer && non-enum variable name | noun in `camelCase` style-form                             | `userName`           |
-| Other variable name                                                                            | noun in `[variable-prefix]_camelCase` style-form           | `gsc_userName`       |
-| Enum class member variable name                                                                | noun in `[enum-variable-prefix]_camelCase_` style-form     | `gsce_operatingMode_`|
-| Pointer class member variable name                                                             | noun in `[pointer-prefix]_camelCase_` style-form           | `gscpc_userName_`    |
-| Reference class member variable name                                                           | noun in `[reference-prefix]_camelCase_` style-form         | `gscr_userName_`     |
-| Non-const && non-reference && non-pointer && non-enum class member variable name               | noun in `camelCase_` style-form                            | `userName_`          |
-| Other class member variable name                                                               | noun in `[variable-prefix]_camelCase_` style-form          | `gsc_userName_`      |
-| Enum struct member variable name                                                               | noun in `[enum-variable-prefix]_camelCase` style-form      | `gsce_operatingMode` |
-| Pointer struct member variable name                                                            | noun in `[pointer-prefix]_camelCase` style-form            | `gscpc_userName`     |
-| Reference struct member variable name                                                          | noun in `[reference-prefix]_camelCase` style-form          | `gscr_userName`      |
-| Non-const && non-reference && non-pointer && non-enum struct member variable name              | noun in `camelCase` style-form                             | `userName`           |
-| Other struct member variable name                                                              | noun in `[variable-prefix]_camelCase` style-form           | `gsc_userName`       |
+| Entity                                                                                         | Convention                                                 | Example               |
+|:---------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | --------------------- |
+| Enum variable name                                                                             | noun in `[enum-variable-prefix]_camelCase` style-form      | `gsce_operatingMode`  |
+| Pointer variable name                                                                          | noun in `[pointer-prefix]_camelCase` style-form            | `gscpc_userName`      |
+| Reference variable name                                                                        | noun in `[reference-prefix]_camelCase` style-form          | `gscr_userName`       |
+| Function/Method parameter name                                                                 | noun in `[function-parameter-prefix]_camelCase` style-form | `cpcf_someArg`        |
+| Local && non-func-param && non-const && non-reference && non-pointer && non-enum variable name | noun in `camelCase` style-form                             | `userName`            |
+| Other variable name                                                                            | noun in `[variable-prefix]_camelCase` style-form           | `gsc_userName`        |
+| Enum class member variable name                                                                | noun in `[enum-variable-prefix]_camelCase_` style-form     | `gsce_operatingMode_` |
+| Pointer class member variable name                                                             | noun in `[pointer-prefix]_camelCase_` style-form           | `gscpc_userName_`     |
+| Reference class member variable name                                                           | noun in `[reference-prefix]_camelCase_` style-form         | `gscr_userName_`      |
+| Non-const && non-reference && non-pointer && non-enum class member variable name               | noun in `camelCase_` style-form                            | `userName_`           |
+| Other class member variable name                                                               | noun in `[variable-prefix]_camelCase_` style-form          | `gsc_userName_`       |
+| Enum struct member variable name                                                               | noun in `[enum-variable-prefix]_camelCase` style-form      | `gsce_operatingMode`  |
+| Pointer struct member variable name                                                            | noun in `[pointer-prefix]_camelCase` style-form            | `gscpc_userName`      |
+| Reference struct member variable name                                                          | noun in `[reference-prefix]_camelCase` style-form          | `gscr_userName`       |
+| Non-const && non-reference && non-pointer && non-enum struct member variable name              | noun in `camelCase` style-form                             | `userName`            |
+| Other struct member variable name                                                              | noun in `[variable-prefix]_camelCase` style-form           | `gsc_userName`        |
 
 ## Template parameters
 
@@ -251,9 +252,9 @@ void pointerExample() {
 ```cpp
 namespace fast_engine {
 
-enum class E_Color { enum_RED, enum_BLUE };       // enum class: E_PascalCase
+enum class E_Color { RED, BLUE };                 // enum class type: E_PascalCase, enumerator: UPPER_SNAKE_CASE
 
-enum E_MyEnum { enum_VAL1, enum_VAL2 };           // enum field: enum_UPPER_SNAKE_CASE
+enum E_MyEnum { enum_VAL1, enum_VAL2 };           // enum type: E_PascalCase, enumerator: enum_UPPER_SNAKE_CASE
 
 struct S_Transform {                              // struct: S_PascalCase
     float x, y, z;
@@ -262,19 +263,21 @@ struct S_Transform {                              // struct: S_PascalCase
 class C_FrameRenderer {                           // class: C_PascalCase
 public:
     void render() {}                              // method: camelCase
-    int gsce_operatingMode_;                      // enum class member variable (with _): gsce_camelCase_
+    static E_Color se_colorType_;                 // enum class member variable (with _): se_camelCase_
 };
 
 struct S_TransformWithEnum {                      // struct: S_PascalCase
     float x, y, z;
-    int gsce_operatingMode;                       // enum struct member variable (without _): gsce_camelCase
+    static E_Color se_colorType;                  // enum struct member variable (without _): se_camelCase
 };
 
 using TA_ProfileInfo = int;                       // type alias: TA_PascalCase
 
+E_MyEnum ne_namespaceEnum;                        // namespace enum variable: ne_camelCase (inside namespace)
+
 void callEnumExample() {
-    E_Color ce_constEnum = E_Color::enum_RED;     // const enum variable: ce_camelCase
-    E_MyEnum ne_namespaceEnum = enum_VAL1;        // namespace enum variable: ne_camelCase (inside namespace)
+    const E_Color ce_constEnum = E_Color::RED;    // const enum variable: ce_camelCase
+    ne_namespaceEnum = enum_VAL1;                 // namespace enum variable: ne_camelCase (inside namespace)
 }
 
 } // namespace fast_engine
