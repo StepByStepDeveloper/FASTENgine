@@ -138,3 +138,92 @@ Example: `gscr_someVar` - `global static const reference` variable with name `so
 | Entity                  | Convention                                                  | Example               |
 |:----------------------- | ----------------------------------------------------------- | --------------------- |
 | Template parameter name | noun in `[template-parameter-prefix]_PascalCase` style-form | `NTP_GreenVegetables` |
+
+## Examples
+
+```cpp
+// File: src/renderer/frame_renderer.hpp (snake_case.hpp)
+#include <cstdint>
+
+namespace fast_engine { // namespace naming (snake_case)
+
+/**
+ * @brief Types & Aliases
+ */
+enum class E_RenderMode { // Type name (E_PascalCase)
+    Forward,               // Enum-class enumerator (PascalCase)
+    Deferred
+};
+
+using TA_FrameBuffer = uint32_t; // Type alias (TA_PascalCase)
+
+struct S_ViewConfig { // Type name (S_PascalCase)
+    float fov;
+    int resolutionX;
+};
+
+class C_FrameRenderer { // Type name (C_PascalCase)
+public:
+    // Public member variables (camelCase)
+    E_RenderMode renderMode;
+    TA_FrameBuffer bufferId;
+
+    /**
+     * @brief Method naming (camelCase)
+     */
+    void updateView(const S_ViewConfig& config) {} 
+
+protected:
+    // Protected/Private member variables (camelCase_)
+    int frameCount_;
+    float deltaTime_;
+
+private:
+    bool isInitialized_;
+};
+
+/**
+ * @brief Templates
+ */
+template <typename T_Value, int NT_Limit, template<typename> class TT_Container, typename... TP_Args> // T_, NT_, TT_, TP_
+class C_Manager {
+public:
+    // Using a type parameter pack (TP_)
+    void handlePack(TP_Args... args) {} 
+};
+
+} // namespace fast_engine
+
+/**
+ * @brief Variables [scope][storage][cv][enum|ptr|ref]_camelCase
+ */
+namespace fast_engine {
+
+int g_globalVar = 0;                                     // global (g_)
+int n_namespaceVar = 0;                                  // namespace (n_)
+static int gs_globalStaticVar = 0;                       // global static (gs_)
+thread_local int t_threadLocalVar = 0;                   // thread local (t_)
+const int gc_constVar = 42;                               // global const (gc_)
+volatile int gv_volatileVar = 0;                         // global volatile (gv_)
+const volatile int gcv_constVolatileVar = 42;            // global const volatile (gcv_)
+
+// Enum, Pointer, Reference variables
+enum E_Status { OK, ERROR };                         // enum type (UPPER_SNAKE_CASE enumerators)
+int gsce_statusEnum = 0;                                 // global static const enum (gsce_)
+int gce_constEnum = 0;                                   // global const enum (gce_)
+
+int dummyVar = 0;                                         // helper for pointers/ref
+int* gp_ptrVar = &dummyVar;                               // global pointer (gp_)
+const int* gpc_ptrToConstInt = &dummyVar;                 // global pointer to const (gpc_)
+int& gr_refVar = dummyVar;                                // global reference (gr_)
+
+} // namespace fast_engine
+
+/**
+ * @brief Macros & Constants
+ */
+#define MAX_THREADS 8                        // Object-like macro (UPPER_SNAKE_CASE)
+#define LOG_ERROR(msg)                       // Function-like macro (UPPER_SNAKE_CASE())
+
+enum E_Color { RED, GREEN, BLUE };              // enum type (UPPER_SNAKE_CASE enumerators)
+```
