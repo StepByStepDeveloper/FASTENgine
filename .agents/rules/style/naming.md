@@ -4,21 +4,28 @@
 
 ### Variables
 
-Notice: naming prefixes can be combined in the order `[scope][storage][cv][enum|ptr|ref]_camelCase` (for example `gscvpc_someVar` is `global static const volatile pointer to const-data` variable with name `someVar`)
+Variable names may consist of a combination of prefixes in the following order of these prefix types (each type appears exactly once in the specified order):
+
+[`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`][`enum-prefix` xor `pointer-prefix`]_camelCase
+
+[`scope-prefix`][`storage-class-prefix`][`reference-prefix`]_camelCase
+
+The first line applies to enumeration or pointer variables; the second line applies to reference variables, because references themselves do not carry cv-qualifiers — they bind to variables that do, which is reflected in the **Reference prefixes** section below.
 
 #### Scope prefixes
 
-- `g`: `global` variable (`g` - `g`lobal)
-- `n`: `namespace` variable (`n` - `n`amespace)
+- g: variable in `global` namespace (`g` - `g`lobal)
+- n: variable in `named` namespace (`n` - `n`amed)
 
-Example: `g_someVar` - `global` variable with name `someVar`
+Example: `g_someVar` - variable in the `global` namespace with name `someVar`
 
 #### Storage class prefixes
 
 - `s`: `static` variable (`s` - `s`tatic)
 - `t`: `thread_local` variable (`t` - `t`hread_local)
+- `st`: `static` `thread_local` variable (`st` - `s`tatic `t`hread_local)
 
-Example: `gs_someVar` - `global static` variable with name `someVar`
+Example: `st_someVar` - `static` `thread_local` variable with name `someVar`
 
 #### cv-qualifier prefixes
 
@@ -26,28 +33,43 @@ Example: `gs_someVar` - `global static` variable with name `someVar`
 - `v`: `volatile` variable (`v` - `v`olatile)
 - `cv`: `const` `volatile` variable (`cv` - `c`onst `v`olatile)
 
-Example: `gsc_someVar` - `global static const` variable with name `someVar`
+Example: `cv_someVar` - `const` `volatile` variable with name `someVar`
 
 #### Enum prefixes
 
-- `e`: `enum` variable (`e` - `e`num)
+- `e`: variable of `enum` type (`e` - `e`num)
 
-Example: `gsce_someVar` - `global static const enum` variable with name `someVar`
+Example: `e_someVar` - variable of `enum` type with name `someVar`
 
 #### Pointer prefixes
 
 - `p`: `pointer` (`p` - `p`ointer)
 - `pc`: `pointer` to `const` object (`pc` - `p`ointer `c`onst)
+- `pv`: `pointer` to `volatile` object (`pv` - `p`ointer `v`olatile)
+- `pcv`: `pointer` to `const` `volatile` object (`pcv` - `p`ointer `c`onst `v`olatile)
 
 Notice: applicable for smart pointers
 
-Example: `gscpc_someVar` - `global static const pointer to const-data` variable with name `someVar`
+Example: `pcv_someVar` - `pointer to const-volatile-object` with name `someVar`
 
 #### Reference prefixes
 
 - `r`: `reference` (`r` - `r`eference)
+- `rc`: `reference` to `const` object (`rc` - `r`eference `c`onst)
+- `rv`: `reference` to `volatile` object (`rv` - `r`eference `v`olatile)
+- `rcv`: `reference` to `const` `volatile` object (`rcv` - `r`eference `c`onst `v`olatile)
 
-Example: `gscr_someVar` - `global static const reference` variable with name `someVar`
+Example: `rcv_someVar` - `reference to const-volatile-object` with name `someVar`
+
+#### Ultimate variable naming example
+
+Variable `gscvpcv_someVar` is `global static const volatile pointer to const-volatile-object` with name `someVar`:
+
+- variable has `global` scope
+- variable has `static` storage class
+- variable is of `const volatile` type
+- variable has `pointer` type
+- data pointed by this variable is of `const volatile` type
 
 ### Types
 
@@ -60,6 +82,12 @@ Example: `gscr_someVar` - `global static const reference` variable with name `so
 #### Type alias (`using`/`typedef`) prefixes
 
 - `TA`: some `type` `alias` (`TA` - `T`ype `A`lias)
+
+#### Rationale for type and alias prefixes
+
+The prefixes `C`, `S`, and `E` must be visible in the type name so that, at the point of variable declaration, it is always obvious which C++ category the underlying type belongs to.
+
+Some types may be type aliases atop existing types. This is conveyed by the `TA_` prefix. The reader must understand that although a variable declared as `TA_SomeType someVar` is allowed to omit certain prefixes (so the user does not have to jump to the alias declaration every time and copy the real type’s qualifiers into the variable name), this does **not** mean the variable or object actually lacks those qualifiers (covering all valid cases: cv, ref, ptr, and so on). The reader can always navigate to the variable declaration, notice that it uses an alias, and inspect the alias definition. However, because an alias is itself a type — a “smart” one — and we are allowed not to know what hides underneath, any additional prefixes added to the variable name are applied relative to the qualifiers of the `TA_SomeType` type itself.
 
 ### Template parameters
 
@@ -113,117 +141,203 @@ Example: `gscr_someVar` - `global static const reference` variable with name `so
 | Enumerator name for enum-class type | any name in `PascalCase` style-form       | `E_Color::DeepPurple` |
 | Enumerator name for enum type       | any name in `UPPER_SNAKE_CASE` style-form | `DEEP_PURPLE`         |
 
+### Rationale for enumerator naming
+
+The `e_` prefix on a variable (e.g., `e_varName`) makes it always possible to recognize that the variable is an enumeration. This is especially important when the variable is of a plain `enum` (not `enum class`), because plain enumerators can be assigned directly as `VAL` instead of `E_EnumType::VAL`. If a reader sees `var = VAL`, they might not realize it is an enumeration; `e_var = VAL` solves that problem.
+
+For backward compatibility with C-style conventions, plain `enum` enumerators use `UPPER_SNAKE_CASE` (e.g., `DEEP_PURPLE`). For `enum class` variables, the mandatory scope prefix `E_EnumType::` allows the enumerator name itself to be written in `PascalCase` instead of `UPPER_SNAKE_CASE`, yielding the full form `E_Color::DeepPurple`.
+
 ## Non-Member variable naming conventions
 
 | Entity                  | Convention                                                | Example           |
 |:----------------------- | --------------------------------------------------------- | ----------------- |
 | Enum variable name      | noun in `[scope][storage][cv][enum]_camelCase` style-form | `e_operatingMode` |
 | Pointer variable name   | noun in `[scope][storage][cv][ptr]_camelCase` style-form  | `p_operatingMode` |
-| Reference variable name | noun in `[scope][storage][cv][ref]_camelCase` style-form  | `r_operatingMode` |
+| Reference variable name | noun in `[scope][storage][ref]_camelCase` style-form      | `r_operatingMode` |
 | Ordinary variable name  | noun in `[scope][storage][cv]_camelCase` style-form       | `operatingMode`   |
+
+### Rationale for enum variable prefix
+
+See the rationale under **Constant naming conventions / Rationale for enumerator naming**. The `e_` prefix on a non-member variable serves the same purpose: it makes the enumeration nature explicit at every use site.
 
 ## Member variable naming conventions
 
-| Entity                                           | Convention                                                          | Example                |
-|:------------------------------------------------ | ------------------------------------------------------------------- | ---------------------- |
-| Public member variable name (Vers. 1)            | noun in `this->[non-member-variable-naming-convention]` style-form  | `this->operatingMode`  |
-| Public member variable name (Vers. 2)            | noun in `obj->[non-member-variable-naming-convention]` style-form   | `obj->operatingMode`   |
-| Public member variable name (Vers. 3)            | noun in `obj.[non-member-variable-naming-convention]` style-form    | `obj.operatingMode`    |
-| Protected/Private member variable name (Vers. 1) | noun in `this->[non-member-variable-naming-convention]_` style-form | `this->operatingMode_` |
-| Protected/Private member variable name (Vers. 2) | noun in `obj->[non-member-variable-naming-convention]_` style-form  | `obj->operatingMode_`  |
-| Protected/Private member variable name (Vers. 3) | noun in `obj.[non-member-variable-naming-convention]_` style-form   | `obj.operatingMode_`   |
+The base name of a member variable follows the same prefix rules as non-member variables (prefixes + meaningful name in `camelCase`). On top of that, the following requirements apply:
+
+- Fields declared in a class **must** be accessed inside class methods exclusively via `this->variableName`. The `this->` qualifier **must never** be omitted so that it is always obvious an access refers to a class field.
+- `public` fields **must not** add any suffix.
+- `protected` fields **must** have the suffix `_` (e.g., `this->operatingMode_`).
+- `private` fields **must** have the suffix `__` (e.g., `this->operatingMode__`).
+
+| Access level | Inside class methods           | Outside the class (via object/pointer)                                               |
+|:------------ | ------------------------------ | ------------------------------------------------------------------------------------- |
+| `public`     | `this->[non-member-name]`      | `obj.[non-member-name]` / `obj->[non-member-name]`                                    |
+| `protected`  | `this->[non-member-name]_`     | `obj.[non-member-name]_` / `obj->[non-member-name]_` (accessible only from derived) |
+| `private`    | `this->[non-member-name]__`    | Not accessible                                                                        |
 
 ## Template parameter naming conventions
 
-| Entity                  | Convention                                                  | Example               |
-|:----------------------- | ----------------------------------------------------------- | --------------------- |
-| Template parameter name | noun in `[template-parameter-prefix]_PascalCase` style-form | `NTP_GreenVegetables` |
+| Entity                           | Convention                            | Example          |
+|:-------------------------------- | ------------------------------------- | ---------------- |
+| Type template parameter          | noun in `T_PascalCase` style-form     | `T_Value`        |
+| Type template parameter pack     | noun in `TP_PascalCase` style-form    | `TP_Args`        |
+| Non-type template parameter      | noun in `NT_PascalCase` style-form    | `NT_Count`       |
+| Non-type template parameter pack | noun in `NTP_PascalCase` style-form   | `NTP_Values`     |
+| Template template parameter      | noun in `TT_PascalCase` style-form    | `TT_Allocator`   |
+| Template template parameter pack | noun in `TTP_PascalCase` style-form   | `TTP_Policies`   |
+
+### Rationale for template parameter naming
+
+Template parameters are prefixed so that their role is immediately recognizable inside template declarations. `T_` marks a single type parameter, `TP_` a type parameter pack, `NT_` a single non-type parameter, `NTP_` a non-type parameter pack, `TT_` a template template parameter, and `TTP_` a template template parameter pack. Using `PascalCase` for the descriptive part keeps template parameters visually distinct from both runtime variables (`camelCase`) and concrete type names (`Prefix_PascalCase`).
 
 ## Examples
 
 ```cpp
-// File: src/renderer/frame_renderer.hpp (snake_case.hpp)
-#include <cstdint>
+/// File: widget_renderer.cpp
+/// Convention: noun in snake_case.cpp style-form
 
-namespace fast_engine { // namespace naming (snake_case)
+#include <cstddef>
+#include <memory>
+#include <tuple>
 
-/**
- * @brief Types & Aliases
- */
-enum class E_RenderMode { // Type name (E_PascalCase)
-    Forward,               // Enum-class enumerator (PascalCase)
-    Deferred
-};
-
-using TA_FrameBuffer = uint32_t; // Type alias (TA_PascalCase)
-
-struct S_ViewConfig { // Type name (S_PascalCase)
-    float fov;
-    int resolutionX;
-};
-
-class C_FrameRenderer { // Type name (C_PascalCase)
-public:
-    // Public member variables (camelCase)
-    E_RenderMode renderMode;
-    TA_FrameBuffer bufferId;
-
-    /**
-     * @brief Method naming (camelCase)
-     */
-    void updateView(const S_ViewConfig& config) {} 
-
-protected:
-    // Protected/Private member variables (camelCase_)
-    int frameCount_;
-    float deltaTime_;
-
-private:
-    bool isInitialized_;
-};
-
-/**
- * @brief Templates
- */
-template <typename T_Value, int NT_Limit, template<typename> class TT_Container, typename... TP_Args> // T_, NT_, TT_, TP_
-class C_Manager {
-public:
-    // Using a type parameter pack (TP_)
-    void handlePack(TP_Args... args) {} 
-};
-
-} // namespace fast_engine
-
-/**
- * @brief Variables [scope][storage][cv][enum|ptr|ref]_camelCase
- */
+// Namespace naming: snake_case
 namespace fast_engine {
 
-int g_globalVar = 0;                                     // global (g_)
-int n_namespaceVar = 0;                                  // namespace (n_)
-static int gs_globalStaticVar = 0;                       // global static (gs_)
-thread_local int t_threadLocalVar = 0;                   // thread local (t_)
-const int gc_constVar = 42;                               // global const (gc_)
-volatile int gv_volatileVar = 0;                         // global volatile (gv_)
-const volatile int gcv_constVolatileVar = 42;            // global const volatile (gcv_)
+// Object-like macro: UPPER_SNAKE_CASE
+#define MAX_RENDER_TARGETS 8
 
-// Enum, Pointer, Reference variables
-enum E_Status { OK, ERROR };                         // enum type (UPPER_SNAKE_CASE enumerators)
-int gsce_statusEnum = 0;                                 // global static const enum (gsce_)
-int gce_constEnum = 0;                                   // global const enum (gce_)
+// Function-like macro: UPPER_SNAKE_CASE()
+#define LOG_CALL(fn) do { fn; } while (0)
 
-int dummyVar = 0;                                         // helper for pointers/ref
-int* gp_ptrVar = &dummyVar;                               // global pointer (gp_)
-const int* gpc_ptrToConstInt = &dummyVar;                 // global pointer to const (gpc_)
-int& gr_refVar = dummyVar;                                // global reference (gr_)
+// Type alias: TA_PascalCase
+using TA_RenderId = std::size_t;
+
+// Enum class: E_Prefix, enumerators PascalCase
+enum class E_Color { DeepPurple, SkyBlue };
+
+// Plain enum: E_Prefix, enumerators UPPER_SNAKE_CASE
+enum E_Flags { FLAG_NONE = 0, FLAG_VISIBLE = 1 };
+
+// Struct: S_PrefixPascalCase
+struct S_Vertex {
+    float x{0.0f};
+    float y{0.0f};
+};
+
+// Template parameters: T_, NT_, TT_
+template <typename T_Data,
+          std::size_t NT_BufferSize,
+          template <typename> class TT_Allocator>
+class C_Array {
+public:
+    // Public member: no suffix
+    T_Data* p_buffer{nullptr};
+
+protected:
+    // Protected member: suffix _
+    std::size_t capacity_{NT_BufferSize};
+
+private:
+    // Private member: suffix __
+    TT_Allocator<T_Data> allocator__;
+
+public:
+    explicit C_Array(std::size_t cap) : capacity_{cap}, allocator__{} {
+        // Member access inside methods: mandatory this->
+        this->p_buffer = this->allocator__.allocate(this->capacity_);
+    }
+
+    // Method: camelCase imperative verb
+    void sendData() {
+        if (this->p_buffer != nullptr) {
+            const std::size_t c_localCount = this->capacity_;
+            std::size_t& r_count = this->capacity_;
+            LOG_CALL(r_count = c_localCount);
+        }
+    }
+};
+
+// Template parameter pack: TP_
+template <typename... TP_Elements>
+class C_Bundle {
+private:
+    std::tuple<TP_Elements...> items__;
+};
+
+// Non-type template parameter pack: NTP_
+template <std::size_t... NTP_Dims>
+constexpr std::size_t multiplyDimensions() {
+    return (1 * ... * NTP_Dims);
+}
+
+// Template template parameter pack: TTP_
+template <template <typename> class... TTP_Policies>
+class C_PolicySet {
+};
 
 } // namespace fast_engine
 
-/**
- * @brief Macros & Constants
- */
-#define MAX_THREADS 8                        // Object-like macro (UPPER_SNAKE_CASE)
-#define LOG_ERROR(msg)                       // Function-like macro (UPPER_SNAKE_CASE())
+// Global-scope variables with scope / storage / cv / pointer / reference prefixes
+static int gs_frameCount = 0;
+thread_local int gt_threadId = 1;
+const int gc_version = 1;
+volatile int gv_status = 0;
+const volatile int gcv_mode = 0;
 
-enum E_Color { RED, GREEN, BLUE };              // enum type (UPPER_SNAKE_CASE enumerators)
+int* gp_handle = nullptr;
+int const* gpc_handle = nullptr;
+
+int& gr_counter = gs_frameCount;
+const int& grc_limit = gc_version;
+
+fast_engine::E_Color ge_currentColor = fast_engine::E_Color::DeepPurple;
+fast_engine::E_Flags ge_currentFlags = fast_engine::FLAG_VISIBLE;
+
+// Named-namespace variable: n_ prefix
+namespace fast_engine {
+    int n_engineId = 42;
+}
+
+// Function: camelCase imperative verb
+void sendRequest() {
+    // Local ordinary variable
+    int operatingMode = 1;
+
+    // Local cv-qualified variables
+    const int c_operatingMode = 2;
+    volatile int v_operatingMode = 3;
+    const volatile int cv_operatingMode = 4;
+
+    // Pointer variables
+    int* p_mode = &operatingMode;
+    int const* pc_mode = &c_operatingMode;
+
+    // Reference variables
+    int& r_mode = operatingMode;
+    const int& rc_mode = c_operatingMode;
+
+    // Enum variable: e_ prefix
+    fast_engine::E_Color e_color = fast_engine::E_Color::SkyBlue;
+
+    LOG_CALL(operatingMode += 1);
+}
+
+int main() {
+    fast_engine::C_Array<float, 4, std::allocator> arr{4};
+    arr.sendData();
+
+    fast_engine::C_Bundle<int, float, double> bundle{};
+    constexpr std::size_t dims = fast_engine::multiplyDimensions<2, 3, 4>();
+    (void)dims;
+
+    fast_engine::C_PolicySet<std::allocator, std::default_delete> policies{};
+    (void)policies;
+
+    sendRequest();
+    (void)ge_currentColor;
+    (void)ge_currentFlags;
+    (void)fast_engine::n_engineId;
+
+    return 0;
+}
 ```
