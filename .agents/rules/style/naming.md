@@ -6,16 +6,19 @@
 
 Variable names may consist of a combination of prefixes in the following order of these prefix types (each type appears exactly once in the specified order):
 
-[`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`][`enum-prefix` xor `pointer-prefix`]_camelCase
+- `normal-var` (non-enum and non-pointer and non-reference) variable: [`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`]_camelCase
+- `enum-var` variable: [`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`][`enum-prefix`]_camelCase
+- `pointer-var` variable: [`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`][`pointer-prefix`]_camelCase
+- `reference-var` variable: [`scope-prefix`][`storage-class-prefix`][`reference-prefix`]_camelCase
 
-[`scope-prefix`][`storage-class-prefix`][`reference-prefix`]_camelCase
+Notice for `pointer-var`: pointers themselves carry cv-qualifiers, also they can bind to variables that do, which is reflected in the **Pointer prefixes** section below.
 
-The first line applies to enumeration or pointer variables; the second line applies to reference variables, because references themselves do not carry cv-qualifiers — they bind to variables that do, which is reflected in the **Reference prefixes** section below.
+Notice for `reference-var`: references themselves do not carry cv-qualifiers, but they can bind to variables that do, which is reflected in the **Reference prefixes** section below.
 
 #### Scope prefixes
 
-- g: variable in `global` namespace (`g` - `g`lobal)
-- n: variable in `named` namespace (`n` - `n`amed)
+- `g`: variable in `global` namespace (`g` - `g`lobal)
+- `n`: variable in `named` namespace (`n` - `n`amed)
 
 Example: `g_someVar` - variable in the `global` namespace with name `someVar`
 
@@ -47,10 +50,14 @@ Example: `e_someVar` - variable of `enum` type with name `someVar`
 - `pc`: `pointer` to `const` object (`pc` - `p`ointer `c`onst)
 - `pv`: `pointer` to `volatile` object (`pv` - `p`ointer `v`olatile)
 - `pcv`: `pointer` to `const` `volatile` object (`pcv` - `p`ointer `c`onst `v`olatile)
+- `pe`: `pointer` to `enum` object (`pe` - `p`ointer `e`num)
+- `pce`: `pointer` to `const` `enum` object (`pce` - `p`ointer `c`onst `e`num)
+- `pve`: `pointer` to `volatile` `enum` object (`pve` - `p`ointer `v`olatile `e`num)
+- `pcve`: `pointer` to `const` `volatile` `enum` object (`pcve` - `p`ointer `c`onst `v`olatile `e`num)
 
 Notice: applicable for smart pointers
 
-Example: `pcv_someVar` - `pointer to const-volatile-object` with name `someVar`
+Example: `pcve_someVar` - `pointer to const-volatile-enum object` with name `someVar`
 
 #### Reference prefixes
 
@@ -58,18 +65,22 @@ Example: `pcv_someVar` - `pointer to const-volatile-object` with name `someVar`
 - `rc`: `reference` to `const` object (`rc` - `r`eference `c`onst)
 - `rv`: `reference` to `volatile` object (`rv` - `r`eference `v`olatile)
 - `rcv`: `reference` to `const` `volatile` object (`rcv` - `r`eference `c`onst `v`olatile)
+- `re`: `reference` to `enum` (`re` - `r`eference `e`num)
+- `rce`: `reference` to `const` `enum` object (`rce` - `r`eference `c`onst `e`num)
+- `rve`: `reference` to `volatile` `enum` object (`rve` - `r`eference `v`olatile `e`num)
+- `rcve`: `reference` to `const` `volatile` `enum` object (`rcve` - `r`eference `c`onst `v`olatile `e`num)
 
-Example: `rcv_someVar` - `reference to const-volatile-object` with name `someVar`
+Example: `rcve_someVar` - `reference to const-volatile-enum object` with name `someVar`
 
 #### Ultimate variable naming example
 
-Variable `gscvpcv_someVar` is `global static const volatile pointer to const-volatile-object` with name `someVar`:
+Variable `gscvpcve_someVar` is `global static const volatile pointer to const-volatile-enum object` with name `someVar`:
 
 - variable has `global` scope
 - variable has `static` storage class
-- variable is of `const volatile` type
+- variable has `const volatile` qualifiers
 - variable has `pointer` type
-- data pointed by this variable is of `const volatile` type
+- variable points to `const volatile enum` object
 
 ### Types
 
