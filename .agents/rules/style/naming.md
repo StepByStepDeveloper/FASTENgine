@@ -11,9 +11,9 @@ Variable names may consist of a combination of prefixes in the following order o
 - `pointer-var` variable: [`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`][`pointer-prefix`]_camelCase
 - `reference-var` variable: [`scope-prefix`][`storage-class-prefix`][`reference-prefix`]_camelCase
 
-Notice for `pointer-var`: pointers themselves carry cv-qualifiers, also they can bind to variables that do, which is reflected in the **Pointer prefixes** section below.
+**Important notice for references**:
 
-Notice for `reference-var`: references themselves do not carry cv-qualifiers, but they can bind to variables that do, which is reflected in the **Reference prefixes** section below.
+Unlike pointers, references in C++ cannot carry cv-qualifiers (const, volatile) themselves. Therefore, the [`cv-qualifier-prefix`] is intentionally omitted from the reference variable naming formula. The cv-qualifiers of the referenced object are fully captured by the [`reference-prefix`] (e.g., `rc` for `reference to const`, `rcv` for `reference to const volatile`). Never apply [`cv-qualifier-prefix`] before [`reference-prefix`].
 
 #### Scope prefixes
 
@@ -30,6 +30,10 @@ Example: `g_someVar` - variable in the `global` namespace with name `someVar`
 
 Example: `st_someVar` - `static` `thread_local` variable with name `someVar`
 
+**Important notice for `s` prefix in global scope**:
+
+All global variables in C++ inherently have static storage duration. However, the `s` prefix in global scope (e.g., `gs_someVar`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files.
+
 #### cv-qualifier prefixes
 
 - `c`: `const` variable (`c` - `c`onst)
@@ -40,49 +44,81 @@ Example: `cv_someVar` - `const` `volatile` variable with name `someVar`
 
 #### Enum prefixes
 
-- `e`: variable of `enum` type (`e` - `e`num)
+- `e`: variable of `enum` or `enum class` type (`e` - `e`num)
 
 Example: `e_someVar` - variable of `enum` type with name `someVar`
 
 #### Pointer prefixes
 
-- `p`: `pointer` (`p` - `p`ointer)
-- `pc`: `pointer` to `const` object (`pc` - `p`ointer `c`onst)
-- `pv`: `pointer` to `volatile` object (`pv` - `p`ointer `v`olatile)
-- `pcv`: `pointer` to `const` `volatile` object (`pcv` - `p`ointer `c`onst `v`olatile)
-- `pe`: `pointer` to `enum` object (`pe` - `p`ointer `e`num)
-- `pce`: `pointer` to `const` `enum` object (`pce` - `p`ointer `c`onst `e`num)
-- `pve`: `pointer` to `volatile` `enum` object (`pve` - `p`ointer `v`olatile `e`num)
-- `pcve`: `pointer` to `const` `volatile` `enum` object (`pcve` - `p`ointer `c`onst `v`olatile `e`num)
+- `p`: `pointer` to object of `class`/`struct`/`primitive` type (`p` - `p`ointer)
+- `pc`: `pointer` to object of `const` `class`/`struct`/`primitive` type (`pc` - `p`ointer `c`onst)
+- `pv`: `pointer` to object of `volatile` `class`/`struct`/`primitive` type (`pv` - `p`ointer `v`olatile)
+- `pcv`: `pointer` to object of `const` `volatile` `class`/`struct`/`primitive` type (`pcv` - `p`ointer `c`onst `v`olatile)
+- `pe`: `pointer` to object of `enum` (or `enum class`) type (`pe` - `p`ointer `e`num)
+- `pce`: `pointer` to object of `const` `enum` (or `enum class`) type (`pce` - `p`ointer `c`onst `e`num)
+- `pve`: `pointer` to object of `volatile` `enum` (or `enum class`) type (`pve` - `p`ointer `v`olatile `e`num)
+- `pcve`: `pointer` to object of `const` `volatile` `enum` (or `enum class`) type (`pcve` - `p`ointer `c`onst `v`olatile `e`num)
 
 Notice: applicable for smart pointers
 
-Example: `pcve_someVar` - `pointer to const-volatile-enum object` with name `someVar`
+Example: `pcve_someVar` - `pointer to object of const-volatile-enum type` with name `someVar`
 
 #### Reference prefixes
 
-- `r`: `reference` (`r` - `r`eference)
-- `rc`: `reference` to `const` object (`rc` - `r`eference `c`onst)
-- `rv`: `reference` to `volatile` object (`rv` - `r`eference `v`olatile)
-- `rcv`: `reference` to `const` `volatile` object (`rcv` - `r`eference `c`onst `v`olatile)
-- `re`: `reference` to `enum` (`re` - `r`eference `e`num)
-- `rce`: `reference` to `const` `enum` object (`rce` - `r`eference `c`onst `e`num)
-- `rve`: `reference` to `volatile` `enum` object (`rve` - `r`eference `v`olatile `e`num)
-- `rcve`: `reference` to `const` `volatile` `enum` object (`rcve` - `r`eference `c`onst `v`olatile `e`num)
+- `r`: `reference` to object of `class`/`struct`/`primitive` type (`r` - `r`eference)
+- `rc`: `reference` to object of `const` `class`/`struct`/`primitive` type (`rc` - `r`eference `c`onst)
+- `rv`: `reference` to object of `volatile` `class`/`struct`/`primitive` type (`rv` - `r`eference `v`olatile)
+- `rcv`: `reference` to object of `const` `volatile` `class`/`struct`/`primitive` type (`rcv` - `r`eference `c`onst `v`olatile)
+- `re`: `reference` to object of `enum` (or `enum class`) type (`re` - `r`eference `e`num)
+- `rce`: `reference` to object of `const` `enum` (or `enum class`) type (`rce` - `r`eference `c`onst `e`num)
+- `rve`: `reference` to object of `volatile` `enum` (or `enum class`) type (`rve` - `r`eference `v`olatile `e`num)
+- `rcve`: `reference` to object of `const` `volatile` `enum` (or `enum class`) type (`rcve` - `r`eference `c`onst `v`olatile `e`num)
 
-Example: `rcve_someVar` - `reference to const-volatile-enum object` with name `someVar`
+Example: `rcve_someVar` - `reference to object of const-volatile-enum type` with name `someVar`
 
-#### Ultimate variable naming example
+#### Ultimate variable naming examples
 
-Variable `gscvpcve_someVar` is `global static const volatile pointer to const-volatile-enum object` with name `someVar`:
+Example 1:
+
+```C++
+enum E_DeviceState { STATE_IDLE, STATE_RUNNING, STATE_ERROR };
+
+const volatile E_DeviceState gcve_targetState = STATE_IDLE;
+
+static const volatile E_DeviceState* const volatile gscvpcve_someVar = &gcve_targetState;
+```
+
+Variable `gscvpcve_someVar` is `global static const volatile pointer to object of const-volatile-enum type` with name `someVar`:
 
 - variable has `global` scope
-- variable has `static` storage class
+- variable has internal linkage (`static`)
 - variable has `const volatile` qualifiers
 - variable has `pointer` type
-- variable points to `const volatile enum` object
+- variable points to object of `const-volatile-enum` type, specifically `E_DeviceState`
+
+Example 2:
+
+```C++
+enum E_DeviceState { STATE_IDLE, STATE_RUNNING, STATE_ERROR };
+
+const volatile E_DeviceState gcve_targetState = STATE_IDLE;
+
+static const volatile E_DeviceState& gsrcve_someVar = gcve_targetState;
+```
+
+Variable `gsrcve_someVar` is `global static reference to object of const-volatile-enum type` with name `someVar`:
+
+- variable has `global` scope
+- variable has internal linkage (`static`)
+- variable has `reference` type
+- variable refers to object of `const-volatile-enum` type, specifically `E_DeviceState`
 
 ### Types
+
+Prefixes for types:
+
+- `type-name`: [`type-prefix`]_SomeType
+- `type-alias-name`: [`type-alias-prefix`]_SomeType
 
 #### Type prefixes
 
@@ -90,15 +126,99 @@ Variable `gscvpcve_someVar` is `global static const volatile pointer to const-vo
 - `S`: `struct` (`S` - `S`truct)
 - `E`: `enum` or `enum class` (`E` - `E`num)
 
-#### Type alias (`using`/`typedef`) prefixes
+Example 1:
 
-- `TA`: some `type` `alias` (`TA` - `T`ype `A`lias)
+```C++
+enum class E_SomeType { Enum1, Enum2};
 
-#### Rationale for type and alias prefixes
+const E_SomeType gce_someVar = E_SomeType::Enum1;
+```
 
-The prefixes `C`, `S`, and `E` must be visible in the type name so that, at the point of variable declaration, it is always obvious which C++ category the underlying type belongs to.
+- `E_SomeType`: An `enum class` type with name `SomeType`
+- `gce_someVar`: A `global scope const enum` variable (instance) of that `enum class` type, marked with the `enum-prefix`
 
-Some types may be type aliases atop existing types. This is conveyed by the `TA_` prefix. The reader must understand that although a variable declared as `TA_SomeType someVar` is allowed to omit certain prefixes (so the user does not have to jump to the alias declaration every time and copy the real type’s qualifiers into the variable name), this does **not** mean the variable or object actually lacks those qualifiers (covering all valid cases: cv, ref, ptr, and so on). The reader can always navigate to the variable declaration, notice that it uses an alias, and inspect the alias definition. However, because an alias is itself a type — a “smart” one — and we are allowed not to know what hides underneath, any additional prefixes added to the variable name are applied relative to the qualifiers of the `TA_SomeType` type itself.
+Example 2:
+
+```C++
+class C_SomeType {};
+
+C_SomeType g_var;
+
+const C_SomeType* gpc_someVar = &g_var;
+```
+
+- `C_SomeType`: A `class` type with name `SomeType`
+- `g_var`: A `global scope` variable (instance) of that `class` type
+- `gpc_someVar`: A `global scope pointer to const` object of that `class` type, marked with the `pointer-prefix`
+
+Example 3:
+
+```C++
+struct S_SomeType {};
+
+S_SomeType g_var;
+
+const S_SomeType& grc_someVar = g_var;
+```
+
+- `S_SomeType`: A `struct` type with name `SomeType`
+- `g_var`: A `global scope` variable (instance) of that `struct` type
+- `grc_someVar`: A `global scope reference to const` object of that `struct` type, marked with the `reference-prefix`
+
+#### Type alias prefixes (prefixes for types created via `using`/`typedef` keywords)
+
+- `TA`: `type` `alias` to some primitive type (`TA` - `T`ype `A`lias)
+- `TAC`: `type` `alias` to some `class` type (`TAC` - `T`ype `A`lias `C`lass)
+- `TAS`: `type` `alias` to some `struct` type (`TAS` - `T`ype `A`lias `S`truct)
+- `TAE`: `type` `alias` to some `enum` type (`TAE` - `T`ype `A`lias `E`num)
+
+Example 1:
+
+```C++
+enum class E_SomeType { Enum1, Enum2};
+
+using TAE_SomeType = E_SomeType;
+
+E_SomeType ge_var = E_SomeType::Enum1;
+
+const TAE_SomeType gce_someVar = ge_var;
+```
+
+- `TAE_SomeType`: A `type alias` (`TA`) for an `enum class` type (`E`)
+- `ge_var`: A `global scope enum` variable (instance) of that `enum class` type, marked with the `enum-prefix`
+- `gce_someVar`: A `global scope const enum` variable (instance) of that `enum class` type, marked with the `enum-prefix`
+
+Example 2:
+
+```C++
+class C_SomeType {};
+
+using TAC_SomeType = C_SomeType;
+
+C_SomeType g_var;
+
+const TAC_SomeType* gpc_someVar = &g_var;
+```
+
+- `TAC_SomeType`: A `type alias` (`TA`) for a `class` type (`C`)
+- `g_var`: A `global scope` variable (instance) of that `class` type
+- `gpc_someVar`: A `global scope pointer to const` object of that `class` type, marked with the `pointer-prefix`
+
+Example 3:
+
+```C++
+struct S_SomeType {};
+
+using TAS_SomeType = S_SomeType;
+
+S_SomeType g_var;
+
+const TAS_SomeType& grc_someVar = g_var;
+```
+
+- `TAS_SomeType`: A `type alias` (`TA`) for a `struct` type (`S`)
+- `g_var`: A `global scope` variable (instance) of that `struct` type
+- `grc_someVar`: A `global scope reference to const` object of that `struct` type, marked with the `reference-prefix`
 
 ### Template parameters
 
@@ -202,153 +322,3 @@ The base name of a member variable follows the same prefix rules as non-member v
 Template parameters are prefixed so that their role is immediately recognizable inside template declarations. `T_` marks a single type parameter, `TP_` a type parameter pack, `NT_` a single non-type parameter, `NTP_` a non-type parameter pack, `TT_` a template template parameter, and `TTP_` a template template parameter pack. Using `PascalCase` for the descriptive part keeps template parameters visually distinct from both runtime variables (`camelCase`) and concrete type names (`Prefix_PascalCase`).
 
 ## Examples
-
-```cpp
-/// File: widget_renderer.cpp
-/// Convention: noun in snake_case.cpp style-form
-
-#include <cstddef>
-#include <memory>
-#include <tuple>
-
-// Namespace naming: snake_case
-namespace fast_engine {
-
-// Object-like macro: UPPER_SNAKE_CASE
-#define MAX_RENDER_TARGETS 8
-
-// Function-like macro: UPPER_SNAKE_CASE()
-#define LOG_CALL(fn) do { fn; } while (0)
-
-// Type alias: TA_PascalCase
-using TA_RenderId = std::size_t;
-
-// Enum class: E_Prefix, enumerators PascalCase
-enum class E_Color { DeepPurple, SkyBlue };
-
-// Plain enum: E_Prefix, enumerators UPPER_SNAKE_CASE
-enum E_Flags { FLAG_NONE = 0, FLAG_VISIBLE = 1 };
-
-// Struct: S_PrefixPascalCase
-struct S_Vertex {
-    float x{0.0f};
-    float y{0.0f};
-};
-
-// Template parameters: T_, NT_, TT_
-template <typename T_Data,
-          std::size_t NT_BufferSize,
-          template <typename> class TT_Allocator>
-class C_Array {
-public:
-    // Public member: no suffix
-    T_Data* p_buffer{nullptr};
-
-protected:
-    // Protected member: suffix _
-    std::size_t capacity_{NT_BufferSize};
-
-private:
-    // Private member: suffix __
-    TT_Allocator<T_Data> allocator__;
-
-public:
-    explicit C_Array(std::size_t cap) : capacity_{cap}, allocator__{} {
-        // Member access inside methods: mandatory this->
-        this->p_buffer = this->allocator__.allocate(this->capacity_);
-    }
-
-    // Method: camelCase imperative verb
-    void sendData() {
-        if (this->p_buffer != nullptr) {
-            const std::size_t c_localCount = this->capacity_;
-            std::size_t& r_count = this->capacity_;
-            LOG_CALL(r_count = c_localCount);
-        }
-    }
-};
-
-// Template parameter pack: TP_
-template <typename... TP_Elements>
-class C_Bundle {
-private:
-    std::tuple<TP_Elements...> items__;
-};
-
-// Non-type template parameter pack: NTP_
-template <std::size_t... NTP_Dims>
-constexpr std::size_t multiplyDimensions() {
-    return (1 * ... * NTP_Dims);
-}
-
-// Template template parameter pack: TTP_
-template <template <typename> class... TTP_Policies>
-class C_PolicySet {
-};
-
-} // namespace fast_engine
-
-// Global-scope variables with scope / storage / cv / pointer / reference prefixes
-static int gs_frameCount = 0;
-thread_local int gt_threadId = 1;
-const int gc_version = 1;
-volatile int gv_status = 0;
-const volatile int gcv_mode = 0;
-
-int* gp_handle = nullptr;
-int const* gpc_handle = nullptr;
-
-int& gr_counter = gs_frameCount;
-const int& grc_limit = gc_version;
-
-fast_engine::E_Color ge_currentColor = fast_engine::E_Color::DeepPurple;
-fast_engine::E_Flags ge_currentFlags = fast_engine::FLAG_VISIBLE;
-
-// Named-namespace variable: n_ prefix
-namespace fast_engine {
-    int n_engineId = 42;
-}
-
-// Function: camelCase imperative verb
-void sendRequest() {
-    // Local ordinary variable
-    int operatingMode = 1;
-
-    // Local cv-qualified variables
-    const int c_operatingMode = 2;
-    volatile int v_operatingMode = 3;
-    const volatile int cv_operatingMode = 4;
-
-    // Pointer variables
-    int* p_mode = &operatingMode;
-    int const* pc_mode = &c_operatingMode;
-
-    // Reference variables
-    int& r_mode = operatingMode;
-    const int& rc_mode = c_operatingMode;
-
-    // Enum variable: e_ prefix
-    fast_engine::E_Color e_color = fast_engine::E_Color::SkyBlue;
-
-    LOG_CALL(operatingMode += 1);
-}
-
-int main() {
-    fast_engine::C_Array<float, 4, std::allocator> arr{4};
-    arr.sendData();
-
-    fast_engine::C_Bundle<int, float, double> bundle{};
-    constexpr std::size_t dims = fast_engine::multiplyDimensions<2, 3, 4>();
-    (void)dims;
-
-    fast_engine::C_PolicySet<std::allocator, std::default_delete> policies{};
-    (void)policies;
-
-    sendRequest();
-    (void)ge_currentColor;
-    (void)ge_currentFlags;
-    (void)fast_engine::n_engineId;
-
-    return 0;
-}
-```
