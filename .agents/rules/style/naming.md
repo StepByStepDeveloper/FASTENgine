@@ -290,14 +290,14 @@ const TAS_SomeType& grc_someVar = g_var;
 | Type name       | noun in `type-name` style-form       | `C_FrameRenderer`   |
 | Type alias name | noun in `type-alias-name` style-form | `TAC_FrameRenderer` |
 
-## Functions/Method naming conventions
+## Function-like Macro and Function/Method naming conventions
 
 | Entity                   | Convention                                         | Example         |
 |:------------------------ | -------------------------------------------------- | --------------- |
 | Function-like macro name | imperative verb in `UPPER_SNAKE_CASE()` style-form | `SAVE_DATA()`   |
 | Function/Method name     | imperative verb in `camelCase()` style-form        | `sendRequest()` |
 
-## Macro & Enumerator naming conventions
+## Object-like Macro and Enumerator naming conventions
 
 | Entity                              | Convention                                | Example           |
 |:----------------------------------- | ----------------------------------------- | ----------------- |
