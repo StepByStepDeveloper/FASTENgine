@@ -353,11 +353,11 @@ Example:
 ```C++
 class C_Cache {
 public:
-    mutable std::size_t accessCount;        // mutable public:    no suffix
+    mutable std::size_t accessCount;       // mutable public:    no suffix
 protected:
-    mutable E_CacheState e_state_;           // mutable protected: suffix `_`
+    mutable E_CacheState e_state_;         // mutable protected: suffix `_`
 private:
-    mutable E_CacheState e_replacement__;   // mutable private:   suffix `__`
+    mutable E_CacheState e_replacement__;  // mutable private:   suffix `__`
 };
 
 // inside a const method:
