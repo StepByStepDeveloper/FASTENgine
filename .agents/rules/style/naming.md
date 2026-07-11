@@ -19,10 +19,21 @@ Unlike pointers, references in C++ cannot carry cv-qualifiers (const, volatile) 
 
 - `g`: variable in `global` namespace (`g` - `g`lobal)
 - `n`: variable in `named` namespace (`n` - `n`amed)
+- `a`: variable in `anonymous` (unnamed) namespace (`a` - `a`nonymous)
 
 Example 1: `g_someVar` - variable in the `global` namespace with name `someVar`
 
 Example 2: `n_someVar` - variable in the `named` namespace with name `someVar`
+
+Example 3: `a_someVar` - variable in the `anonymous` namespace with name `someVar`
+
+**Important notice for the `a` prefix**:
+
+Variables declared inside an anonymous (unnamed) namespace have internal linkage by definition — the compiler guarantees this automatically, so there is no need (and it is an error) to additionally apply the `static` (`s`) storage-class prefix. The `a` prefix is therefore mutually exclusive with `static` (`s`) and `extern` (`x`) storage class prefixes (see the storage-class prefixes below). An anonymous-namespace variable with internal-linkage storage is written `a_…`, never `as_…`.
+
+**Important notice for local (function/block) scope**:
+
+Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the scope prefix** entirely. The prefix order for a local variable starts at the `storage-class-prefix` slot (e.g., a `static` local is `s_someVar`, never `gs_someVar`); an ordinary local uses no leading scope/storage prefix at all (e.g., `someVar`). Recall that the minimal forms shown in the [Non-Member variable naming conventions](#non-member-variable-naming-conventions) table (such as `e_operatingMode`, `p_dataBuffer`) are valid only at local scope.
 
 #### Storage class prefixes
 
@@ -34,9 +45,9 @@ Example 2: `n_someVar` - variable in the `named` namespace with name `someVar`
 
 Example: `st_someVar` - `static` `thread_local` variable with name `someVar`
 
-**Important notice for `s` prefix in global scope**:
+**Important notice for `s` prefix at namespace scope**:
 
-All global variables in C++ inherently have static storage duration. However, the `s` prefix in global scope (e.g., `gs_someVar`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files.
+All namespace-scope variables in C++ inherently have static storage duration. However, the `s` prefix at namespace scope (e.g., `gs_someVar` or `ns_someVar`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope prefixes.
 
 **Important notice for `x` prefix**:
 
@@ -165,7 +176,7 @@ const C_SomeType* gpc_someVar = &g_var;
 
 - `C_SomeType`: A `class` type with name `SomeType`
 - `g_var`: A `global` variable (instance) of `class` type (`C_SomeType`)
-- `gpc_someVar`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-prefix` (`p`)
+- `gpc_someVar`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-to-const` variant of the `pointer-prefix` (`pc`)
 
 Example 3:
 
@@ -179,7 +190,7 @@ const S_SomeType& grc_someVar = g_var;
 
 - `S_SomeType`: A `struct` type with name `SomeType`
 - `g_var`: A `global` variable (instance) of `struct` type (`S_SomeType`)
-- `grc_someVar`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-prefix` (`r`)
+- `grc_someVar`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-to-const` variant of the `reference-prefix` (`rc`)
 
 #### Type alias prefixes (prefixes for types created via `using`/`typedef` keywords)
 
@@ -224,7 +235,7 @@ const TAC_SomeType* gpc_someVar = &g_var;
 
 - `TAC_SomeType`: A `type alias` for `class` type (`C_SomeType`)
 - `g_var`: A `global` variable (instance) of `class` type (`C_SomeType`)
-- `gpc_someVar`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-prefix` (`p`)
+- `gpc_someVar`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-to-const` variant of the `pointer-prefix` (`pc`)
 
 Example 3:
 
@@ -240,7 +251,7 @@ const TAS_SomeType& grc_someVar = g_var;
 
 - `TAS_SomeType`: A `type alias` for `struct` type (`S_SomeType`)
 - `g_var`: A `global` variable (instance) of `struct` type (`S_SomeType`)
-- `grc_someVar`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-prefix` (`r`)
+- `grc_someVar`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-to-const` variant of the `reference-prefix` (`rc`)
 
 ### Template parameters
 
@@ -303,15 +314,26 @@ For backward compatibility with C-style conventions, plain `enum` enumerators us
 | Entity                  | Convention                         | Example           |
 |:----------------------- | ---------------------------------- | ----------------- |
 | Enum variable name      | noun in `enum-var` style-form      | `e_operatingMode` |
-| Pointer variable name   | noun in `pointer-var` style-form   | `p_operatingMode` |
-| Reference variable name | noun in `reference-var` style-form | `r_operatingMode` |
+| Pointer variable name   | noun in `pointer-var` style-form   | `p_dataBuffer`    |
+| Reference variable name | noun in `reference-var` style-form | `r_dataBuffer`    |
 | Ordinary variable name  | noun in `normal-var` style-form    | `operatingMode`   |
 
 ## Member variable naming conventions
 
-The base name of a member variable follows the same prefix rules as non-member variables (prefixes + meaningful name in `camelCase`). On top of that, the following requirements apply:
+The base name of a member variable follows the same prefix rules as non-member variables (prefixes + meaningful name in `camelCase`). On top of that, the requirements below apply.
 
-- Fields declared in a class **must** be accessed inside class methods exclusively via the `this->` qualifier (e.g., `this->operatingMode`). The `this->` qualifier **must never** be omitted so that it is always obvious an access refers to a class field.
+**Important notice for member scope and storage prefixes**:
+
+Class members are *class-scoped*, not namespace-scoped, so they intentionally **omit the `scope-prefix`** (`g` / `n` / `a`) — none of those applies to a field. What remains is the `storage-class-prefix` slot:
+
+- An ordinary (instance) non-static member uses **no storage-class prefix** (e.g., `operatingMode`, `pe_dataBuffer`).
+- A `static` class member uses the **`s`** storage-class prefix (e.g., `s_instanceCount`). Note carefully: at *namespace* scope `s` means internal linkage, but a `static` class member has **external linkage**. The `s` prefix on a member therefore denotes *class-level (shared) storage only*, not internal linkage — there is no contradiction because the scope prefix is absent and the class scope, not the storage prefix, governs linkage. The `x` (`extern`) prefix is **never** used on members: `static` members are defined exactly once and resolved by the linker; an `extern` declaration of one is written in the header with the plain `s` prefix and defined in one source file with the same `s` prefix (the keyword `static` is omitted at the definition).
+- `thread_local` members additionally carry **`t`** (e.g., `t_threadStorage`), and `static thread_local` members carry **`st`** (e.g., `st_threadCache`), mirroring the namespace-scope storage-class prefixes.
+
+These storage prefixes occupy the same slot as for non-members — between the (absent) `scope-prefix` and the `cv-qualifier-prefix`, i.e. `[scope: omitted][storage-class-prefix][cv-qualifier-prefix][enum/pointer/reference-prefix]_camelCase`. The access suffix (`_` / `__`) is always appended last, after the full prefixed base name (see [Members combining prefixes and access suffixes](#members-combining-prefixes-and-access-suffixes)).
+
+- Non-`static` fields declared in a class **must** be accessed inside class methods exclusively via the `this->` qualifier (e.g., `this->operatingMode`). The `this->` qualifier **must never** be omitted so that it is always obvious an access refers to a class field.
+- `static` members are **not** accessed via `this->` (they have no instance). They **must** be qualified with their enclosing class name (e.g., `C_SomeType::s_instanceCount`) even from within the class's own methods, so that the access is unambiguously a class-level entity.
 - `public` fields **must not** add any suffix.
 - `protected` fields **must** have the suffix `_` (e.g., `operatingMode_`).
 - `private` fields **must** have the suffix `__` (e.g., `operatingMode__`).
@@ -353,9 +375,9 @@ Example:
 ```C++
 class C_SomeType {
 protected:
-    E_OperatingMode* pe_operatingMode_;      // protected pointer member
+    E_OperatingMode* pe_operatingMode_;  // protected pointer member
 private:
-    E_OperatingMode  e_targetState__;       // private enum-typed member
+    E_OperatingMode e_targetState__;     // private enum-typed member
 };
 
 // access:
