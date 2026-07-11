@@ -1,6 +1,6 @@
 # Naming Conventions
 
-## Naming prefixes
+## Identifier prefixes
 
 ### Variables
 
@@ -29,12 +29,21 @@ Example 2: `n_someVar` - variable in the `named` namespace with name `someVar`
 - `s`: `static` variable (`s` - `s`tatic)
 - `t`: `thread_local` variable (`t` - `t`hread_local)
 - `st`: `static` `thread_local` variable (`st` - `s`tatic `t`hread_local)
+- `x`: `extern` variable (`x` - e`x`tern)
+- `xt`: `extern` `thread_local` variable (`xt` - e`x`tern `t`hread_local)
 
 Example: `st_someVar` - `static` `thread_local` variable with name `someVar`
 
 **Important notice for `s` prefix in global scope**:
 
 All global variables in C++ inherently have static storage duration. However, the `s` prefix in global scope (e.g., `gs_someVar`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files.
+
+**Important notice for `x` prefix**:
+
+The `x` prefix marks an `extern` *declaration* — a reference to a variable defined in another translation unit. The `extern` specifier requests external linkage, which is the opposite of what `static` requests at namespace scope; therefore the `s` and `x` prefixes are mutually exclusive and never combined. The `x` prefix is only valid on declarations, never on the corresponding definition (the definition is named according to its own scope/storage, typically with no storage-class prefix). The `xt` prefix marks a declaration of a `thread_local` variable defined in another translation unit.
+
+Example: `gx_someVar` - `extern` variable variable in a `global` namespace with name `someVar` (declared in this translation unit, defined elsewhere)
+Example: `nxt_someVar` - `extern` `thread_local` variable in a `named` namespace with name `someVar`
 
 #### cv-qualifier prefixes
 
@@ -56,10 +65,10 @@ The `e` prefix on a variable (e.g., `e_varName`) makes it always possible to rec
 
 #### Pointer prefixes
 
-- `p`: `pointer` to object of `class`/`struct`/`primitive` type (`p` - `p`ointer)
-- `pc`: `pointer` to object of `const` `class`/`struct`/`primitive` type (`pc` - `p`ointer `c`onst)
-- `pv`: `pointer` to object of `volatile` `class`/`struct`/`primitive` type (`pv` - `p`ointer `v`olatile)
-- `pcv`: `pointer` to object of `const` `volatile` `class`/`struct`/`primitive` type (`pcv` - `p`ointer `c`onst `v`olatile)
+- `p`: `pointer` to object of `class`/`struct`/`union`/`primitive` type (`p` - `p`ointer)
+- `pc`: `pointer` to object of `const` `class`/`struct`/`union`/`primitive` type (`pc` - `p`ointer `c`onst)
+- `pv`: `pointer` to object of `volatile` `class`/`struct`/`union`/`primitive` type (`pv` - `p`ointer `v`olatile)
+- `pcv`: `pointer` to object of `const` `volatile` `class`/`struct`/`union`/`primitive` type (`pcv` - `p`ointer `c`onst `v`olatile)
 - `pe`: `pointer` to object of `enum` (or `enum class`) type (`pe` - `p`ointer `e`num)
 - `pce`: `pointer` to object of `const` `enum` (or `enum class`) type (`pce` - `p`ointer `c`onst `e`num)
 - `pve`: `pointer` to object of `volatile` `enum` (or `enum class`) type (`pve` - `p`ointer `v`olatile `e`num)
@@ -71,10 +80,10 @@ Example: `pcve_someVar` - `pointer to object of const-volatile-enum type` with n
 
 #### Reference prefixes
 
-- `r`: `reference` to object of `class`/`struct`/`primitive` type (`r` - `r`eference)
-- `rc`: `reference` to object of `const` `class`/`struct`/`primitive` type (`rc` - `r`eference `c`onst)
-- `rv`: `reference` to object of `volatile` `class`/`struct`/`primitive` type (`rv` - `r`eference `v`olatile)
-- `rcv`: `reference` to object of `const` `volatile` `class`/`struct`/`primitive` type (`rcv` - `r`eference `c`onst `v`olatile)
+- `r`: `reference` to object of `class`/`struct`/`union`/`primitive` type (`r` - `r`eference)
+- `rc`: `reference` to object of `const` `class`/`struct`/`union`/`primitive` type (`rc` - `r`eference `c`onst)
+- `rv`: `reference` to object of `volatile` `class`/`struct`/`union`/`primitive` type (`rv` - `r`eference `v`olatile)
+- `rcv`: `reference` to object of `const` `volatile` `class`/`struct`/`union`/`primitive` type (`rcv` - `r`eference `c`onst `v`olatile)
 - `re`: `reference` to object of `enum` (or `enum class`) type (`re` - `r`eference `e`num)
 - `rce`: `reference` to object of `const` `enum` (or `enum class`) type (`rce` - `r`eference `c`onst `e`num)
 - `rve`: `reference` to object of `volatile` `enum` (or `enum class`) type (`rve` - `r`eference `v`olatile `e`num)
@@ -94,7 +103,7 @@ const volatile E_DeviceState gcve_targetState = STATE_IDLE;
 static const volatile E_DeviceState* const volatile gscvpcve_someVar = &gcve_targetState;
 ```
 
-Variable `gscvpcve_someVar` is `global static const volatile pointer to object of const-volatile-enum type` with name `someVar`:
+Variable `gscvpcve_someVar` is `global`-scope, internal-linkage (`static`), `const volatile` pointer to an object of `const-volatile-enum` type, with name `someVar`:
 
 - variable has `global` scope
 - variable has internal linkage (`static`)
@@ -112,7 +121,7 @@ const volatile E_DeviceState gcve_targetState = STATE_IDLE;
 static const volatile E_DeviceState& gsrcve_someVar = gcve_targetState;
 ```
 
-Variable `gsrcve_someVar` is `global static reference to object of const-volatile-enum type` with name `someVar`:
+Variable `gsrcve_someVar` is `global`-scope, internal-linkage (`static`) reference to an object of `const-volatile-enum` type, with name `someVar`:
 
 - variable has `global` scope
 - variable has internal linkage (`static`)
@@ -131,6 +140,7 @@ Possible type cases:
 - `C`: `class` (`C` - `C`lass)
 - `S`: `struct` (`S` - `S`truct)
 - `E`: `enum` or `enum class` (`E` - `E`num)
+- `U`: `union` (`U` - `U`nion)
 
 Example 1:
 
@@ -177,6 +187,12 @@ const S_SomeType& grc_someVar = g_var;
 - `TAC`: `type` `alias` to some `class` type (`TAC` - `T`ype `A`lias `C`lass)
 - `TAS`: `type` `alias` to some `struct` type (`TAS` - `T`ype `A`lias `S`truct)
 - `TAE`: `type` `alias` to some `enum` type (`TAE` - `T`ype `A`lias `E`num)
+- `TAU`: `type` `alias` to some `union` type (`TAU` - `T`ype `A`lias `U`nion)
+- `TAP`: `type` `alias` to some `pointer` type (`TAP` - `T`ype `A`lias `P`ointer)
+- `TAR`: `type` `alias` to some `reference` type (`TAR` - `T`ype `A`lias `R`eference)
+- `TAF`: `type` `alias` to some `function` type (`TAF` - `T`ype `A`lias `F`unction)
+
+**Notice for aliases of aliases**: A `using`/`typedef` declaration introduces no new type — an alias is just another name for the underlying type. Therefore, an alias of another alias must be named according to the *resolved* underlying type's category (e.g., aliasing a `TAC_SomeType` still yields a `TAC_…` name, not a separate `TAA` prefix). There is intentionally no `TAA` prefix.
 
 Example 1:
 
@@ -270,7 +286,7 @@ const TAS_SomeType& grc_someVar = g_var;
 | Function-like macro name | imperative verb in `UPPER_SNAKE_CASE()` style-form | `SAVE_DATA()`   |
 | Function/Method name     | imperative verb in `camelCase()` style-form        | `sendRequest()` |
 
-## Constant naming conventions
+## Macro & Enumerator naming conventions
 
 | Entity                              | Convention                                | Example           |
 |:----------------------------------- | ----------------------------------------- | ----------------- |
@@ -305,6 +321,47 @@ The base name of a member variable follows the same prefix rules as non-member v
 | `public`     | `this->[member-variable-name]`   | `obj.[member-variable-name]` / `ptr->[member-variable-name]`                                        |
 | `protected`  | `this->[member-variable-name]_`  | `obj.[member-variable-name]_` / `ptr->[member-variable-name]_` (accessible only from derived class) |
 | `private`    | `this->[member-variable-name]__` | Not accessible                                                                                      |
+
+### `mutable` members
+
+The `mutable` keyword is orthogonal to access level and to all prefix categories: it governs whether a field may be modified through a `const`-qualified method, not the field's scope, storage, or type. `mutable` members therefore follow exactly the same naming rules as non-`mutable` members of the same access level; the `mutable` qualifier is intentionally not encoded in the name.
+
+Example:
+
+```C++
+class C_Cache {
+public:
+    mutable std::size_t accessCount;        // mutable public:    no suffix
+protected:
+    mutable E_CacheState p_state_;           // mutable protected: suffix `_`
+private:
+    mutable E_CacheState e_replacement__;   // mutable private:   suffix `__`
+};
+
+// inside a const method:
+// this->accessCount++;
+// this->p_state_;
+// this->e_replacement__;
+```
+
+### Members combining prefixes and access suffixes
+
+When a member carries both a leading prefix (e.g., a `pointer-prefix` or `enum-prefix`) and an access suffix (`_` / `__`), the access suffix is appended *after* the full prefixed base name, in exactly the same position as for plain members.
+
+Example:
+
+```C++
+class C_SomeType {
+protected:
+    E_OperatingMode* p_operatingMode_;      // protected pointer member
+private:
+    E_OperatingMode  e_targetState__;       // private enum-typed member
+};
+
+// access:
+// this->p_operatingMode_;
+// this->e_targetState__;
+```
 
 ## Template parameter naming conventions
 
