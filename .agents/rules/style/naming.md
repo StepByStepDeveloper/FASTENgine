@@ -395,3 +395,286 @@ private:
 | Non-type template parameter pack | noun in `NTTPP_PascalCase` style-form | `NTTPP_Values`   |
 | Template template parameter      | noun in `TeTP_PascalCase` style-form  | `TeTP_Allocator` |
 | Template template parameter pack | noun in `TeTPP_PascalCase` style-form | `TeTPP_Policies` |
+
+## Ultimate Compilable Example
+
+A single, self-contained translation unit (example) that exercises every naming convention defined in this document. This example is artificial by design. The file-name convention is represented by the hypothetical artifact name `ultimate_example.cpp`, and the namespace-name convention is demonstrated by the `snake_case` namespaces below.
+
+```C++
+// ============================================================================
+// Ultimate Compilable Example
+// File-name convention: ultimate_example.cpp  Namespace convention: snake_case
+// ============================================================================
+
+// ---- Macros (object-like + function-like) ----
+#define MAX_BUFFER_SIZE 256                                           // object-like macro: UPPER_SNAKE_CASE
+#define SAVE_DATA(dst, src) ((void)((dst) = (src)))                   // function-like macro: UPPER_SNAKE_CASE()
+
+// ---- Types ----
+enum       E_DeviceState { STATE_IDLE, STATE_RUNNING, STATE_ERROR };  // plain enum; enumerators UPPER_SNAKE_CASE
+enum class E_Color       { DeepPurple, LightBlue };                   // enum class; enumerators PascalCase
+struct     S_Point       { int x; int y; };                           // struct type
+union      U_Packet      { int raw; float floating; };                // union type
+class      C_Renderer;                                                // class type (forward)
+
+// ---- Type aliases (using) ----
+using TA_Count     = unsigned;       // alias to primitive
+using TAC_Renderer = C_Renderer;     // alias to class
+using TAS_Point    = S_Point;        // alias to struct
+using TAE_Color    = E_Color;        // alias to enum
+using TAU_Packet   = U_Packet;       // alias to union
+using TAP_IntPtr   = int*;           // alias to pointer
+using TAR_IntRef   = int&;           // alias to reference
+using TAF_BinaryOp = int(int, int);  // alias to function
+
+// ============================================================================
+// Global-namespace variables
+// ============================================================================
+int                     g_someVar   = 20;                    // scope=g
+static int              gs_someVar  = 21;                    // g + static(internal linkage)
+thread_local int        gt_someVar  = 22;                    // g + thread_local
+static thread_local int gst_someVar = 23;                    // g + static thread_local
+const int               gc_someVar  = 24;                    // g + const
+volatile int            gv_someVar  = 25;                    // g + volatile
+const volatile int      gcv_someVar = 0;                     // g + const volatile
+
+extern int              gx_someVar;                          // extern declaration (defined elsewhere)
+extern thread_local int gxt_someVar;                         // extern thread_local declaration
+
+// global enum variables
+E_DeviceState                ge_someState     = STATE_IDLE;  // scope=g + enum
+const E_DeviceState          gce_someState    = STATE_IDLE;  // g + const + enum
+const volatile E_DeviceState gcve_targetState = STATE_IDLE;  // g + const volatile + enum
+
+// targets for pointers / references
+int                          g_intTarget     = 30;
+const int                    gc_intTarget    = 31;
+volatile int                 gv_intTarget    = 32;
+const volatile int           gcv_intTarget   = 0;
+E_DeviceState                ge_enumTarget   = STATE_RUNNING;
+const E_DeviceState          gce_enumTarget  = STATE_RUNNING;
+volatile E_DeviceState       gve_enumTarget  = STATE_RUNNING;
+const volatile E_DeviceState gcve_enumTarget = STATE_RUNNING;
+
+// pointer variables
+int*                                                gp_ptr             = &g_intTarget;      // pointer
+const int*                                          gpc_ptr            = &gc_intTarget;     // pointer to const
+volatile int*                                       gpv_ptr            = &gv_intTarget;     // pointer to volatile
+const volatile int*                                 gpcv_ptr           = &gcv_intTarget;    // pointer to const volatile
+E_DeviceState*                                      gpe_ptr            = &ge_enumTarget;    // pointer to enum
+const E_DeviceState*                                gpce_ptr           = &gce_enumTarget;   // pointer to const enum
+volatile E_DeviceState*                             gpve_ptr           = &gve_enumTarget;   // pointer to volatile enum
+const volatile E_DeviceState*                       gpcve_ptr          = &gcve_enumTarget;  // pointer to const volatile enum
+static const volatile E_DeviceState* const volatile gscvpcve_samplePtr = &gcve_enumTarget;  // static const volatile pointer to const volatile enum
+
+// reference variables — no cv-qualifier prefix slot for references
+int&                                 gr_ref           = g_intTarget;      // reference
+const int&                           grc_ref          = gc_intTarget;     // reference to const
+volatile int&                        grv_ref          = gv_intTarget;     // reference to volatile
+const volatile int&                  grcv_ref         = gcv_intTarget;    // reference to const volatile
+E_DeviceState&                       gre_ref          = ge_enumTarget;    // reference to enum
+const E_DeviceState&                 grce_ref         = gce_enumTarget;   // reference to const enum
+volatile E_DeviceState&              grve_ref         = gve_enumTarget;   // reference to volatile enum
+const volatile E_DeviceState&        grcve_ref        = gcve_enumTarget;  // reference to const volatile enum
+static const volatile E_DeviceState& gsrcve_sampleRef = gcve_enumTarget;  // static reference to const volatile enum
+
+// ============================================================================
+// Named namespace (snake_case): frame_renderer
+// ============================================================================
+namespace frame_renderer
+{
+    int                  n_someVar    = 1;                                   // scope=n
+    static int           ns_someVar   = 2;                                   // n + static
+    thread_local int     nt_someVar   = 3;                                   // n + thread_local
+    static thread_local int nst_someVar = 4;                                 // n + static thread_local
+    const int            nc_someVar   = 5;
+    const volatile int   ncv_someVar  = 0;
+    E_DeviceState        ne_someState = STATE_IDLE;                           // n + enum
+    const E_DeviceState nce_someState = STATE_IDLE;                          // n + const + enum
+
+    int*           np_ptr = nullptr;                                         // n + pointer
+    E_DeviceState* npe_ptr = &ne_someState;                                   // n + pointer to enum
+    E_DeviceState& nre_ref = ne_someState;                                    // n + reference to enum
+
+    extern thread_local int nxt_someVar;                                     // extern declaration (elsewhere)
+
+    int computeFrameSum(int lhs, int rhs) { return lhs + rhs; }              // function: camelCase
+}
+
+// ============================================================================
+// Anonymous namespace (prefix `a`; mutually exclusive with `static`)
+// ============================================================================
+namespace
+{
+    int                  a_someVar    = 10;                                   // scope=a
+    const int            ac_someVar   = 11;                                   // a + const
+    E_DeviceState        ae_someState = STATE_IDLE;                           // a + enum
+    int*                 ap_ptr       = nullptr;                             // a + pointer
+    const E_DeviceState& arce_ref     = ae_someState;                         // a + reference to const enum
+}
+
+// ============================================================================
+// Free function (camelCase) demonstrating local-scope variables
+// (block scope: no scope prefix; name starts at the storage slot)
+// ============================================================================
+void demonstrateLocals()
+{
+    int                 someVar      = 0;                                    // ordinary local (no prefix)
+    static int          s_someLocal  = 0;                                    // static local
+    thread_local int    t_threadVar  = 0;                                    // thread_local local (block scope)
+    const int           c_constLocal = 1;                                    // const local
+    E_DeviceState       e_someState  = STATE_IDLE;                            // local enum
+    const E_DeviceState ce_someState = STATE_IDLE;                            // local const enum
+    int*                p_dataBuffer = nullptr;                               // local pointer
+    const int&          rc_ref       = someVar;                               // local reference to const
+    E_DeviceState&      re_ref       = e_someState;                           // local reference to enum
+}
+
+int sendRequest(int value) { return value; }                                 // free function: camelCase
+
+// ============================================================================
+// Class members: access suffixes (public: none, protected: `_`, private: `__`)
+// Non-static members accessed via this->; static members via C_Logger::s_...
+// ============================================================================
+class C_Logger
+{
+public:
+    int          publicField;            // public: no suffix
+    mutable int  accessCount;            // public, mutable: no suffix (mutable not encoded)
+    int*         p_publicBuffer;         // public pointer member: no suffix
+    static int   s_instanceCount;        // public static member (declaration)
+
+protected:
+    int           protectedField_;        // protected: suffix `_`
+    E_DeviceState e_logState_;            // protected enum member
+    E_DeviceState* pe_operatingMode_;     // protected pointer-to-enum member
+
+private:
+    int           privateField__;          // private: suffix `__`
+    E_DeviceState e_targetState__;         // private enum member
+    static int    s_privateCounter__;      // private static member
+
+public:
+    static inline thread_local int st_threadCache = 0;  // static thread_local member
+
+    C_Logger()
+        : publicField(0), accessCount(0), p_publicBuffer(nullptr),
+          protectedField_(0), e_logState_(STATE_IDLE), pe_operatingMode_(nullptr),
+          privateField__(0), e_targetState__(STATE_IDLE)
+    {}
+
+    void logMessage()
+    {
+        this->publicField++;
+        this->accessCount++;
+        this->protectedField_++;
+        this->e_logState_ = STATE_RUNNING;
+        this->pe_operatingMode_ = &this->e_logState_;
+        this->privateField__++;
+        this->e_targetState__ = STATE_ERROR;
+        C_Logger::s_instanceCount++;
+        C_Logger::s_privateCounter__++;
+    }
+
+    void touch() const { this->accessCount++; }   // mutable modified through const method
+
+    static int resetCount()
+    {
+        C_Logger::s_privateCounter__ = 0;
+        return C_Logger::s_instanceCount;
+    }
+};
+
+// static member definitions: keyword `static` omitted; same `s_` prefixed name
+int C_Logger::s_instanceCount    = 0;
+int C_Logger::s_privateCounter__ = 0;
+
+// ============================================================================
+// Template parameters (all six kinds) and template class members
+// Note: a parameter pack must be the final template-parameter of its list,
+// so the three packs are demonstrated in their own declarations.
+// ============================================================================
+template <typename TTP_Value>                                          class C_Ttp   {}; // type template parameter
+template <typename... TTPP_Args>                                     class C_Ttpp  {}; // type template parameter pack
+template <int NTTP_Count>                                            class C_Nttp  {}; // non-type template parameter
+template <auto... NTTPP_Values>                                     class C_Nttpp {}; // non-type template parameter pack
+template <template <typename> typename TeTP_Allocator>                class C_Tetp  {}; // template template parameter
+template <template <typename...> typename... TeTPP_Policies>        class C_Tetpp {}; // template template parameter pack
+
+template <typename TTP_Value,                                                 // type template parameter
+          int NTTP_Count,                                                     // non-type template parameter
+          template <typename> typename TeTP_Allocator>                        // template template parameter
+class C_Container
+{
+public:
+    C_Container() : value_(), e_state_(STATE_IDLE), internal__(0) {}
+
+    TTP_Value retrieve() const { return this->value_; }
+
+    void update()
+    {
+        this->value_ = TTP_Value{};
+        this->e_state_ = STATE_RUNNING;
+        this->internal__++;
+        C_Container::s_sharedCount++;
+        C_Container::s_privateTotal__++;
+    }
+
+    static inline int s_sharedCount = 0;          // public static inline member
+
+protected:
+    TTP_Value    value_;                          // protected (suffix `_`)
+    E_DeviceState e_state_;                        // protected enum member
+
+private:
+    int internal__;                               // private (suffix `__`)
+    static inline int s_privateTotal__ = 0;       // private static member (suffix `__`)
+};
+
+// ============================================================================
+// Entry point exercising the runnable surface
+// ============================================================================
+int main()
+{
+    C_Logger logger;
+    logger.logMessage();                       // method (camelCase); internal access via this->
+    logger.touch();
+    logger.p_publicBuffer = nullptr;          // public field access from outside (obj.member)
+    int v = C_Logger::s_instanceCount;        // static member access qualified by class name
+    C_Logger::resetCount();
+
+    C_Logger* p_logger = &logger;             // local pointer variable (block scope: p_)
+    p_logger->publicField = 0;                // public field access via pointer (ptr->member)
+
+    sendRequest(0);
+    frame_renderer::computeFrameSum(1, 2);
+    demonstrateLocals();
+
+    (void)v;
+    return 0;
+}
+```
+
+This example covers, in alphabetical order of concept:
+
+- **Anonymous namespace** variables (`a`, `ac`, `ae`, `ap`, `arce`) and the mutual exclusion of `a` with `static`.
+- **cv-qualifier prefixes** (`c`, `v`, `cv`) at namespace and local scope.
+- **Enum prefixes** (`e`, `ce`, `cve`) for plain-enum and enum-class variables.
+- **Enumerator naming**: `UPPER_SNAKE_CASE` for plain `enum` (`STATE_IDLE`, …) and `PascalCase` for `enum class` (`DeepPurple`, …).
+- **Extern declarations** (`gx`, `gxt`, `nxt`) marked as declarations only, defined elsewhere.
+- **File-name convention** represented by the artifact name `ultimate_example.cpp`.
+- **Function-like macro** (`SAVE_DATA()`) and **object-like macro** (`MAX_BUFFER_SIZE`).
+- **Functions/methods in `camelCase`** (`sendRequest`, `computeFrameSum`, `logMessage`, `touch`, `resetCount`, `retrieve`, `update`, `main`).
+- **Local (block) scope** variables with no scope prefix (`someVar`, `s_someLocal`, `p_dataBuffer`, `p_logger`, …).
+- **Member access suffixes**: `public` (none), `protected` (`_`), `private` (`__`), including on pointer/enum members and static members.
+- **Member access discipline**: non-static members via `this->…`; static members via `C_Logger::s_…` / `C_Container::s_…`.
+- **Namespace convention** via the `snake_case` namespace `frame_renderer`.
+- **Pointer prefixes** — all 8 variants (`p`, `pc`, `pv`, `pcv`, `pe`, `pce`, `pve`, `pcve`) and the note that they apply to smart pointers alike.
+- **Reference prefixes** — all 8 variants (`r`, `rc`, `rv`, `rcv`, `re`, `rce`, `rve`, `rcve`), with the cv-qualifier prefix slot intentionally omitted.
+- **Scope prefixes** (`g`, `n`, `a`) and their omission at local/member scope.
+- **Static linkage/storage prefixes** (`s`, `t`, `st`) at namespace scope and as class members, plus the out-of-line static-member definition pattern (keyword `static` omitted, `s_` name retained).
+- **Static thread_local** namespace (`gst`, `nst`) and member (`st`) forms.
+- **Type prefixes** (`C`, `S`, `E`, `U`) and **type-alias prefixes** (`TA`, `TAC`, `TAS`, `TAE`, `TAU`, `TAP`, `TAR`, `TAF`).
+- **Template parameter prefixes** — all 6 kinds (`TTP`, `TTPP`, `NTTP`, `NTTPP`, `TeTP`, `TeTPP`).
+- **Ultimate compound forms** (`gscvpcve_samplePtr`, `gsrcve_sampleRef`) combining scope + storage + cv + pointer/reference-to-const-volatile-enum.
+- **`mutable` members** following the same naming rules as non-`mutable` members of the same access level, modifiable through a `const` method (`touch()`).
