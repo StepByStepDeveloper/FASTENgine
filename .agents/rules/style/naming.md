@@ -42,7 +42,7 @@ All global variables in C++ inherently have static storage duration. However, th
 
 The `x` prefix marks an `extern` *declaration* — a reference to a variable defined in another translation unit. The `extern` specifier requests external linkage, which is the opposite of what `static` requests at namespace scope; therefore the `s` and `x` prefixes are mutually exclusive and never combined. The `x` prefix is only valid on declarations, never on the corresponding definition (the definition is named according to its own scope/storage, typically with no storage-class prefix). The `xt` prefix marks a declaration of a `thread_local` variable defined in another translation unit.
 
-Example: `gx_someVar` - `extern` variable variable in a `global` namespace with name `someVar` (declared in this translation unit, defined elsewhere)
+Example: `gx_someVar` - `extern` variable in a `global` namespace with name `someVar` (declared in this translation unit, defined elsewhere)
 Example: `nxt_someVar` - `extern` `thread_local` variable in a `named` namespace with name `someVar`
 
 #### cv-qualifier prefixes
@@ -333,14 +333,14 @@ class C_Cache {
 public:
     mutable std::size_t accessCount;        // mutable public:    no suffix
 protected:
-    mutable E_CacheState p_state_;           // mutable protected: suffix `_`
+    mutable E_CacheState e_state_;           // mutable protected: suffix `_`
 private:
     mutable E_CacheState e_replacement__;   // mutable private:   suffix `__`
 };
 
 // inside a const method:
 // this->accessCount++;
-// this->p_state_;
+// this->e_state_;
 // this->e_replacement__;
 ```
 
@@ -353,13 +353,13 @@ Example:
 ```C++
 class C_SomeType {
 protected:
-    E_OperatingMode* p_operatingMode_;      // protected pointer member
+    E_OperatingMode* pe_operatingMode_;      // protected pointer member
 private:
     E_OperatingMode  e_targetState__;       // private enum-typed member
 };
 
 // access:
-// this->p_operatingMode_;
+// this->pe_operatingMode_;
 // this->e_targetState__;
 ```
 
