@@ -20,7 +20,9 @@ Unlike pointers, references in C++ cannot carry cv-qualifiers (const, volatile) 
 - `g`: variable in `global` namespace (`g` - `g`lobal)
 - `n`: variable in `named` namespace (`n` - `n`amed)
 
-Example: `g_someVar` - variable in the `global` namespace with name `someVar`
+Example 1: `g_someVar` - variable in the `global` namespace with name `someVar`
+
+Example 2: `n_someVar` - variable in the `named` namespace with name `someVar`
 
 #### Storage class prefixes
 
@@ -46,7 +48,11 @@ Example: `cv_someVar` - `const` `volatile` variable with name `someVar`
 
 - `e`: variable of `enum` or `enum class` type (`e` - `e`num)
 
-Example: `e_someVar` - variable of `enum` type with name `someVar`
+Example: `e_someVar` - variable of `enum` (or `enum class`) type with name `someVar`
+
+##### Rationale for enum variable prefix
+
+The `e` prefix on a variable (e.g., `e_varName`) makes it always possible to recognize that the variable is an enumeration. This is especially important when the variable is of a plain `enum` (not `enum class`), because plain enumerators can be assigned directly as `VAL` instead of `E_EnumType::VAL`. If a reader sees `var = VAL`, they might not realize variable is an enumeration because in such representation it may be some constant, not enumeration. Utilization of `e` prefix (`e_var = VAL`) solves that problem.
 
 #### Pointer prefixes
 
@@ -59,7 +65,7 @@ Example: `e_someVar` - variable of `enum` type with name `someVar`
 - `pve`: `pointer` to object of `volatile` `enum` (or `enum class`) type (`pve` - `p`ointer `v`olatile `e`num)
 - `pcve`: `pointer` to object of `const` `volatile` `enum` (or `enum class`) type (`pcve` - `p`ointer `c`onst `v`olatile `e`num)
 
-Notice: applicable for smart pointers
+Notice: pointer prefixes are applicable for smart pointers
 
 Example: `pcve_someVar` - `pointer to object of const-volatile-enum type` with name `someVar`
 
@@ -115,7 +121,7 @@ Variable `gsrcve_someVar` is `global static reference to object of const-volatil
 
 ### Types
 
-Prefixes for types:
+Possible type cases:
 
 - `type-name`: [`type-prefix`]_SomeType
 - `type-alias-name`: [`type-alias-prefix`]_SomeType
@@ -135,7 +141,7 @@ const E_SomeType gce_someVar = E_SomeType::Enum1;
 ```
 
 - `E_SomeType`: An `enum class` type with name `SomeType`
-- `gce_someVar`: A `global scope const enum` variable (instance) of that `enum class` type, marked with the `enum-prefix`
+- `gce_someVar`: A `global const enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum-prefix` (`e`)
 
 Example 2:
 
@@ -148,8 +154,8 @@ const C_SomeType* gpc_someVar = &g_var;
 ```
 
 - `C_SomeType`: A `class` type with name `SomeType`
-- `g_var`: A `global scope` variable (instance) of that `class` type
-- `gpc_someVar`: A `global scope pointer to const` object of that `class` type, marked with the `pointer-prefix`
+- `g_var`: A `global` variable (instance) of `class` type (`C_SomeType`)
+- `gpc_someVar`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-prefix` (`p`)
 
 Example 3:
 
@@ -162,8 +168,8 @@ const S_SomeType& grc_someVar = g_var;
 ```
 
 - `S_SomeType`: A `struct` type with name `SomeType`
-- `g_var`: A `global scope` variable (instance) of that `struct` type
-- `grc_someVar`: A `global scope reference to const` object of that `struct` type, marked with the `reference-prefix`
+- `g_var`: A `global` variable (instance) of `struct` type (`S_SomeType`)
+- `grc_someVar`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-prefix` (`r`)
 
 #### Type alias prefixes (prefixes for types created via `using`/`typedef` keywords)
 
@@ -184,9 +190,9 @@ E_SomeType ge_var = E_SomeType::Enum1;
 const TAE_SomeType gce_someVar = ge_var;
 ```
 
-- `TAE_SomeType`: A `type alias` (`TA`) for an `enum class` type (`E`)
-- `ge_var`: A `global scope enum` variable (instance) of that `enum class` type, marked with the `enum-prefix`
-- `gce_someVar`: A `global scope const enum` variable (instance) of that `enum class` type, marked with the `enum-prefix`
+- `TAE_SomeType`: A `type alias` for `enum class` type (`E_SomeType`)
+- `ge_var`: A `global enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum-prefix` (`e`)
+- `gce_someVar`: A `global const enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum-prefix` (`e`)
 
 Example 2:
 
@@ -200,9 +206,9 @@ C_SomeType g_var;
 const TAC_SomeType* gpc_someVar = &g_var;
 ```
 
-- `TAC_SomeType`: A `type alias` (`TA`) for a `class` type (`C`)
-- `g_var`: A `global scope` variable (instance) of that `class` type
-- `gpc_someVar`: A `global scope pointer to const` object of that `class` type, marked with the `pointer-prefix`
+- `TAC_SomeType`: A `type alias` for `class` type (`C_SomeType`)
+- `g_var`: A `global` variable (instance) of `class` type (`C_SomeType`)
+- `gpc_someVar`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-prefix` (`p`)
 
 Example 3:
 
@@ -216,26 +222,26 @@ S_SomeType g_var;
 const TAS_SomeType& grc_someVar = g_var;
 ```
 
-- `TAS_SomeType`: A `type alias` (`TA`) for a `struct` type (`S`)
-- `g_var`: A `global scope` variable (instance) of that `struct` type
-- `grc_someVar`: A `global scope reference to const` object of that `struct` type, marked with the `reference-prefix`
+- `TAS_SomeType`: A `type alias` for `struct` type (`S_SomeType`)
+- `g_var`: A `global` variable (instance) of `struct` type (`S_SomeType`)
+- `grc_someVar`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-prefix` (`r`)
 
 ### Template parameters
 
 #### Type template parameter prefixes
 
-- `T`: `type` template parameter (`T` - `T`ype)
-- `TP`: `type` template parameter `pack` (`TP` - `T`ype `P`ack)
+- `TTP`: `type` `template` `parameter` (`TTP` - `T`ype `T`emplate `P`arameter)
+- `TTPP`: `type` `template` `parameter` `pack` (`TTPP` - `T`ype `T`emplate `P`arameter `P`ack)
 
 #### Non-Type template parameter prefixes
 
-- `NT`: `non-type` template parameter (`NT` - `N`on `T`ype)
-- `NTP`: `non-type` template parameter `pack` (`NTP` - `N`on `T`ype `P`ack)
+- `NTTP`: `non` `type` `template` `parameter` (`NTTP` - `N`on `T`ype `T`emplate `P`arameter)
+- `NTTPP`: `non` `type` `template` `parameter` `pack` (`NTTPP` - `N`on `T`ype `T`emplate `P`arameter `P`ack)
 
 #### Template template parameter prefixes
 
-- `TT`: `template` template parameter (`TT` - `T`empla`T`e)
-- `TTP`: `template` template parameter `pack` (`TTP` - `T`empla`T`e `P`ack)
+- `TeTP`: `template` `template` `parameter` (`TeTP` - `Te`mplate `T`emplate `P`arameter)
+- `TeTPP`: `template` `template` `parameter` `pack` (`TeTPP` - `Te`mplate `T`emplate `P`arameter `P`ack)
 
 ## File naming conventions
 
@@ -246,16 +252,16 @@ const TAS_SomeType& grc_someVar = g_var;
 
 ## Namespace naming conventions
 
-| Entity     | Convention   | Example       |
-|:---------- | ------------ | ------------- |
-| Namespaces | `snake_case` | `fast_engine` |
+| Entity     | Convention   | Example          |
+|:---------- | ------------ | ---------------- |
+| Namespaces | `snake_case` | `frame_renderer` |
 
 ## Type naming conventions
 
-| Entity          | Convention                                          | Example           |
-|:--------------- | --------------------------------------------------- | ----------------- |
-| Type name       | noun in `[type-prefix]_PascalCase` style-form       | `C_FrameRenderer` |
-| Type alias name | noun in `[type-alias-prefix]_PascalCase` style-form | `TA_ProfileInfo`  |
+| Entity          | Convention                           | Example             |
+|:--------------- | ------------------------------------ | ------------------- |
+| Type name       | noun in `type-name` style-form       | `C_FrameRenderer`   |
+| Type alias name | noun in `type-alias-name` style-form | `TAC_FrameRenderer` |
 
 ## Functions/Method naming conventions
 
@@ -266,59 +272,47 @@ const TAS_SomeType& grc_someVar = g_var;
 
 ## Constant naming conventions
 
-| Entity                              | Convention                                | Example               |
-|:----------------------------------- | ----------------------------------------- | --------------------- |
-| Object-like macro name              | noun in `UPPER_SNAKE_CASE` style-form     | `MAX_BUFFER_SIZE`     |
-| Enumerator name for enum-class type | any name in `PascalCase` style-form       | `E_Color::DeepPurple` |
-| Enumerator name for enum type       | any name in `UPPER_SNAKE_CASE` style-form | `DEEP_PURPLE`         |
+| Entity                              | Convention                                | Example           |
+|:----------------------------------- | ----------------------------------------- | ----------------- |
+| Object-like macro name              | noun in `UPPER_SNAKE_CASE` style-form     | `MAX_BUFFER_SIZE` |
+| Enumerator name for enum-class type | any name in `PascalCase` style-form       | `DeepPurple`      |
+| Enumerator name for enum type       | any name in `UPPER_SNAKE_CASE` style-form | `DEEP_PURPLE`     |
 
 ### Rationale for enumerator naming
 
-The `e_` prefix on a variable (e.g., `e_varName`) makes it always possible to recognize that the variable is an enumeration. This is especially important when the variable is of a plain `enum` (not `enum class`), because plain enumerators can be assigned directly as `VAL` instead of `E_EnumType::VAL`. If a reader sees `var = VAL`, they might not realize it is an enumeration; `e_var = VAL` solves that problem.
-
-For backward compatibility with C-style conventions, plain `enum` enumerators use `UPPER_SNAKE_CASE` (e.g., `DEEP_PURPLE`). For `enum class` variables, the mandatory scope prefix `E_EnumType::` allows the enumerator name itself to be written in `PascalCase` instead of `UPPER_SNAKE_CASE`, yielding the full form `E_Color::DeepPurple`.
+For backward compatibility with C-style conventions, plain `enum` enumerators use `UPPER_SNAKE_CASE` (e.g., `DEEP_PURPLE`). For `enum class` enumerators, the mandatory type-name qualifier `E_EnumType::` allows the enumerator name itself to be written in `PascalCase` instead of `UPPER_SNAKE_CASE`, yielding the full form `E_Color::DeepPurple`.
 
 ## Non-Member variable naming conventions
 
-| Entity                  | Convention                                                | Example           |
-|:----------------------- | --------------------------------------------------------- | ----------------- |
-| Enum variable name      | noun in `[scope][storage][cv][enum]_camelCase` style-form | `e_operatingMode` |
-| Pointer variable name   | noun in `[scope][storage][cv][ptr]_camelCase` style-form  | `p_operatingMode` |
-| Reference variable name | noun in `[scope][storage][ref]_camelCase` style-form      | `r_operatingMode` |
-| Ordinary variable name  | noun in `[scope][storage][cv]_camelCase` style-form       | `operatingMode`   |
-
-### Rationale for enum variable prefix
-
-See the rationale under **Constant naming conventions / Rationale for enumerator naming**. The `e_` prefix on a non-member variable serves the same purpose: it makes the enumeration nature explicit at every use site.
+| Entity                  | Convention                         | Example           |
+|:----------------------- | ---------------------------------- | ----------------- |
+| Enum variable name      | noun in `enum-var` style-form      | `e_operatingMode` |
+| Pointer variable name   | noun in `pointer-var` style-form   | `p_operatingMode` |
+| Reference variable name | noun in `reference-var` style-form | `r_operatingMode` |
+| Ordinary variable name  | noun in `normal-var` style-form    | `operatingMode`   |
 
 ## Member variable naming conventions
 
 The base name of a member variable follows the same prefix rules as non-member variables (prefixes + meaningful name in `camelCase`). On top of that, the following requirements apply:
 
-- Fields declared in a class **must** be accessed inside class methods exclusively via `this->variableName`. The `this->` qualifier **must never** be omitted so that it is always obvious an access refers to a class field.
+- Fields declared in a class **must** be accessed inside class methods exclusively via the `this->` qualifier (e.g., `this->operatingMode`). The `this->` qualifier **must never** be omitted so that it is always obvious an access refers to a class field.
 - `public` fields **must not** add any suffix.
-- `protected` fields **must** have the suffix `_` (e.g., `this->operatingMode_`).
-- `private` fields **must** have the suffix `__` (e.g., `this->operatingMode__`).
+- `protected` fields **must** have the suffix `_` (e.g., `operatingMode_`).
+- `private` fields **must** have the suffix `__` (e.g., `operatingMode__`).
 
-| Access level | Inside class methods           | Outside the class (via object/pointer)                                               |
-|:------------ | ------------------------------ | ------------------------------------------------------------------------------------- |
-| `public`     | `this->[non-member-name]`      | `obj.[non-member-name]` / `obj->[non-member-name]`                                    |
-| `protected`  | `this->[non-member-name]_`     | `obj.[non-member-name]_` / `obj->[non-member-name]_` (accessible only from derived) |
-| `private`    | `this->[non-member-name]__`    | Not accessible                                                                        |
+| Access level | Inside class methods             | Outside the class (via object/pointer)                                                              |
+|:------------ | -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `public`     | `this->[member-variable-name]`   | `obj.[member-variable-name]` / `ptr->[member-variable-name]`                                        |
+| `protected`  | `this->[member-variable-name]_`  | `obj.[member-variable-name]_` / `ptr->[member-variable-name]_` (accessible only from derived class) |
+| `private`    | `this->[member-variable-name]__` | Not accessible                                                                                      |
 
 ## Template parameter naming conventions
 
 | Entity                           | Convention                            | Example          |
 |:-------------------------------- | ------------------------------------- | ---------------- |
-| Type template parameter          | noun in `T_PascalCase` style-form     | `T_Value`        |
-| Type template parameter pack     | noun in `TP_PascalCase` style-form    | `TP_Args`        |
-| Non-type template parameter      | noun in `NT_PascalCase` style-form    | `NT_Count`       |
-| Non-type template parameter pack | noun in `NTP_PascalCase` style-form   | `NTP_Values`     |
-| Template template parameter      | noun in `TT_PascalCase` style-form    | `TT_Allocator`   |
-| Template template parameter pack | noun in `TTP_PascalCase` style-form   | `TTP_Policies`   |
-
-### Rationale for template parameter naming
-
-Template parameters are prefixed so that their role is immediately recognizable inside template declarations. `T_` marks a single type parameter, `TP_` a type parameter pack, `NT_` a single non-type parameter, `NTP_` a non-type parameter pack, `TT_` a template template parameter, and `TTP_` a template template parameter pack. Using `PascalCase` for the descriptive part keeps template parameters visually distinct from both runtime variables (`camelCase`) and concrete type names (`Prefix_PascalCase`).
-
-## Examples
+| Type template parameter          | noun in `TTP_PascalCase` style-form   | `TTP_Value`      |
+| Type template parameter pack     | noun in `TTPP_PascalCase` style-form  | `TTPP_Args`      |
+| Non-type template parameter      | noun in `NTTP_PascalCase` style-form  | `NTTP_Count`     |
+| Non-type template parameter pack | noun in `NTTPP_PascalCase` style-form | `NTTPP_Values`   |
+| Template template parameter      | noun in `TeTP_PascalCase` style-form  | `TeTP_Allocator` |
+| Template template parameter pack | noun in `TeTPP_PascalCase` style-form | `TeTPP_Policies` |
