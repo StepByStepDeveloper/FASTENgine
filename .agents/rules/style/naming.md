@@ -328,7 +328,7 @@ Class members are *class-scoped*, not namespace-scoped, so they intentionally **
 
 - An ordinary (instance) non-static member uses **no storage-class prefix** (e.g., `operatingMode`, `pe_dataBuffer`).
 - A `static` class member uses the **`s`** storage-class prefix (e.g., `s_instanceCount`). Note carefully: at *namespace* scope `s` means internal linkage, but a `static` class member has **external linkage**. The `s` prefix on a member therefore denotes *class-level (shared) storage only*, not internal linkage — there is no contradiction because the scope prefix is absent and the class scope, not the storage prefix, governs linkage. The `x` (`extern`) prefix is **never** used on members: `static` members are defined exactly once and resolved by the linker; an `extern` declaration of one is written in the header with the plain `s` prefix and defined in one source file with the same `s` prefix (the keyword `static` is omitted at the definition).
-- `thread_local` members additionally carry **`t`** (e.g., `t_threadStorage`), and `static thread_local` members carry **`st`** (e.g., `st_threadCache`), mirroring the namespace-scope storage-class prefixes.
+- `thread_local` members additionally carry **`t`** (e.g., `t_threadStorage`), and `static thread_local` members carry **`st`** (e.g., `st_cache`), mirroring the namespace-scope storage-class prefixes.
 
 These storage prefixes occupy the same slot as for non-members — between the (absent) `scope-prefix` and the `cv-qualifier-prefix`, i.e. `[scope: omitted][storage-class-prefix][cv-qualifier-prefix][enum/pointer/reference-prefix]_camelCase`. The access suffix (`_` / `__`) is always appended last, after the full prefixed base name (see [Members combining prefixes and access suffixes](#members-combining-prefixes-and-access-suffixes)).
 
@@ -430,7 +430,7 @@ using TAF_BinaryOp = int(int, int);  // alias to function
 // ============================================================================
 // Global-namespace variables
 // ============================================================================
-int                     g_someVar   = 20;                    // scope=g
+int                     g_someVar   = 20;                    // scope = g
 static int              gs_someVar  = 21;                    // g + static(internal linkage)
 thread_local int        gt_someVar  = 22;                    // g + thread_local
 static thread_local int gst_someVar = 23;                    // g + static thread_local
@@ -442,7 +442,7 @@ extern int              gx_someVar;                          // extern declarati
 extern thread_local int gxt_someVar;                         // extern thread_local declaration
 
 // global enum variables
-E_DeviceState                ge_someState     = STATE_IDLE;  // scope=g + enum
+E_DeviceState                ge_someState     = STATE_IDLE;  // scope = g + enum
 const E_DeviceState          gce_someState    = STATE_IDLE;  // g + const + enum
 const volatile E_DeviceState gcve_targetState = STATE_IDLE;  // g + const volatile + enum
 
@@ -451,54 +451,56 @@ int                          g_intTarget     = 30;
 const int                    gc_intTarget    = 31;
 volatile int                 gv_intTarget    = 32;
 const volatile int           gcv_intTarget   = 0;
-E_DeviceState                ge_enumTarget   = STATE_RUNNING;
-const E_DeviceState          gce_enumTarget  = STATE_RUNNING;
-volatile E_DeviceState       gve_enumTarget  = STATE_RUNNING;
-const volatile E_DeviceState gcve_enumTarget = STATE_RUNNING;
+
+// states for pointers / references
+E_DeviceState                ge_state   = STATE_RUNNING;
+const E_DeviceState          gce_state  = STATE_RUNNING;
+volatile E_DeviceState       gve_state  = STATE_RUNNING;
+const volatile E_DeviceState gcve_state = STATE_RUNNING;
 
 // pointer variables
-int*                                                gp_ptr             = &g_intTarget;      // pointer
-const int*                                          gpc_ptr            = &gc_intTarget;     // pointer to const
-volatile int*                                       gpv_ptr            = &gv_intTarget;     // pointer to volatile
-const volatile int*                                 gpcv_ptr           = &gcv_intTarget;    // pointer to const volatile
-E_DeviceState*                                      gpe_ptr            = &ge_enumTarget;    // pointer to enum
-const E_DeviceState*                                gpce_ptr           = &gce_enumTarget;   // pointer to const enum
-volatile E_DeviceState*                             gpve_ptr           = &gve_enumTarget;   // pointer to volatile enum
-const volatile E_DeviceState*                       gpcve_ptr          = &gcve_enumTarget;  // pointer to const volatile enum
-static const volatile E_DeviceState* const volatile gscvpcve_samplePtr = &gcve_enumTarget;  // static const volatile pointer to const volatile enum
+int*                                                gp_intTarget   = &g_intTarget;    // global pointer
+const int*                                          gpc_intTarget  = &gc_intTarget;   // global pointer to const
+volatile int*                                       gpv_intTarget  = &gv_intTarget;   // global pointer to volatile
+const volatile int*                                 gpcv_intTarget = &gcv_intTarget;  // global pointer to const volatile
+E_DeviceState*                                      gpe_state      = &ge_state;       // global pointer to enum
+const E_DeviceState*                                gpce_state     = &gce_state;      // global pointer to const enum
+volatile E_DeviceState*                             gpve_state     = &gve_state;      // global pointer to volatile enum
+const volatile E_DeviceState*                       gpcve_state    = &gcve_state;     // global pointer to const volatile enum
+static const volatile E_DeviceState* const volatile gscvpcve_state = &gcve_state;     // global static const volatile pointer to const volatile enum
 
 // reference variables — no cv-qualifier prefix slot for references
-int&                                 gr_ref           = g_intTarget;      // reference
-const int&                           grc_ref          = gc_intTarget;     // reference to const
-volatile int&                        grv_ref          = gv_intTarget;     // reference to volatile
-const volatile int&                  grcv_ref         = gcv_intTarget;    // reference to const volatile
-E_DeviceState&                       gre_ref          = ge_enumTarget;    // reference to enum
-const E_DeviceState&                 grce_ref         = gce_enumTarget;   // reference to const enum
-volatile E_DeviceState&              grve_ref         = gve_enumTarget;   // reference to volatile enum
-const volatile E_DeviceState&        grcve_ref        = gcve_enumTarget;  // reference to const volatile enum
-static const volatile E_DeviceState& gsrcve_sampleRef = gcve_enumTarget;  // static reference to const volatile enum
+int&                                 gr_intTarget   = g_intTarget;    // global reference
+const int&                           grc_intTarget  = gc_intTarget;   // global reference to const
+volatile int&                        grv_intTarget  = gv_intTarget;   // global reference to volatile
+const volatile int&                  grcv_intTarget = gcv_intTarget;  // global reference to const volatile
+E_DeviceState&                       gre_state      = ge_state;       // global reference to enum
+const E_DeviceState&                 grce_state     = gce_state;      // global reference to const enum
+volatile E_DeviceState&              grve_state     = gve_state;      // global reference to volatile enum
+const volatile E_DeviceState&        grcve_state    = gcve_state;     // global reference to const volatile enum
+static const volatile E_DeviceState& gsrcve_state   = gcve_state;     // global static reference to const volatile enum
 
 // ============================================================================
 // Named namespace (snake_case): frame_renderer
 // ============================================================================
 namespace frame_renderer
 {
-    int                  n_someVar    = 1;                                   // scope=n
-    static int           ns_someVar   = 2;                                   // n + static
-    thread_local int     nt_someVar   = 3;                                   // n + thread_local
-    static thread_local int nst_someVar = 4;                                 // n + static thread_local
-    const int            nc_someVar   = 5;
-    const volatile int   ncv_someVar  = 0;
-    E_DeviceState        ne_someState = STATE_IDLE;                           // n + enum
-    const E_DeviceState nce_someState = STATE_IDLE;                          // n + const + enum
+    int                     n_someVar     = 1;           // scope = n
+    static int              ns_someVar    = 2;           // n + static
+    thread_local int        nt_someVar    = 3;           // n + thread_local
+    static thread_local int nst_someVar   = 4;           // n + static thread_local
+    const int               nc_someVar    = 5;           // n + const
+    const volatile int      ncv_someVar   = 0;           // n + const volatile
+    E_DeviceState           ne_someState  = STATE_IDLE;  // n + enum
+    const E_DeviceState     nce_someState = STATE_IDLE;  // n + const + enum
 
-    int*           np_ptr = nullptr;                                         // n + pointer
-    E_DeviceState* npe_ptr = &ne_someState;                                   // n + pointer to enum
-    E_DeviceState& nre_ref = ne_someState;                                    // n + reference to enum
+    int*                    np_ptr = nullptr;            // n + pointer
+    E_DeviceState*          npe_ptr = &ne_someState;     // n + pointer to enum
+    E_DeviceState&          nre_ref = ne_someState;      // n + reference to enum
 
-    extern thread_local int nxt_someVar;                                     // extern declaration (elsewhere)
+    extern thread_local int nxt_someVar;                 // n + extern declaration (definition is elsewhere) of thread_local variable
 
-    int computeFrameSum(int lhs, int rhs) { return lhs + rhs; }              // function: camelCase
+    int computeFrameSum(int lhs, int rhs) { return lhs + rhs; }  // function: camelCase
 }
 
 // ============================================================================
@@ -506,11 +508,11 @@ namespace frame_renderer
 // ============================================================================
 namespace
 {
-    int                  a_someVar    = 10;                                   // scope=a
-    const int            ac_someVar   = 11;                                   // a + const
-    E_DeviceState        ae_someState = STATE_IDLE;                           // a + enum
-    int*                 ap_ptr       = nullptr;                             // a + pointer
-    const E_DeviceState& arce_ref     = ae_someState;                         // a + reference to const enum
+    int                  a_someVar      = 10;            // scope = a
+    const int            ac_someVar     = 11;            // a + const
+    E_DeviceState        ae_someState   = STATE_IDLE;    // a + enum
+    int*                 ap_someVar     = &a_someVar;    // a + pointer
+    const E_DeviceState& arce_someState = ae_someState;  // a + reference to const enum
 }
 
 // ============================================================================
@@ -519,18 +521,18 @@ namespace
 // ============================================================================
 void demonstrateLocals()
 {
-    int                 someVar      = 0;                                    // ordinary local (no prefix)
-    static int          s_someLocal  = 0;                                    // static local
-    thread_local int    t_threadVar  = 0;                                    // thread_local local (block scope)
-    const int           c_constLocal = 1;                                    // const local
-    E_DeviceState       e_someState  = STATE_IDLE;                            // local enum
-    const E_DeviceState ce_someState = STATE_IDLE;                            // local const enum
-    int*                p_dataBuffer = nullptr;                               // local pointer
-    const int&          rc_ref       = someVar;                               // local reference to const
-    E_DeviceState&      re_ref       = e_someState;                           // local reference to enum
+    int                 someVar      = 0;            // local (no prefix)
+    static int          s_someLocal  = 0;            // local + static
+    thread_local int    t_someVar    = 0;            // local + thread_local
+    const int           c_someLocal  = 1;            // local + const
+    E_DeviceState       e_someState  = STATE_IDLE;   // local + enum
+    const E_DeviceState ce_someState = STATE_IDLE;   // local + const enum
+    int*                p_dataBuffer = nullptr;      // local + pointer
+    const int&          rc_someVar   = someVar;      // local + reference to const
+    E_DeviceState&      re_someState = e_someState;  // local + reference to enum
 }
 
-int sendRequest(int value) { return value; }                                 // free function: camelCase
+int sendRequest(int value) { return value; }  // free function: camelCase
 
 // ============================================================================
 // Class members: access suffixes (public: none, protected: `_`, private: `__`)
@@ -539,33 +541,33 @@ int sendRequest(int value) { return value; }                                 // 
 class C_Logger
 {
 public:
-    int          publicField;            // public: no suffix
-    mutable int  accessCount;            // public, mutable: no suffix (mutable not encoded)
-    int*         p_publicBuffer;         // public pointer member: no suffix
-    static int   s_instanceCount;        // public static member (declaration)
+    int         someField;        // public: no suffix
+    mutable int accessCount;      // public, mutable: no suffix (mutable not encoded)
+    int*        p_publicBuffer;   // public pointer member: no suffix
+    static int  s_instanceCount;  // public static member (declaration)
 
 protected:
-    int           protectedField_;        // protected: suffix `_`
-    E_DeviceState e_logState_;            // protected enum member
-    E_DeviceState* pe_operatingMode_;     // protected pointer-to-enum member
+    int            protectedField_;    // protected: suffix `_`
+    E_DeviceState  e_logState_;        // protected enum member
+    E_DeviceState* pe_operatingMode_;  // protected pointer-to-enum member
 
 private:
-    int           privateField__;          // private: suffix `__`
-    E_DeviceState e_targetState__;         // private enum member
-    static int    s_privateCounter__;      // private static member
+    int           privateField__;   // private: suffix `__`
+    E_DeviceState e_targetState__;  // private enum member
+    static int    s_someCounter__;  // private static member
 
 public:
-    static inline thread_local int st_threadCache = 0;  // static thread_local member
+    static inline thread_local int st_cache = 0;  // static thread_local member
 
     C_Logger()
-        : publicField(0), accessCount(0), p_publicBuffer(nullptr),
+        : someField(0), accessCount(0), p_publicBuffer(nullptr),
           protectedField_(0), e_logState_(STATE_IDLE), pe_operatingMode_(nullptr),
           privateField__(0), e_targetState__(STATE_IDLE)
     {}
 
     void logMessage()
     {
-        this->publicField++;
+        this->someField++;
         this->accessCount++;
         this->protectedField_++;
         this->e_logState_ = STATE_RUNNING;
@@ -573,37 +575,37 @@ public:
         this->privateField__++;
         this->e_targetState__ = STATE_ERROR;
         C_Logger::s_instanceCount++;
-        C_Logger::s_privateCounter__++;
+        C_Logger::s_someCounter__++;
     }
 
-    void touch() const { this->accessCount++; }   // mutable modified through const method
+    void touch() const { this->accessCount++; }  // mutable modified through const method
 
     static int resetCount()
     {
-        C_Logger::s_privateCounter__ = 0;
+        C_Logger::s_someCounter__ = 0;
         return C_Logger::s_instanceCount;
     }
 };
 
 // static member definitions: keyword `static` omitted; same `s_` prefixed name
-int C_Logger::s_instanceCount    = 0;
-int C_Logger::s_privateCounter__ = 0;
+int C_Logger::s_instanceCount = 0;
+int C_Logger::s_someCounter__ = 0;
 
 // ============================================================================
 // Template parameters (all six kinds) and template class members
 // Note: a parameter pack must be the final template-parameter of its list,
 // so the three packs are demonstrated in their own declarations.
 // ============================================================================
-template <typename TTP_Value>                                          class C_Ttp   {}; // type template parameter
-template <typename... TTPP_Args>                                     class C_Ttpp  {}; // type template parameter pack
-template <int NTTP_Count>                                            class C_Nttp  {}; // non-type template parameter
-template <auto... NTTPP_Values>                                     class C_Nttpp {}; // non-type template parameter pack
-template <template <typename> typename TeTP_Allocator>                class C_Tetp  {}; // template template parameter
-template <template <typename...> typename... TeTPP_Policies>        class C_Tetpp {}; // template template parameter pack
+template <typename TTP_Value>                                class C_Ttp   {}; // type template parameter
+template <typename... TTPP_Args>                             class C_Ttpp  {}; // type template parameter pack
+template <int NTTP_Count>                                    class C_Nttp  {}; // non-type template parameter
+template <auto... NTTPP_Values>                              class C_Nttpp {}; // non-type template parameter pack
+template <template <typename> typename TeTP_Allocator>       class C_Tetp  {}; // template template parameter
+template <template <typename...> typename... TeTPP_Policies> class C_Tetpp {}; // template template parameter pack
 
-template <typename TTP_Value,                                                 // type template parameter
-          int NTTP_Count,                                                     // non-type template parameter
-          template <typename> typename TeTP_Allocator>                        // template template parameter
+template <typename TTP_Value,                           // type template parameter
+          int NTTP_Count,                               // non-type template parameter
+          template <typename> typename TeTP_Allocator>  // template template parameter
 class C_Container
 {
 public:
@@ -620,15 +622,15 @@ public:
         C_Container::s_privateTotal__++;
     }
 
-    static inline int s_sharedCount = 0;          // public static inline member
+    static inline int s_sharedCount = 0;  // public static inline member
 
 protected:
-    TTP_Value    value_;                          // protected (suffix `_`)
-    E_DeviceState e_state_;                        // protected enum member
+    TTP_Value     value_;    // protected (suffix `_`)
+    E_DeviceState e_state_;  // protected enum member
 
 private:
-    int internal__;                               // private (suffix `__`)
-    static inline int s_privateTotal__ = 0;       // private static member (suffix `__`)
+    int               internal__;            // private (suffix `__`)
+    static inline int s_privateTotal__ = 0;  // private static member (suffix `__`)
 };
 
 // ============================================================================
@@ -637,14 +639,14 @@ private:
 int main()
 {
     C_Logger logger;
-    logger.logMessage();                       // method (camelCase); internal access via this->
+    logger.logMessage();                // method (camelCase); internal access via this->
     logger.touch();
-    logger.p_publicBuffer = nullptr;          // public field access from outside (obj.member)
-    int v = C_Logger::s_instanceCount;        // static member access qualified by class name
+    logger.p_publicBuffer = nullptr;    // public field access from outside (obj.member)
+    int v = C_Logger::s_instanceCount;  // static member access qualified by class name
     C_Logger::resetCount();
 
-    C_Logger* p_logger = &logger;             // local pointer variable (block scope: p_)
-    p_logger->publicField = 0;                // public field access via pointer (ptr->member)
+    C_Logger* p_logger = &logger;       // local pointer variable (block scope: p_)
+    p_logger->someField = 0;            // public field access via pointer (ptr->member)
 
     sendRequest(0);
     frame_renderer::computeFrameSum(1, 2);
