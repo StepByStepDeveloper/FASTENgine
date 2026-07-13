@@ -4,7 +4,7 @@
 
 ### Variables
 
-Variable names may consist of a combination of prefixes in the following order of these prefix types (each type appears exactly once in the specified order):
+Variable names may consist of a combination of prefixes in the following order of these prefix types (each applicable type appears at most once, in the specified order, with the cv-qualifier-prefix slot intentionally absent for references — see the notice below):
 
 - `normal-var` (non-enum and non-pointer and non-reference) variable: [`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`]_camelCase
 - `enum-var` variable: [`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`][`enum-prefix`]_camelCase
@@ -56,7 +56,7 @@ The `x` prefix marks an `extern` *declaration* — a reference to a variable def
 Example: `gx_someVar` - `extern` variable in a `global` namespace with name `someVar` (declared in this translation unit, defined elsewhere)
 Example: `nxt_someVar` - `extern` `thread_local` variable in a `named` namespace with name `someVar`
 
-#### cv-qualifier prefixes
+#### CV-qualifier prefixes
 
 - `c`: `const` variable (`c` - `c`onst)
 - `v`: `volatile` variable (`v` - `v`olatile)
@@ -297,6 +297,10 @@ const TAS_SomeType& grc_someVar = g_var;
 | Function-like macro name | imperative verb in `UPPER_SNAKE_CASE()` style-form | `SAVE_DATA()`   |
 | Function/Method name     | imperative verb in `camelCase()` style-form        | `sendRequest()` |
 
+**Important notice for member-method calls**:
+
+Non-`static` member methods **must** be called from within the class's own methods exclusively via the `this->` qualifier (e.g., `this->resizeBuffer()`). The `this->` qualifier **must never** be omitted so that it is always obvious a call targets an instance method rather than a free function. `static` member methods, conversely, **must** be qualified with the enclosing class name (e.g., `C_SomeType::create()`) and **must never** be called via `this->`.
+
 ## Object-like Macro and Enumerator naming conventions
 
 | Entity                              | Convention                                | Example           |
@@ -536,7 +540,7 @@ int sendRequest(int value) { return value; }  // free function: camelCase
 
 // ============================================================================
 // Class members: access suffixes (public: none, protected: `_`, private: `__`)
-// Non-static members accessed via this->; static members via C_Logger::s_...
+// Non-static members/methods accessed via this->; static members/methods via C_Logger::...
 // ============================================================================
 class C_Logger
 {
@@ -565,6 +569,11 @@ public:
           privateField__(0), e_targetState__(STATE_IDLE)
     {}
 
+    void flushBuffer()  // non-static helper method (camelCase)
+    {
+        this->someField = 0;
+    }
+
     void logMessage()
     {
         this->someField++;
@@ -574,8 +583,10 @@ public:
         this->pe_operatingMode_ = &this->e_logState_;
         this->privateField__++;
         this->e_targetState__ = STATE_ERROR;
+        this->flushBuffer();          // non-static method call: this->method()
         C_Logger::s_instanceCount++;
         C_Logger::s_someCounter__++;
+        C_Logger::resetCount();       // static method call: C_Logger::method()
     }
 
     void touch() const { this->accessCount++; }  // mutable modified through const method
@@ -652,12 +663,13 @@ int main()
     frame_renderer::computeFrameSum(1, 2);
     demonstrateLocals();
 
-    (void)v;
+    (void) v;
+    
     return 0;
 }
 ```
 
-This example covers, in alphabetical order of concept:
+This example covers:
 
 - **Anonymous namespace** variables (`a`, `ac`, `ae`, `ap`, `arce`) and the mutual exclusion of `a` with `static`.
 - **cv-qualifier prefixes** (`c`, `v`, `cv`) at namespace and local scope.
@@ -669,7 +681,7 @@ This example covers, in alphabetical order of concept:
 - **Functions/methods in `camelCase`** (`sendRequest`, `computeFrameSum`, `logMessage`, `touch`, `resetCount`, `retrieve`, `update`, `main`).
 - **Local (block) scope** variables with no scope prefix (`someVar`, `s_someLocal`, `p_dataBuffer`, `p_logger`, …).
 - **Member access suffixes**: `public` (none), `protected` (`_`), `private` (`__`), including on pointer/enum members and static members.
-- **Member access discipline**: non-static members via `this->…`; static members via `C_Logger::s_…` / `C_Container::s_…`.
+- **Member access discipline**: non-static fields/methods via `this->…`; static members/methods via `C_Logger::s_…` / `C_Logger::resetCount()` / `C_Container::s_…`.
 - **Namespace convention** via the `snake_case` namespace `frame_renderer`.
 - **Pointer prefixes** — all 8 variants (`p`, `pc`, `pv`, `pcv`, `pe`, `pce`, `pve`, `pcve`) and the note that they apply to smart pointers alike.
 - **Reference prefixes** — all 8 variants (`r`, `rc`, `rv`, `rcv`, `re`, `rce`, `rve`, `rcve`), with the cv-qualifier prefix slot intentionally omitted.
@@ -678,5 +690,5 @@ This example covers, in alphabetical order of concept:
 - **Static thread_local** namespace (`gst`, `nst`) and member (`st`) forms.
 - **Type prefixes** (`C`, `S`, `E`, `U`) and **type-alias prefixes** (`TA`, `TAC`, `TAS`, `TAE`, `TAU`, `TAP`, `TAR`, `TAF`).
 - **Template parameter prefixes** — all 6 kinds (`TTP`, `TTPP`, `NTTP`, `NTTPP`, `TeTP`, `TeTPP`).
-- **Ultimate compound forms** (`gscvpcve_samplePtr`, `gsrcve_sampleRef`) combining scope + storage + cv + pointer/reference-to-const-volatile-enum.
+- **Ultimate compound forms** (`gscvpcve_state`, `gsrcve_state`) combining scope + storage + cv + pointer/reference-to-const-volatile-enum.
 - **`mutable` members** following the same naming rules as non-`mutable` members of the same access level, modifiable through a `const` method (`touch()`).
