@@ -70,3 +70,6 @@ Testing/
 
 # IDE files
 *.code-workspace
+
+# Obsidian vault
+.obsidian/
