@@ -148,10 +148,59 @@ Possible type cases:
 
 #### Type prefixes
 
+A type prefix consists of optional `role markers` followed by a `kind letter`. `Role markers` concatenate in the fixed order (`P` before `I`/`A` before the `kind letter`) and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. In particular, the combination `PI` cannot exist — any non-virtual contract member degrades an interface to an abstract type (see [Abstraction & Protocol Markers](#abstraction--protocol-markers)).
+
+Kind letters:
+
 - `C`: `class` (`C` - `C`lass)
 - `S`: `struct` (`S` - `S`truct)
 - `E`: `enum` or `enum class` (`E` - `E`num)
 - `U`: `union` (`U` - `U`nion)
+
+Role markers (definitions in [Abstraction & Protocol Markers](#abstraction--protocol-markers)):
+
+- *(none)*: concrete type
+- `I`: `interface` type — every non-static member function is pure virtual, with no data fields (`I` - `I`nterface)
+- `A`: `abstract` type — cannot be instantiated, yet does not qualify as an interface (carries data fields or non-pure-virtual methods) (`A` - `A`bstract)
+- `P`: `protocol` type — base for static polymorphism (typically CRTP): imposes obligations on its derived type via non-virtual member functions only, with no virtual functions of its own (`P` - `P`rotocol)
+
+Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC`, `PAS`.
+
+**Important notice for `union` and `enum`**:
+
+`Role markers` never combine with the `U`/`E` kinds — unions cannot declare virtual member functions or participate in inheritance, and enums have no members at all.
+
+#### Abstraction & Protocol Markers
+
+- **`I` (interface)**: an abstract type in which every non-static member function is pure virtual (`= 0`), with no data fields. The destructor is exempt from the purity check (`virtual ~X() = default;` is allowed and mandatory for polymorphic deletion). Static members are permitted and lie outside the purity requirement — they can never be virtual, so the check does not apply to them; they affect neither object layout nor the vtable.
+- **`A` (abstract)**: an abstract type that fails the `I` contract — it carries data fields, or declares non-pure-virtual non-static member functions. *Abstract* is meant in the standard C++ sense: at least one pure virtual function (declared by the type or inherited) has no final overrider in it, so the type cannot be instantiated. Overriding every remaining pure virtual function makes the type concrete again — inheriting a pure virtual function alone does not make a type permanently abstract.
+- **`P` (protocol)**: the type defines contract obligations toward a derived type through non-virtual members (typically CRTP forwarding such as `static_cast<TTP_Derived&>(*this).onRefresh();`). A virtual destructor is not required because there is no virtual dispatch.
+
+Composition rules:
+
+- `Role markers` concatenate in the fixed order (`P` before `I`/`A` before the `kind letter`). Exactly five marker combinations exist: *(none)*, `I`, `A`, `P`, `PA`.
+- **`I` and `P` are mutually exclusive by construction**: any non-virtual contract member is an implemented non-static member function and therefore degrades the `I` facet to `A`. Hence the only possible hybrid is `PA` (`PAC_`, `PAS_`).
+- One type bears exactly one resulting prefix; no other combinations exist.
+
+Mechanical classification algorithm:
+
+1. Does the type contain non-virtual contract members toward a derived type (typically CRTP forwarding such as `static_cast<TTP_Derived&>(*this).onRefresh();`)? Every such member is an *implemented* non-static member function. If any exist, remember marker `P`.
+2. Is the type abstract in the standard C++ sense — at least one pure virtual function (declared by the type or inherited) has no final overrider in it?
+   - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g., `C_Button final : public IS_Drawable`).
+   - Yes → continue.
+3. Was marker `P` remembered?
+   - Yes → `PAC_`/`PAS_`. The contract member is already an implemented non-static member function, so the interface purity requirement checked next can never hold — there is nothing left to ask.
+   - No → continue.
+4. Are all non-static member functions pure virtual, with no data fields?
+   - Yes → `IC_`/`IS_`.
+   - No → `AC_`/`AS_`.
+
+Additional rules:
+
+- **Base restriction for `PC_`/`PS_`**: they inherit only from concrete or other `P`-only types — an inherited pure virtual function would reclassify them as `PAC_`/`PAS_`. `PAC_`/`PAS_` types may inherit from anything, including `IC_`/`IS_`.
+- A class implementing every inherited pure virtual function stays concrete and keeps ordinary naming: `C_Button final : public IS_Drawable` (implementations marked `override`).
+- **Guidance**: prefer decomposing hybrid designs into orthogonal bases — a dynamic base (`IC_`/`AC_`) plus standalone `PC_` mixins — over `PAC_` hierarchies.
+- **Variable prefixes never encode role markers**: the abstraction level and protocol nature of a type are carried by the type name alone (`p_renderable` regardless of whether it points to an `IC_`, `AC_` or `C_` type). Pairing a protocol with a same-named concept (`PC_Drawable` ↔ `concept Drawable`) is recommended; concept naming itself is out of scope of this document.
 
 Example 1:
 
@@ -192,6 +241,66 @@ const S_SomeType& grc_someVar = g_var;
 - `g_var`: A `global` variable (instance) of `struct` type (`S_SomeType`)
 - `grc_someVar`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-to-const` variant of the `reference-prefix` (`rc`)
 
+Example 4:
+
+```C++
+struct IS_Drawable                            // interface struct
+{
+    virtual ~IS_Drawable() = default;
+    virtual void draw() const = 0;
+};
+
+class AC_WidgetBase : public IS_Drawable      // abstract class: adds a field
+{
+public:
+    void draw() const override = 0;
+
+protected:
+    int width_;
+};
+
+class C_Button final : public AC_WidgetBase   // concrete implementation
+{
+public:
+    void draw() const override;
+};
+```
+
+Example 5:
+
+```C++
+template <typename TTP_Derived>
+class PC_Refreshable                          // protocol class (CRTP mixin)
+{
+public:
+    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+};
+
+class C_Ticker final : public PC_Refreshable<C_Ticker>
+{
+public:
+    void onRefresh();
+};
+
+template <typename TTP_Derived>
+class PAC_PanelBase : public IS_Drawable      // abstract protocol: pure virtual + forwarding + field
+{
+public:
+    void draw() const override = 0;
+    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+
+protected:
+    int width_;
+};
+
+class C_MainPanel final : public PAC_PanelBase<C_MainPanel>
+{
+public:
+    void draw() const override;
+    void onRefresh();
+};
+```
+
 #### Type alias prefixes (prefixes for types created via `using`/`typedef` keywords)
 
 - `TA`: `type` `alias` to some primitive type (`TA` - `T`ype `A`lias)
@@ -202,8 +311,16 @@ const S_SomeType& grc_someVar = g_var;
 - `TAP`: `type` `alias` to some `pointer` type (`TAP` - `T`ype `A`lias `P`ointer)
 - `TAR`: `type` `alias` to some `reference` type (`TAR` - `T`ype `A`lias `R`eference)
 - `TAF`: `type` `alias` to some `function` type (`TAF` - `T`ype `A`lias `F`unction)
+- `TAIC`: `type` `alias` to some `interface class` type (`TAIC` - `T`ype `A`lias `I`nterface `C`lass)
+- `TAAC`: `type` `alias` to some `abstract class` type (`TAAC` - `T`ype `A`lias `A`bstract `C`lass)
+- `TAIS`: `type` `alias` to some `interface struct` type (`TAIS` - `T`ype `A`lias `I`nterface `S`truct)
+- `TAAS`: `type` `alias` to some `abstract struct` type (`TAAS` - `T`ype `A`lias `A`bstract `S`truct)
+- `TAPC`: `type` `alias` to some `protocol class` type (`TAPC` - `T`ype `A`lias `P`rotocol `C`lass)
+- `TAPS`: `type` `alias` to some `protocol struct` type (`TAPS` - `T`ype `A`lias `P`rotocol `S`truct)
+- `TAPAC`: `type` `alias` to some `abstract protocol class` type (`TAPAC` - `T`ype `A`lias `P`rotocol `A`bstract `C`lass)
+- `TAPAS`: `type` `alias` to some `abstract protocol struct` type (`TAPAS` - `T`ype `A`lias `P`rotocol `A`bstract `S`truct)
 
-**Notice for aliases of aliases**: A `using`/`typedef` declaration introduces no new type — an alias is just another name for the underlying type. Therefore, an alias of another alias must be named according to the *resolved* underlying type's category (e.g., aliasing a `TAC_SomeType` still yields a `TAC_…` name, not a separate `TAA` prefix). There is intentionally no `TAA` prefix.
+**Notice for aliases of aliases**: A `using`/`typedef` declaration introduces no new type — an alias is just another name for the underlying type. Therefore, an alias of another alias must be named according to the *resolved* underlying type's category (e.g., aliasing a `TAC_SomeType` still yields a `TAC_…` name, not a separate `TAA` prefix). There is intentionally no `TAA` prefix. The resolved underlying category includes role markers (e.g., aliasing a `PAC_SomeType` yields a `TAPAC_…` name, preserving the `[P][A][kind]` marker order).
 
 Example 1:
 
@@ -420,6 +537,7 @@ enum class E_Color       { DeepPurple, LightBlue };                   // enum cl
 struct     S_Point       { int x; int y; };                           // struct type
 union      U_Packet      { int raw; float floating; };                // union type
 class      C_Renderer;                                                // class type (forward)
+struct     IS_Drawable;                                               // interface struct type (forward)
 
 // ---- Type aliases (using) ----
 using TA_Count     = unsigned;       // alias to primitive
@@ -430,6 +548,8 @@ using TAU_Packet   = U_Packet;       // alias to union
 using TAP_IntPtr   = int*;           // alias to pointer
 using TAR_IntRef   = int&;           // alias to reference
 using TAF_BinaryOp = int(int, int);  // alias to function
+
+using TAIS_Drawable = IS_Drawable;   // alias to interface struct (marker-aware)
 
 // ============================================================================
 // Global-namespace variables
@@ -603,6 +723,61 @@ int C_Logger::s_instanceCount = 0;
 int C_Logger::s_someCounter__ = 0;
 
 // ============================================================================
+// Role-marked types: interface / abstract / protocol / abstract protocol
+// ============================================================================
+struct IS_Drawable
+{
+    virtual ~IS_Drawable() = default;
+    virtual void draw() const = 0;
+};
+
+class AC_WidgetBase : public IS_Drawable  // abstract class: virtual + field
+{
+public:
+    void draw() const override = 0;
+
+protected:
+    int width_;
+};
+
+class C_Button final : public AC_WidgetBase  // concrete implementation
+{
+public:
+    void draw() const override {}
+};
+
+template <typename TTP_Derived>
+class PC_Refreshable  // protocol class (static contract, no virtual functions)
+{
+public:
+    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+};
+
+class C_Ticker final : public PC_Refreshable<C_Ticker>
+{
+public:
+    void onRefresh() {}
+};
+
+template <typename TTP_Derived>
+class PAC_PanelBase : public IS_Drawable  // abstract protocol: pure virtual + forwarding + field
+{
+public:
+    void draw() const override = 0;
+    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+
+protected:
+    int width_;
+};
+
+class C_MainPanel final : public PAC_PanelBase<C_MainPanel>
+{
+public:
+    void draw() const override {}
+    void onRefresh() { ++this->width_; }
+};
+
+// ============================================================================
 // Template parameters (all six kinds) and template class members
 // Note: a parameter pack must be the final template-parameter of its list,
 // so the three packs are demonstrated in their own declarations.
@@ -663,6 +838,14 @@ int main()
     frame_renderer::computeFrameSum(1, 2);
     demonstrateLocals();
 
+    C_Ticker ticker;
+    ticker.refresh();                   // static dispatch through protocol base (no vtable)
+
+    C_MainPanel panel;
+    panel.refresh();                    // abstract protocol forwarding
+    IS_Drawable& r_drawable = panel;    // local reference to interface (block scope: r_)
+    r_drawable.draw();                  // virtual dispatch through the interface
+
     (void) v;
     
     return 0;
@@ -692,3 +875,6 @@ This example covers:
 - **Template parameter prefixes** — all 6 kinds (`TTP`, `TTPP`, `NTTP`, `NTTPP`, `TeTP`, `TeTPP`).
 - **Ultimate compound forms** (`gscvpcve_state`, `gsrcve_state`) combining scope + storage + cv + pointer/reference-to-const-volatile-enum.
 - **`mutable` members** following the same naming rules as non-`mutable` members of the same access level, modifiable through a `const` method (`touch()`).
+- **Role-marker type prefixes** — `IS_`, `AC_`, `PC_`, `PAC_` demonstrated directly (remaining forms `IC_/AS_/PS_/PAS_` follow from the five-combination marker rule: *(none)*, `I`, `A`, `P`, `PA`), including the mechanical classification algorithm and the impossibility of combining `I` with `P`.
+- **Marker-aware type aliases** (`TAIS_Drawable`; family `TAIC_/TAAC_/TAAS_/TAPC_/TAPS_/TAPAC_/TAPAS_`).
+- **Protocol forwarding** through non-virtual members (`ticker.refresh()`, `panel.refresh()`) alongside virtual dispatch through an interface reference (`r_drawable.draw()`).
