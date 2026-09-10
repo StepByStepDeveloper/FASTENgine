@@ -6,6 +6,7 @@ High-performance C++ Engine.
 
 - **Language**: All artifacts (code, documentation, comments, commit messages, etc.) must be created in English.
 - **Ambiguity**: If any part of a task, requirement, or context is unclear, do not make assumptions. Ask the user for clarification instead.
+- **Documentation**: Every piece of code created in this project must be accompanied by detailed Doxygen comments — see [Documentation (Doxygen)](.agents/rules/style/documentation.md) for the mandatory coverage, the required commands and the documented exceptions.
 
 ## Quick Commands
 
