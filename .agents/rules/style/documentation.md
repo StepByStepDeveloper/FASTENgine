@@ -78,7 +78,7 @@ A type block answers: what does an instance *mean*, what invariants must hold, w
  * @details The mesh never copies vertex data: the constructor stores the caller's pointer and every
  *          accessor hands it back. Objects are movable; duplication is an explicit operation.
  * @tparam TTP_Vertex Vertex component type (in practice @c float or @c double) used for both position and normal data.
- * @invariant this->p_vertices__ is non-null and this->vertexCount__ is greater than zero.
+ * @invariant priv_vertices_p is non-null and priv_vertexCount is greater than zero.
  * @warning The object holds a view over the storage passed to the constructor; destroying that storage first leaves the mesh dangling.
  * @see C_MeshLoader
  */
@@ -88,12 +88,12 @@ class C_Mesh
 public:
     /**
      * @brief Creates a mesh over a caller-provided vertex array.
-     * @param[in,out] p_vertices Vertex array of at least @p vertexCount elements; ownership stays with the caller and the storage must outlive this object.
-     * @param[in] vertexCount Number of vertices in @p p_vertices; must be greater than zero.
-     * @pre p_vertices != nullptr
+     * @param[in,out] vertices_p Vertex array of at least @p vertexCount elements; ownership stays with the caller and the storage must outlive this object.
+     * @param[in] vertexCount Number of vertices in @p vertices_p; must be greater than zero.
+     * @pre vertices_p != nullptr
      */
-    C_Mesh(TTP_Vertex* p_vertices, std::size_t vertexCount)
-        : p_vertices__(p_vertices), vertexCount__(vertexCount)
+    C_Mesh(TTP_Vertex* vertices_p, std::size_t vertexCount)
+        : priv_vertices_p(vertices_p), priv_vertexCount(vertexCount)
     {
     }
 
@@ -101,14 +101,14 @@ public:
      * @brief Returns the number of vertices covered by this mesh.
      * @return Vertex count; never zero for a validly constructed mesh.
      */
-    std::size_t vertexCount() const { return this->vertexCount__; }
+    std::size_t vertexCount() const { return priv_vertexCount; }
 
 private:
     /// @brief Vertex array owned by the caller; must outlive this object.
-    TTP_Vertex* p_vertices__;
+    TTP_Vertex* priv_vertices_p;
 
-    /// @brief Number of vertices in this->p_vertices__; strictly greater than zero.
-    std::size_t vertexCount__;
+    /// @brief Number of vertices in priv_vertices_p; strictly greater than zero.
+    std::size_t priv_vertexCount;
 };
 ```
 
@@ -138,7 +138,7 @@ A function block must let a caller use the function **without reading its body**
 
 - `@brief` — one clause, semantics rather than a paraphrase of the identifier.
 - `@details` — required for any function with side effects, hidden state, ordering requirements, complexity, or a non-obvious algorithm.
-- `@param[in]` / `@param[out]` / `@param[in,out]` — **every** parameter, exactly once, in declaration order, each with the directional specifier. References (`r_`/`rc_…` per naming rules) written to by the callee are `@param[out]` or `@param[in,out]`, never bare `@param`; a parameter that is never read and never written does not belong in the signature.
+- `@param[in]` / `@param[out]` / `@param[in,out]` — **every** parameter, exactly once, in declaration order, each with the directional specifier. References (`_r` / `_rc` … per naming rules) written to by the callee are `@param[out]` or `@param[in,out]`, never bare `@param`; a parameter that is never read and never written does not belong in the signature.
 - `@return` — required for every non-`void` function: the meaning of the returned value, its units and range.
 - `@retval` — required when distinct returned values carry distinct meanings; use one `@retval` per meaningful value instead of a vague `@return`.
 - `@pre` / `@post` — required for every precondition the callee does not enforce itself (non-null pointers, index ranges, locked mutexes, initialized subsystems) and for every postcondition a caller may rely on.
@@ -157,23 +157,23 @@ class C_Logger
 public:
     /// @brief Number of live C_Logger instances; incremented by the constructor and decremented by the destructor.
     /// @note Class-level storage shared by every instance; not thread-safe by itself.
-    static std::uint32_t s_instanceCount;
+    static std::uint32_t pub_instanceCount_s;
 
     /// @brief Returns the age of the oldest entry that has not been flushed yet.
     /// @return Age in milliseconds, saturated at the configured flush timeout; never decreasing.
-    std::uint32_t lastFlushAge() const { return this->lastFlushAge_; }
+    std::uint32_t lastFlushAge() const { return prot_lastFlushAge; }
 
 protected:
     /// @brief Milliseconds since the last successful flush; saturated at the configured timeout.
-    std::uint32_t lastFlushAge_;
+    std::uint32_t prot_lastFlushAge;
 
 private:
     /// @brief One past the last written entry of the caller-provided sink; the sink must not be reallocated while the logger is alive.
-    std::byte* p_sinkEnd__;
+    std::byte* priv_sinkEnd_p;
 };
 ```
 
-`mutable` and access-suffix rules are not repeated in documentation — the name already carries them (`style/naming.md`); the comment carries the *semantics*.
+`mutable` and access-marker rules are not repeated in documentation — the name already carries them (`style/naming.md`); the comment carries the *semantics*.
 
 ### Macros
 

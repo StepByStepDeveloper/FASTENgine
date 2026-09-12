@@ -1,41 +1,51 @@
-# Naming Conventions
+# `TAPAS (C++ Naming Conventions)`
 
-## Identifier prefixes
+## `1. Identifier markers`
 
-### Variables
+### `1.1. Variable markers`
 
-Variable names may consist of a combination of prefixes in the following order of these prefix types (each applicable type appears at most once, in the specified order, with the cv-qualifier-prefix slot intentionally absent for references — see the notice below):
+A variable name is a meaningful noun in `camelCase` followed by a **marker block**: every marker that applies to the variable, written as lowercase letters after a single `_`, in the fixed order below (each applicable marker appears at most once, in the specified order, with the cv-qualifier slot intentionally absent for references — see the notice below).
 
-- `normal-var` (non-enum and non-pointer and non-reference) variable: [`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`]_camelCase
-- `enum-var` variable: [`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`][`enum-prefix`]_camelCase
-- `pointer-var` variable: [`scope-prefix`][`storage-class-prefix`][`cv-qualifier-prefix`][`pointer-prefix`]_camelCase
-- `reference-var` variable: [`scope-prefix`][`storage-class-prefix`][`reference-prefix`]_camelCase
+- `normal-var` (non-enum and non-pointer and non-reference) variable: `camelCase`\_[`scope`][`storage-class`][`cv-qualifier`]
+- `enum-var` variable: `camelCase`\_[`scope`][`storage-class`][`cv-qualifier`][`enum`]
+- `pointer-var` variable: `camelCase`\_[`scope`][`storage-class`][`cv-qualifier`][`pointer`]
+- `reference-var` variable: `camelCase`\_[`scope`][`storage-class`][`reference`]
+
+Markers are trailing on purpose: the meaningful part of every name comes first, so a reader (and an editor's completion list) sees *what the variable holds* before *how it is qualified*, and no reading order is inverted. A trailing marker block also cannot produce a reserved identifier, because it never contains a double underscore and never places an underscore before an uppercase letter.
+
+**Important notice for an absent marker block**:
+
+> A variable to which no marker applies (an ordinary local) is written `someVar`, **never** `someVar`\_. The separating underscore exists only to introduce a non-empty marker block.
 
 **Important notice for references**:
 
-Unlike pointers, references in C++ cannot carry cv-qualifiers (const, volatile) themselves. Therefore, the [`cv-qualifier-prefix`] is intentionally omitted from the reference variable naming formula. The cv-qualifiers of the referenced object are fully captured by the [`reference-prefix`] (e.g., `rc` for `reference to const`, `rcv` for `reference to const volatile`). Never apply [`cv-qualifier-prefix`] before [`reference-prefix`].
+> Unlike pointers, references in C++ cannot carry cv-qualifiers (const, volatile) themselves. Therefore, the [`cv-qualifier`] marker is intentionally omitted from the reference variable naming formula. The cv-qualifiers of the referenced object are fully captured by the [`reference`] marker (e.g., `rc` for `reference to const`, `rcv` for `reference to const volatile`). The [`cv-qualifier`] marker is never written together with the [`reference`] marker.
 
-#### Scope prefixes
+#### `1.1.1. Scope markers`
 
 - `g`: variable in `global` namespace (`g` - `g`lobal)
 - `n`: variable in `named` namespace (`n` - `n`amed)
 - `a`: variable in `anonymous` (unnamed) namespace (`a` - `a`nonymous)
 
-Example 1: `g_someVar` - variable in the `global` namespace with name `someVar`
+***Example 1***: `someVar`\_`g` - variable in the `global` namespace with name `someVar`
 
-Example 2: `n_someVar` - variable in the `named` namespace with name `someVar`
+***Example 2***: `someVar`\_`n` - variable in the `named` namespace with name `someVar`
 
-Example 3: `a_someVar` - variable in the `anonymous` namespace with name `someVar`
+***Example 3***: `someVar`\_`a` - variable in the `anonymous` namespace with name `someVar`
 
-**Important notice for the `a` prefix**:
+**Important notice for the `a` marker**:
 
-Variables declared inside an anonymous (unnamed) namespace have internal linkage by definition — the compiler guarantees this automatically, so there is no need (and it is an error) to additionally apply the `static` (`s`) storage-class prefix. The `a` prefix is therefore mutually exclusive with `static` (`s`) and `extern` (`x`) storage class prefixes (see the storage-class prefixes below). An anonymous-namespace variable with internal-linkage storage is written `a_…`, never `as_…`.
+> Variables declared inside an anonymous (unnamed) namespace have internal linkage by definition — the compiler guarantees this automatically, so there is no need (and it is an error) to additionally apply the `static` (`s`) storage-class marker. The `a` marker is therefore mutually exclusive with the `static` (`s`) and `extern` (`x`) storage-class markers (see the storage-class markers below). An anonymous-namespace variable with internal-linkage storage is written `someVar`\_`a`, never `someVar`\_`as`.
 
 **Important notice for local (function/block) scope**:
 
-Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the scope prefix** entirely. The prefix order for a local variable starts at the `storage-class-prefix` slot (e.g., a `static` local is `s_someVar`, never `gs_someVar`); an ordinary local uses no leading scope/storage prefix at all (e.g., `someVar`). Recall that the minimal forms shown in the [Non-Member variable naming conventions](#non-member-variable-naming-conventions) table (such as `e_operatingMode`, `p_dataBuffer`) are valid only at local scope.
+> Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the [`scope`] marker** entirely. The marker block of a local variable therefore starts at the [`storage-class`] slot (e.g., a `static` local is `someLocal`\_`s`, never `someLocal`\_`gs`), and a local that has nothing to mark at all is written with no block and no trailing underscore (e.g., `someVar`). Recall that the minimal forms shown in the [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) table (such as `operatingMode`\_`e`, `dataBuffer`\_`p`) are valid only at local scope.
 
-#### Storage class prefixes
+**Important notice for function parameters**:
+
+> A function parameter is block-scoped exactly like any other local variable, so it omits the [`scope`] marker; and because `static` and `extern` cannot be applied to a parameter, no [`storage-class`] marker can appear on one either. What remains is the [`cv-qualifier`] and kind part of the block, so a pointer parameter is `vertices`\_`p` (never `p_vertices`), while an unqualified one keeps its bare name (`vertexCount`).
+
+#### `1.1.2. Storage-class markers`
 
 - `s`: `static` variable (`s` - `s`tatic)
 - `t`: `thread_local` variable (`t` - `t`hread_local)
@@ -43,38 +53,39 @@ Variables declared inside a function or block scope are *block-scoped*: they hav
 - `x`: `extern` variable (`x` - e`x`tern)
 - `xt`: `extern` `thread_local` variable (`xt` - e`x`tern `t`hread_local)
 
-Example: `st_someVar` - `static` `thread_local` variable with name `someVar`
+***Example***: `someVar`\_`st` - `static` `thread_local` variable with name `someVar`
 
-**Important notice for `s` prefix at namespace scope**:
+**Important notice for the `s` marker at namespace scope**:
 
-All namespace-scope variables in C++ inherently have static storage duration. However, the `s` prefix at namespace scope (e.g., `gs_someVar` or `ns_someVar`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope prefixes.
+> All namespace-scope variables in C++ inherently have static storage duration. However, the `s` marker at namespace scope (e.g., `someVar`\_`gs` or `someVar`\_`ns`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope markers.
 
-**Important notice for `x` prefix**:
+**Important notice for the `x` marker**:
 
-The `x` prefix marks an `extern` *declaration* — a reference to a variable defined in another translation unit. The `extern` specifier requests external linkage, which is the opposite of what `static` requests at namespace scope; therefore the `s` and `x` prefixes are mutually exclusive and never combined. The `x` prefix is only valid on declarations, never on the corresponding definition (the definition is named according to its own scope/storage, typically with no storage-class prefix). The `xt` prefix marks a declaration of a `thread_local` variable defined in another translation unit.
+> The `x` marker marks a variable that is *declared* in one translation unit and *defined* in another one. The `extern` keyword belongs to that declaration only, but the name does not change among translation untis: a variable has exactly one name, so the definition is written with the same marked name (`extern int someVar_gx;` declares it; `int someVar_gx = 42;` defines it). `s` and `x` never combine, because `s` marks a name that only its own translation unit can see, while `x` marks a name another translation unit has to provide — no name can be both, and declaring a `static` variable `extern` fails when the program is linked, not when it is compiled. The `xt` marker is the `thread_local` counterpart and follows the same rule.
 
-Example: `gx_someVar` - `extern` variable in a `global` namespace with name `someVar` (declared in this translation unit, defined elsewhere)
-Example: `nxt_someVar` - `extern` `thread_local` variable in a `named` namespace with name `someVar`
+***Example 1***: `someVar`\_`gx` - `extern` variable in a `global` namespace with name `someVar` (e.g. declared in this translation unit, defined elsewhere)
 
-#### CV-qualifier prefixes
+***Example 2***: `someVar`\_`nxt` - `extern` `thread_local` variable in a `named` namespace with name `someVar`
+
+#### `1.1.3. CV-qualifier markers`
 
 - `c`: `const` variable (`c` - `c`onst)
 - `v`: `volatile` variable (`v` - `v`olatile)
 - `cv`: `const` `volatile` variable (`cv` - `c`onst `v`olatile)
 
-Example: `cv_someVar` - `const` `volatile` variable with name `someVar`
+***Example***: `someVar`\_`cv` - `const` `volatile` variable with name `someVar`
 
-#### Enum prefixes
+#### `1.1.4. Enum markers`
 
 - `e`: variable of `enum` or `enum class` type (`e` - `e`num)
 
-Example: `e_someVar` - variable of `enum` (or `enum class`) type with name `someVar`
+***Example***: `someVar`\_`e` - variable of `enum` (or `enum class`) type with name `someVar`
 
-##### Rationale for enum variable prefix
+**Rationale for the enum marker**:
 
-The `e` prefix on a variable (e.g., `e_varName`) makes it always possible to recognize that the variable is an enumeration. This is especially important when the variable is of a plain `enum` (not `enum class`), because plain enumerators can be assigned directly as `VAL` instead of `E_EnumType::VAL`. If a reader sees `var = VAL`, they might not realize variable is an enumeration because in such representation it may be some constant, not enumeration. Utilization of `e` prefix (`e_var = VAL`) solves that problem.
+> The `e` marker on a variable (e.g., `varName`\_`e`) makes it always possible to recognize that the variable is an enumeration. This is especially important when the variable is of a plain `enum` (not `enum class`), because plain enumerators can be assigned directly as `VAL` instead of `E_EnumType::VAL`. If a reader sees `var = VAL`, they might not realize the variable is an enumeration, because in that representation `VAL` may be taken for some constant rather than an enumerator. The `e` marker (`var_e = VAL`) solves that problem.
 
-#### Pointer prefixes
+#### `1.1.5. Pointer markers`
 
 - `p`: `pointer` to object of `class`/`struct`/`union`/`primitive` type (`p` - `p`ointer)
 - `pc`: `pointer` to object of `const` `class`/`struct`/`union`/`primitive` type (`pc` - `p`ointer `c`onst)
@@ -85,11 +96,13 @@ The `e` prefix on a variable (e.g., `e_varName`) makes it always possible to rec
 - `pve`: `pointer` to object of `volatile` `enum` (or `enum class`) type (`pve` - `p`ointer `v`olatile `e`num)
 - `pcve`: `pointer` to object of `const` `volatile` `enum` (or `enum class`) type (`pcve` - `p`ointer `c`onst `v`olatile `e`num)
 
-Notice: pointer prefixes are applicable for smart pointers
+**Important notice for the `pointer` markers**:
 
-Example: `pcve_someVar` - `pointer to object of const-volatile-enum type` with name `someVar`
+> The pointer markers are applicable to smart pointers as well.
 
-#### Reference prefixes
+***Example***: `someVar`\_`pcve` - `pointer to object of const-volatile-enum type` with name `someVar`
+
+#### `1.1.6. Reference markers`
 
 - `r`: `reference` to object of `class`/`struct`/`union`/`primitive` type (`r` - `r`eference)
 - `rc`: `reference` to object of `const` `class`/`struct`/`union`/`primitive` type (`rc` - `r`eference `c`onst)
@@ -100,21 +113,21 @@ Example: `pcve_someVar` - `pointer to object of const-volatile-enum type` with n
 - `rve`: `reference` to object of `volatile` `enum` (or `enum class`) type (`rve` - `r`eference `v`olatile `e`num)
 - `rcve`: `reference` to object of `const` `volatile` `enum` (or `enum class`) type (`rcve` - `r`eference `c`onst `v`olatile `e`num)
 
-Example: `rcve_someVar` - `reference to object of const-volatile-enum type` with name `someVar`
+***Example***: `someVar`\_`rcve` - `reference to object of const-volatile-enum type` with name `someVar`
 
-#### Ultimate variable naming examples
+#### `1.1.7. Ultimate variable naming examples`
 
-Example 1:
+***Example 1***:
 
 ```C++
 enum E_DeviceState { STATE_IDLE, STATE_RUNNING, STATE_ERROR };
 
-const volatile E_DeviceState gcve_targetState = STATE_IDLE;
+const volatile E_DeviceState targetState_gcve = STATE_IDLE;
 
-static const volatile E_DeviceState* const volatile gscvpcve_someVar = &gcve_targetState;
+static const volatile E_DeviceState* const volatile someVar_gscvpcve = &targetState_gcve;
 ```
 
-Variable `gscvpcve_someVar` is `global`-scope, internal-linkage (`static`), `const volatile` pointer to an object of `const-volatile-enum` type, with name `someVar`:
+Variable `someVar`\_`gscvpcve` is `global`-scope, internal-linkage (`static`), `const volatile` pointer to an object of `const-volatile-enum` type, with name `someVar` (`g`lobal `s`tatic `c`onst `v`olatile `p`ointer `c`onst `v`olatile `e`num):
 
 - variable has `global` scope
 - variable has internal linkage (`static`)
@@ -122,55 +135,57 @@ Variable `gscvpcve_someVar` is `global`-scope, internal-linkage (`static`), `con
 - variable has `pointer` type
 - variable points to object of `const-volatile-enum` type, specifically `E_DeviceState`
 
-Example 2:
+***Example 2***:
 
 ```C++
 enum E_DeviceState { STATE_IDLE, STATE_RUNNING, STATE_ERROR };
 
-const volatile E_DeviceState gcve_targetState = STATE_IDLE;
+const volatile E_DeviceState targetState_gcve = STATE_IDLE;
 
-static const volatile E_DeviceState& gsrcve_someVar = gcve_targetState;
+static const volatile E_DeviceState& someVar_gsrcve = targetState_gcve;
 ```
 
-Variable `gsrcve_someVar` is `global`-scope, internal-linkage (`static`) reference to an object of `const-volatile-enum` type, with name `someVar`:
+Variable `someVar`\_`gsrcve` is `global`-scope, internal-linkage (`static`) reference to an object of `const-volatile-enum` type, with name `someVar` (`g`lobal `s`tatic `r`eference `c`onst `v`olatile `e`num):
 
 - variable has `global` scope
 - variable has internal linkage (`static`)
 - variable has `reference` type
 - variable refers to object of `const-volatile-enum` type, specifically `E_DeviceState`
 
-### Types
+### `1.2. Types`
 
 Possible type cases:
 
-- `type-name`: [`type-prefix`]_SomeType
-- `type-alias-name`: [`type-alias-prefix`]_SomeType
+- `type-name`: [`type-prefix`]_`SomeType`
+- `type-alias-name`: [`type-alias-prefix`]_`SomeType`
 
-#### Type prefixes
+#### `1.2.1. Type prefixes`
 
-A type prefix consists of optional `role markers` followed by a `kind letter`. `Role markers` concatenate in the fixed order (`P` before `I`/`A` before the `kind letter`) and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. In particular, the combination `PI` cannot exist — any non-virtual contract member degrades an interface to an abstract type (see [Abstraction & Protocol Markers](#abstraction--protocol-markers)).
+A type prefix consists of optional `role markers` followed by a `type letter`.
 
-Kind letters:
+`Type letters`:
 
 - `C`: `class` (`C` - `C`lass)
 - `S`: `struct` (`S` - `S`truct)
 - `E`: `enum` or `enum class` (`E` - `E`num)
 - `U`: `union` (`U` - `U`nion)
 
-Role markers (definitions in [Abstraction & Protocol Markers](#abstraction--protocol-markers)):
+`Role markers` (definitions in [Abstraction & Protocol Markers](#122-abstraction--protocol-markers)):
 
 - *(none)*: concrete type
 - `I`: `interface` type — every non-static member function is pure virtual, with no data fields (`I` - `I`nterface)
 - `A`: `abstract` type — cannot be instantiated, yet does not qualify as an interface (carries data fields or non-pure-virtual methods) (`A` - `A`bstract)
 - `P`: `protocol` type — base for static polymorphism (typically CRTP): imposes obligations on its derived type via non-virtual member functions only, with no virtual functions of its own (`P` - `P`rotocol)
 
+`Role markers` concatenate in the fixed order and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. In particular, the combination `PI` cannot exist — any non-virtual contract member degrades an interface to an abstract type (see [Abstraction & Protocol Markers](#122-abstraction--protocol-markers)).
+
 Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC`, `PAS`.
 
 **Important notice for `union` and `enum`**:
 
-`Role markers` never combine with the `U`/`E` kinds — unions cannot declare virtual member functions or participate in inheritance, and enums have no members at all.
+> `Role markers` never combine with the `U`/`E` `type letters` — unions cannot declare virtual member functions or participate in inheritance, and enums have no members at all.
 
-#### Abstraction & Protocol Markers
+#### `1.2.2. Abstraction & Protocol Markers`
 
 - **`I` (interface)**: an abstract type in which every non-static member function is pure virtual (`= 0`), with no data fields. The destructor is exempt from the purity check (`virtual ~X() = default;` is allowed and mandatory for polymorphic deletion). Static members are permitted and lie outside the purity requirement — they can never be virtual, so the check does not apply to them; they affect neither object layout nor the vtable.
 - **`A` (abstract)**: an abstract type that fails the `I` contract — it carries data fields, or declares non-pure-virtual non-static member functions. *Abstract* is meant in the standard C++ sense: at least one pure virtual function (declared by the type or inherited) has no final overrider in it, so the type cannot be instantiated. Overriding every remaining pure virtual function makes the type concrete again — inheriting a pure virtual function alone does not make a type permanently abstract.
@@ -178,7 +193,7 @@ Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC
 
 Composition rules:
 
-- `Role markers` concatenate in the fixed order (`P` before `I`/`A` before the `kind letter`). Exactly five marker combinations exist: *(none)*, `I`, `A`, `P`, `PA`.
+- `Role markers` concatenate in the fixed order. Exactly five marker combinations exist: *(none)*, `I`, `A`, `P`, `PA`.
 - **`I` and `P` are mutually exclusive by construction**: any non-virtual contract member is an implemented non-static member function and therefore degrades the `I` facet to `A`. Hence the only possible hybrid is `PA` (`PAC_`, `PAS_`).
 - One type bears exactly one resulting prefix; no other combinations exist.
 
@@ -200,48 +215,48 @@ Additional rules:
 - **Base restriction for `PC_`/`PS_`**: they inherit only from concrete or other `P`-only types — an inherited pure virtual function would reclassify them as `PAC_`/`PAS_`. `PAC_`/`PAS_` types may inherit from anything, including `IC_`/`IS_`.
 - A class implementing every inherited pure virtual function stays concrete and keeps ordinary naming: `C_Button final : public IS_Drawable` (implementations marked `override`).
 - **Guidance**: prefer decomposing hybrid designs into orthogonal bases — a dynamic base (`IC_`/`AC_`) plus standalone `PC_` mixins — over `PAC_` hierarchies.
-- **Variable prefixes never encode role markers**: the abstraction level and protocol nature of a type are carried by the type name alone (`p_renderable` regardless of whether it points to an `IC_`, `AC_` or `C_` type). Pairing a protocol with a same-named concept (`PC_Drawable` ↔ `concept Drawable`) is recommended; concept naming itself is out of scope of this document.
+- **Variable markers never encode role markers**: the abstraction level and protocol nature of a type are carried by the type name alone (`renderable`\_`p` regardless of whether it points to an `IC_`, `AC_` or `C_` type). Pairing a protocol with a same-named concept (`PC_Drawable` ↔ `concept Drawable`) is recommended; concept naming itself is out of scope of this document.
 
-Example 1:
+***Example 1***:
 
 ```C++
 enum class E_SomeType { Enum1, Enum2};
 
-const E_SomeType gce_someVar = E_SomeType::Enum1;
+const E_SomeType someVar_gce = E_SomeType::Enum1;
 ```
 
 - `E_SomeType`: An `enum class` type with name `SomeType`
-- `gce_someVar`: A `global const enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum-prefix` (`e`)
+- `someVar`\_`gce`: A `global const enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum` marker (`e`)
 
-Example 2:
+***Example 2***:
 
 ```C++
 class C_SomeType {};
 
-C_SomeType g_var;
+C_SomeType var_g;
 
-const C_SomeType* gpc_someVar = &g_var;
+const C_SomeType* someVar_gpc = &var_g;
 ```
 
 - `C_SomeType`: A `class` type with name `SomeType`
-- `g_var`: A `global` variable (instance) of `class` type (`C_SomeType`)
-- `gpc_someVar`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-to-const` variant of the `pointer-prefix` (`pc`)
+- `var`\_`g`: A `global` variable (instance) of `class` type (`C_SomeType`)
+- `someVar`\_`gpc`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-to-const` variant of the `pointer` marker (`pc`)
 
-Example 3:
+***Example 3***:
 
 ```C++
 struct S_SomeType {};
 
-S_SomeType g_var;
+S_SomeType var_g;
 
-const S_SomeType& grc_someVar = g_var;
+const S_SomeType& someVar_grc = var_g;
 ```
 
 - `S_SomeType`: A `struct` type with name `SomeType`
-- `g_var`: A `global` variable (instance) of `struct` type (`S_SomeType`)
-- `grc_someVar`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-to-const` variant of the `reference-prefix` (`rc`)
+- `var`\_`g`: A `global` variable (instance) of `struct` type (`S_SomeType`)
+- `someVar`\_`grc`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-to-const` variant of the `reference` marker (`rc`)
 
-Example 4:
+***Example 4***:
 
 ```C++
 struct IS_Drawable                            // interface struct
@@ -256,7 +271,7 @@ public:
     void draw() const override = 0;
 
 protected:
-    int width_;
+    int prot_width;
 };
 
 class C_Button final : public AC_WidgetBase   // concrete implementation
@@ -266,7 +281,7 @@ public:
 };
 ```
 
-Example 5:
+***Example 5***:
 
 ```C++
 template <typename TTP_Derived>
@@ -290,7 +305,7 @@ public:
     void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
 
 protected:
-    int width_;
+    int prot_width;
 };
 
 class C_MainPanel final : public PAC_PanelBase<C_MainPanel>
@@ -301,7 +316,7 @@ public:
 };
 ```
 
-#### Type alias prefixes (prefixes for types created via `using`/`typedef` keywords)
+#### `1.2.3. Type alias prefixes (prefixes for types created via using/typedef keywords)`
 
 - `TA`: `type` `alias` to some primitive type (`TA` - `T`ype `A`lias)
 - `TAC`: `type` `alias` to some `class` type (`TAC` - `T`ype `A`lias `C`lass)
@@ -320,94 +335,96 @@ public:
 - `TAPAC`: `type` `alias` to some `abstract protocol class` type (`TAPAC` - `T`ype `A`lias `P`rotocol `A`bstract `C`lass)
 - `TAPAS`: `type` `alias` to some `abstract protocol struct` type (`TAPAS` - `T`ype `A`lias `P`rotocol `A`bstract `S`truct)
 
-**Notice for aliases of aliases**: A `using`/`typedef` declaration introduces no new type — an alias is just another name for the underlying type. Therefore, an alias of another alias must be named according to the *resolved* underlying type's category (e.g., aliasing a `TAC_SomeType` still yields a `TAC_…` name, not a separate `TAA` prefix). There is intentionally no `TAA` prefix. The resolved underlying category includes role markers (e.g., aliasing a `PAC_SomeType` yields a `TAPAC_…` name, preserving the `[P][A][kind]` marker order).
+**Important notice for aliases of aliases**:
 
-Example 1:
+> A `using`/`typedef` declaration introduces no new type — an alias is just another name for the underlying type. Therefore, an alias of another alias must be named according to the *resolved* underlying type's category (e.g., aliasing a `TAC_SomeType` still yields a `TAC_…` name, not a separate `TAA` prefix). There is intentionally no `TAA` prefix. The resolved underlying category includes role markers (e.g., aliasing a `PAC_SomeType` yields a `TAPAC_…` name, preserving the `[P][A][kind]` marker order).
+
+***Example 1***:
 
 ```C++
 enum class E_SomeType { Enum1, Enum2};
 
 using TAE_SomeType = E_SomeType;
 
-E_SomeType ge_var = E_SomeType::Enum1;
+E_SomeType var_ge = E_SomeType::Enum1;
 
-const TAE_SomeType gce_someVar = ge_var;
+const TAE_SomeType someVar_gce = var_ge;
 ```
 
 - `TAE_SomeType`: A `type alias` for `enum class` type (`E_SomeType`)
-- `ge_var`: A `global enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum-prefix` (`e`)
-- `gce_someVar`: A `global const enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum-prefix` (`e`)
+- `var`\_`ge`: A `global enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum` marker (`e`)
+- `someVar`\_`gce`: A `global const enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum` marker (`e`)
 
-Example 2:
+***Example 2***:
 
 ```C++
 class C_SomeType {};
 
 using TAC_SomeType = C_SomeType;
 
-C_SomeType g_var;
+C_SomeType var_g;
 
-const TAC_SomeType* gpc_someVar = &g_var;
+const TAC_SomeType* someVar_gpc = &var_g;
 ```
 
 - `TAC_SomeType`: A `type alias` for `class` type (`C_SomeType`)
-- `g_var`: A `global` variable (instance) of `class` type (`C_SomeType`)
-- `gpc_someVar`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-to-const` variant of the `pointer-prefix` (`pc`)
+- `var`\_`g`: A `global` variable (instance) of `class` type (`C_SomeType`)
+- `someVar`\_`gpc`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-to-const` variant of the `pointer` marker (`pc`)
 
-Example 3:
+***Example 3***:
 
 ```C++
 struct S_SomeType {};
 
 using TAS_SomeType = S_SomeType;
 
-S_SomeType g_var;
+S_SomeType var_g;
 
-const TAS_SomeType& grc_someVar = g_var;
+const TAS_SomeType& someVar_grc = var_g;
 ```
 
 - `TAS_SomeType`: A `type alias` for `struct` type (`S_SomeType`)
-- `g_var`: A `global` variable (instance) of `struct` type (`S_SomeType`)
-- `grc_someVar`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-to-const` variant of the `reference-prefix` (`rc`)
+- `var`\_`g`: A `global` variable (instance) of `struct` type (`S_SomeType`)
+- `someVar`\_`grc`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-to-const` variant of the `reference` marker (`rc`)
 
-### Template parameters
+### `1.3. Template parameters`
 
-#### Type template parameter prefixes
+#### `1.3.1. Type template parameter prefixes`
 
 - `TTP`: `type` `template` `parameter` (`TTP` - `T`ype `T`emplate `P`arameter)
 - `TTPP`: `type` `template` `parameter` `pack` (`TTPP` - `T`ype `T`emplate `P`arameter `P`ack)
 
-#### Non-Type template parameter prefixes
+#### `1.3.2. Non-Type template parameter prefixes`
 
 - `NTTP`: `non` `type` `template` `parameter` (`NTTP` - `N`on `T`ype `T`emplate `P`arameter)
 - `NTTPP`: `non` `type` `template` `parameter` `pack` (`NTTPP` - `N`on `T`ype `T`emplate `P`arameter `P`ack)
 
-#### Template template parameter prefixes
+#### `1.3.3. Template template parameter prefixes`
 
 - `TeTP`: `template` `template` `parameter` (`TeTP` - `Te`mplate `T`emplate `P`arameter)
 - `TeTPP`: `template` `template` `parameter` `pack` (`TeTPP` - `Te`mplate `T`emplate `P`arameter `P`ack)
 
-## File naming conventions
+## `2. File naming conventions`
 
 | Entity                          | Convention                          | Example              |
 |:------------------------------- | ----------------------------------- | -------------------- |
 | Implementation/Source file name | noun in `snake_case.cpp` style-form | `frame_renderer.cpp` |
 | Header file name                | noun in `snake_case.hpp` style-form | `frame_renderer.hpp` |
 
-## Namespace naming conventions
+## `3. Namespace naming conventions`
 
 | Entity     | Convention   | Example          |
 |:---------- | ------------ | ---------------- |
 | Namespaces | `snake_case` | `frame_renderer` |
 
-## Type naming conventions
+## `4. Type naming conventions`
 
 | Entity          | Convention                           | Example             |
 |:--------------- | ------------------------------------ | ------------------- |
 | Type name       | noun in `type-name` style-form       | `C_FrameRenderer`   |
 | Type alias name | noun in `type-alias-name` style-form | `TAC_FrameRenderer` |
 
-## Function-like Macro and Function/Method naming conventions
+## `5. Function-like Macro and Function/Method naming conventions`
 
 | Entity                   | Convention                                         | Example         |
 |:------------------------ | -------------------------------------------------- | --------------- |
@@ -416,9 +433,9 @@ const TAS_SomeType& grc_someVar = g_var;
 
 **Important notice for member-method calls**:
 
-Non-`static` member methods **must** be called from within the class's own methods exclusively via the `this->` qualifier (e.g., `this->resizeBuffer()`). The `this->` qualifier **must never** be omitted so that it is always obvious a call targets an instance method rather than a free function. `static` member methods, conversely, **must** be qualified with the enclosing class name (e.g., `C_SomeType::create()`) and **must never** be called via `this->`.
+> Non-`static` member methods **must** be called from within the class's own methods exclusively via the `this->` qualifier (e.g., `this->resizeBuffer()`). The `this->` qualifier **must never** be omitted so that it is always obvious a call targets an instance method rather than a free function. `static` member methods, conversely, **must** be qualified with the enclosing class name (e.g., `C_SomeType::create()`) and **must never** be called via `this->`. Member *fields* are the exact opposite: they are never accessed through `this->`, because the access marker already identifies them (see [Member variable naming conventions](#8-member-variable-naming-conventions)).
 
-## Object-like Macro and Enumerator naming conventions
+## `6. Object-like Macro and Enumerator naming conventions`
 
 | Entity                              | Convention                                | Example           |
 |:----------------------------------- | ----------------------------------------- | ----------------- |
@@ -426,87 +443,89 @@ Non-`static` member methods **must** be called from within the class's own metho
 | Enumerator name for enum-class type | any name in `PascalCase` style-form       | `DeepPurple`      |
 | Enumerator name for enum type       | any name in `UPPER_SNAKE_CASE` style-form | `DEEP_PURPLE`     |
 
-### Rationale for enumerator naming
+**Rationale for enumerator naming**:
 
-For backward compatibility with C-style conventions, plain `enum` enumerators use `UPPER_SNAKE_CASE` (e.g., `DEEP_PURPLE`). For `enum class` enumerators, the mandatory type-name qualifier `E_EnumType::` allows the enumerator name itself to be written in `PascalCase` instead of `UPPER_SNAKE_CASE`, yielding the full form `E_Color::DeepPurple`.
+> For backward compatibility with C-style conventions, plain `enum` enumerators use `UPPER_SNAKE_CASE` (e.g., `DEEP_PURPLE`). For `enum class` enumerators, the mandatory type-name qualifier `E_EnumType::` allows the enumerator name itself to be written in `PascalCase` instead of `UPPER_SNAKE_CASE`, yielding the full form `E_Color::DeepPurple`.
 
-## Non-Member variable naming conventions
+## `7. Non-Member variable naming conventions`
 
-| Entity                  | Convention                         | Example           |
-|:----------------------- | ---------------------------------- | ----------------- |
-| Enum variable name      | noun in `enum-var` style-form      | `e_operatingMode` |
-| Pointer variable name   | noun in `pointer-var` style-form   | `p_dataBuffer`    |
-| Reference variable name | noun in `reference-var` style-form | `r_dataBuffer`    |
-| Ordinary variable name  | noun in `normal-var` style-form    | `operatingMode`   |
+| Entity                  | Convention                         | Example              |
+|:----------------------- | ---------------------------------- | -------------------- |
+| Enum variable name      | noun in `enum-var` style-form      | `operatingMode`\_`e` |
+| Pointer variable name   | noun in `pointer-var` style-form   | `dataBuffer`\_`p`    |
+| Reference variable name | noun in `reference-var` style-form | `dataBuffer`\_`r`    |
+| Ordinary variable name  | noun in `normal-var` style-form    | `operatingMode`      |
 
-## Member variable naming conventions
+## `8. Member variable naming conventions`
 
-The base name of a member variable follows the same prefix rules as non-member variables (prefixes + meaningful name in `camelCase`). On top of that, the requirements below apply.
+The base name of a member variable follows the same rules as for non-member variables (a meaningful noun in `camelCase` plus a marker block). On top of that, the requirements below apply.
 
-**Important notice for member scope and storage prefixes**:
+**Important notice for the access marker and member scope**:
 
-Class members are *class-scoped*, not namespace-scoped, so they intentionally **omit the `scope-prefix`** (`g` / `n` / `a`) — none of those applies to a field. What remains is the `storage-class-prefix` slot:
+> Every member carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. What follows the base name is the same trailing marker block as for any other variable, i.e. [`access-marker`]\_`camelCase`\_[`storage-class`][`cv-qualifier`][`enum`|`pointer`|`reference`]:
+>
+> - An ordinary (instance) non-static member carries **no storage-class marker** (e.g., `pub`\_`operatingMode`, `prot`\_`operatingMode`\_`pe`).
+> - A `static` class member carries the **`s`** storage-class marker (e.g., `pub`\_`instanceCount`\_`s`). Note carefully: at *namespace* scope `s` means internal linkage, but a `static` class member has **external linkage**. The `s` marker on a member therefore denotes *class-level (shared) storage only*, not internal linkage — there is no contradiction because the scope marker is absent and the class scope, not the storage marker, governs linkage. The `x` (`extern`) marker is **never** used on members: `static` members are defined exactly once and resolved by the linker; a declaration of one is written in the header with the plain `s` marker and defined in one source file with the same `s` marker (the keyword `static` is omitted at the definition).
+> - `thread_local` members additionally carry **`t`** (e.g., `prot`\_`threadStorage`\_`t`), and `static thread_local` members carry **`st`** (e.g., `pub`\_`cache`\_`st`), mirroring the namespace-scope storage-class markers.
+>
+> The access marker is always the leading prefix and the marker block is always trailing; the two never merge, swap places, or absorb one another (see [Members combining the access marker and the marker block](#82-members-combining-the-access-marker-and-the-marker-block)).
 
-- An ordinary (instance) non-static member uses **no storage-class prefix** (e.g., `operatingMode`, `pe_dataBuffer`).
-- A `static` class member uses the **`s`** storage-class prefix (e.g., `s_instanceCount`). Note carefully: at *namespace* scope `s` means internal linkage, but a `static` class member has **external linkage**. The `s` prefix on a member therefore denotes *class-level (shared) storage only*, not internal linkage — there is no contradiction because the scope prefix is absent and the class scope, not the storage prefix, governs linkage. The `x` (`extern`) prefix is **never** used on members: `static` members are defined exactly once and resolved by the linker; an `extern` declaration of one is written in the header with the plain `s` prefix and defined in one source file with the same `s` prefix (the keyword `static` is omitted at the definition).
-- `thread_local` members additionally carry **`t`** (e.g., `t_threadStorage`), and `static thread_local` members carry **`st`** (e.g., `st_cache`), mirroring the namespace-scope storage-class prefixes.
+Access rules:
 
-These storage prefixes occupy the same slot as for non-members — between the (absent) `scope-prefix` and the `cv-qualifier-prefix`, i.e. `[scope: omitted][storage-class-prefix][cv-qualifier-prefix][enum/pointer/reference-prefix]_camelCase`. The access suffix (`_` / `__`) is always appended last, after the full prefixed base name (see [Members combining prefixes and access suffixes](#members-combining-prefixes-and-access-suffixes)).
+- Non-`static` fields declared in a class are accessed **bare** inside the class's own methods (e.g., `operatingMode`). The `this->` qualifier is **forbidden** on fields: the access marker already makes it obvious that the name denotes a class field, so the qualifier adds nothing but noise.
+- `static` members are **not** accessed via `this->` (they have no instance). They **must** be qualified with their enclosing class name (e.g., `C_SomeType`::`pub`\_`instanceCount`\_`s`) even from within the class's own methods, so that the access is unambiguously a class-level entity.
+- Access from outside the class uses the object or the pointer — `obj`.`pub`\_`operatingMode` and `ptr`->`pub`\_`operatingMode` — once again with the member's full name.
 
-- Non-`static` fields declared in a class **must** be accessed inside class methods exclusively via the `this->` qualifier (e.g., `this->operatingMode`). The `this->` qualifier **must never** be omitted so that it is always obvious an access refers to a class field.
-- `static` members are **not** accessed via `this->` (they have no instance). They **must** be qualified with their enclosing class name (e.g., `C_SomeType::s_instanceCount`) even from within the class's own methods, so that the access is unambiguously a class-level entity.
-- `public` fields **must not** add any suffix.
-- `protected` fields **must** have the suffix `_` (e.g., `operatingMode_`).
-- `private` fields **must** have the suffix `__` (e.g., `operatingMode__`).
+A member's name is identical wherever it is written, inside or outside the class; only the qualifier that selects the object differs:
 
-| Access level | Inside class methods             | Outside the class (via object/pointer)                                                              |
-|:------------ | -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `public`     | `this->[member-variable-name]`   | `obj.[member-variable-name]` / `ptr->[member-variable-name]`                                        |
-| `protected`  | `this->[member-variable-name]_`  | `obj.[member-variable-name]_` / `ptr->[member-variable-name]_` (accessible only from derived class) |
-| `private`    | `this->[member-variable-name]__` | Not accessible                                                                                      |
+| Access level | Leading marker | Inside class methods          | Outside the class (via object/pointer)                                                            |
+|:------------ |:-------------- |:----------------------------- | ------------------------------------------------------------------------------------------------- |
+| `public`     | `pub_`         | `pub`\_`accessCount`          | `obj`.`pub`\_`accessCount` / `ptr`->`pub`\_`accessCount`                                          |
+| `protected`  | `prot_`        | `prot`\_`operatingMode`\_`pe` | `obj`.`prot`\_`operatingMode`\_`pe` / `ptr`->`prot`\_`operatingMode`\_`pe` (derived classes only) |
+| `private`    | `priv_`        | `priv`\_`targetState`\_`e`    | Not accessible                                                                                    |
 
-### `mutable` members
+### `8.1. mutable members`
 
-The `mutable` keyword is orthogonal to access level and to all prefix categories: it governs whether a field may be modified through a `const`-qualified method, not the field's scope, storage, or type. `mutable` members therefore follow exactly the same naming rules as non-`mutable` members of the same access level; the `mutable` qualifier is intentionally not encoded in the name.
+The `mutable` keyword is orthogonal to access level and to all marker categories: it governs whether a field may be modified through a `const`-qualified method, not the field's scope, storage, or type. `mutable` members therefore follow exactly the same naming rules as non-`mutable` members of the same access level; the `mutable` qualifier is intentionally not encoded in the name.
 
-Example:
+***Example***:
 
 ```C++
 class C_Cache {
 public:
-    mutable std::size_t accessCount;       // mutable public:    no suffix
+    mutable std::size_t pub_accessCount;      // mutable public:    access marker only
 protected:
-    mutable E_CacheState e_state_;         // mutable protected: suffix `_`
+    mutable E_CacheState prot_state_e;        // mutable protected: access marker + marker block
 private:
-    mutable E_CacheState e_replacement__;  // mutable private:   suffix `__`
+    mutable E_CacheState priv_replacement_e;  // mutable private:   same rules as any other member
 };
 
 // inside a const method:
-// this->accessCount++;
-// this->e_state_;
-// this->e_replacement__;
+// pub_accessCount++;
+// prot_state_e;
+// priv_replacement_e;
 ```
 
-### Members combining prefixes and access suffixes
+### `8.2. Members combining the access marker and the marker block`
 
-When a member carries both a leading prefix (e.g., a `pointer-prefix` or `enum-prefix`) and an access suffix (`_` / `__`), the access suffix is appended *after* the full prefixed base name, in exactly the same position as for plain members.
+A member always carries both mechanisms at once: the access marker as its leading prefix (from the access level) and the marker block as the tail of the base name (from the variable's own storage, qualifiers and type). Neither mechanism is ever folded into the other, and the block keeps the same order it has for a non-member variable.
 
-Example:
+***Example***:
 
 ```C++
 class C_SomeType {
 protected:
-    E_OperatingMode* pe_operatingMode_;  // protected pointer member
+    E_OperatingMode* prot_operatingMode_pe;  // protected pointer member
 private:
-    E_OperatingMode e_targetState__;     // private enum-typed member
+    E_OperatingMode priv_targetState_e;     // private enum-typed member
 };
 
 // access:
-// this->pe_operatingMode_;
-// this->e_targetState__;
+// prot_operatingMode_pe;
+// priv_targetState_e;
 ```
 
-## Template parameter naming conventions
+## `9. Template parameter naming conventions`
 
 | Entity                           | Convention                            | Example          |
 |:-------------------------------- | ------------------------------------- | ---------------- |
@@ -517,7 +536,7 @@ private:
 | Template template parameter      | noun in `TeTP_PascalCase` style-form  | `TeTP_Allocator` |
 | Template template parameter pack | noun in `TeTPP_PascalCase` style-form | `TeTPP_Policies` |
 
-## Ultimate Compilable Example
+## `10. Ultimate Compilable Example`
 
 A single, self-contained translation unit (example) that exercises every naming convention defined in this document. This example is artificial by design. The file-name convention is represented by the hypothetical artifact name `ultimate_example.cpp`, and the namespace-name convention is demonstrated by the `snake_case` namespaces below.
 
@@ -554,173 +573,173 @@ using TAIS_Drawable = IS_Drawable;   // alias to interface struct (marker-aware)
 // ============================================================================
 // Global-namespace variables
 // ============================================================================
-int                     g_someVar   = 20;                    // scope = g
-static int              gs_someVar  = 21;                    // g + static(internal linkage)
-thread_local int        gt_someVar  = 22;                    // g + thread_local
-static thread_local int gst_someVar = 23;                    // g + static thread_local
-const int               gc_someVar  = 24;                    // g + const
-volatile int            gv_someVar  = 25;                    // g + volatile
-const volatile int      gcv_someVar = 0;                     // g + const volatile
+int                     someVar_g   = 20;                    // scope = g
+static int              someVar_gs  = 21;                    // g + static(internal linkage)
+thread_local int        someVar_gt  = 22;                    // g + thread_local
+static thread_local int someVar_gst = 23;                    // g + static thread_local
+const int               someVar_gc  = 24;                    // g + const
+volatile int            someVar_gv  = 25;                    // g + volatile
+const volatile int      someVar_gcv = 0;                     // g + const volatile
 
-extern int              gx_someVar;                          // extern declaration (defined elsewhere)
-extern thread_local int gxt_someVar;                         // extern thread_local declaration
+extern int              someVar_gx;                          // extern declaration (defined elsewhere)
+extern thread_local int someVar_gxt;                         // extern thread_local declaration
 
 // global enum variables
-E_DeviceState                ge_someState     = STATE_IDLE;  // scope = g + enum
-const E_DeviceState          gce_someState    = STATE_IDLE;  // g + const + enum
-const volatile E_DeviceState gcve_targetState = STATE_IDLE;  // g + const volatile + enum
+E_DeviceState                someState_ge     = STATE_IDLE;  // scope = g + enum
+const E_DeviceState          someState_gce    = STATE_IDLE;  // g + const + enum
+const volatile E_DeviceState targetState_gcve = STATE_IDLE;  // g + const volatile + enum
 
 // targets for pointers / references
-int                          g_intTarget     = 30;
-const int                    gc_intTarget    = 31;
-volatile int                 gv_intTarget    = 32;
-const volatile int           gcv_intTarget   = 0;
+int                          intTarget_g     = 30;
+const int                    intTarget_gc    = 31;
+volatile int                 intTarget_gv    = 32;
+const volatile int           intTarget_gcv   = 0;
 
 // states for pointers / references
-E_DeviceState                ge_state   = STATE_RUNNING;
-const E_DeviceState          gce_state  = STATE_RUNNING;
-volatile E_DeviceState       gve_state  = STATE_RUNNING;
-const volatile E_DeviceState gcve_state = STATE_RUNNING;
+E_DeviceState                state_ge   = STATE_RUNNING;
+const E_DeviceState          state_gce  = STATE_RUNNING;
+volatile E_DeviceState       state_gve  = STATE_RUNNING;
+const volatile E_DeviceState state_gcve = STATE_RUNNING;
 
 // pointer variables
-int*                                                gp_intTarget   = &g_intTarget;    // global pointer
-const int*                                          gpc_intTarget  = &gc_intTarget;   // global pointer to const
-volatile int*                                       gpv_intTarget  = &gv_intTarget;   // global pointer to volatile
-const volatile int*                                 gpcv_intTarget = &gcv_intTarget;  // global pointer to const volatile
-E_DeviceState*                                      gpe_state      = &ge_state;       // global pointer to enum
-const E_DeviceState*                                gpce_state     = &gce_state;      // global pointer to const enum
-volatile E_DeviceState*                             gpve_state     = &gve_state;      // global pointer to volatile enum
-const volatile E_DeviceState*                       gpcve_state    = &gcve_state;     // global pointer to const volatile enum
-static const volatile E_DeviceState* const volatile gscvpcve_state = &gcve_state;     // global static const volatile pointer to const volatile enum
+int*                                                intTarget_gp   = &intTarget_g;    // global pointer
+const int*                                          intTarget_gpc  = &intTarget_gc;   // global pointer to const
+volatile int*                                       intTarget_gpv  = &intTarget_gv;   // global pointer to volatile
+const volatile int*                                 intTarget_gpcv = &intTarget_gcv;  // global pointer to const volatile
+E_DeviceState*                                      state_gpe      = &state_ge;       // global pointer to enum
+const E_DeviceState*                                state_gpce     = &state_gce;      // global pointer to const enum
+volatile E_DeviceState*                             state_gpve     = &state_gve;      // global pointer to volatile enum
+const volatile E_DeviceState*                       state_gpcve    = &state_gcve;     // global pointer to const volatile enum
+static const volatile E_DeviceState* const volatile state_gscvpcve = &state_gcve;     // global static const volatile pointer to const volatile enum
 
-// reference variables — no cv-qualifier prefix slot for references
-int&                                 gr_intTarget   = g_intTarget;    // global reference
-const int&                           grc_intTarget  = gc_intTarget;   // global reference to const
-volatile int&                        grv_intTarget  = gv_intTarget;   // global reference to volatile
-const volatile int&                  grcv_intTarget = gcv_intTarget;  // global reference to const volatile
-E_DeviceState&                       gre_state      = ge_state;       // global reference to enum
-const E_DeviceState&                 grce_state     = gce_state;      // global reference to const enum
-volatile E_DeviceState&              grve_state     = gve_state;      // global reference to volatile enum
-const volatile E_DeviceState&        grcve_state    = gcve_state;     // global reference to const volatile enum
-static const volatile E_DeviceState& gsrcve_state   = gcve_state;     // global static reference to const volatile enum
+// reference variables — no cv-qualifier marker slot for references
+int&                                 intTarget_gr   = intTarget_g;    // global reference
+const int&                           intTarget_grc  = intTarget_gc;   // global reference to const
+volatile int&                        intTarget_grv  = intTarget_gv;   // global reference to volatile
+const volatile int&                  intTarget_grcv = intTarget_gcv;  // global reference to const volatile
+E_DeviceState&                       state_gre      = state_ge;       // global reference to enum
+const E_DeviceState&                 state_grce     = state_gce;      // global reference to const enum
+volatile E_DeviceState&              state_grve     = state_gve;      // global reference to volatile enum
+const volatile E_DeviceState&        state_grcve    = state_gcve;     // global reference to const volatile enum
+static const volatile E_DeviceState& state_gsrcve   = state_gcve;     // global static reference to const volatile enum
 
 // ============================================================================
 // Named namespace (snake_case): frame_renderer
 // ============================================================================
 namespace frame_renderer
 {
-    int                     n_someVar     = 1;           // scope = n
-    static int              ns_someVar    = 2;           // n + static
-    thread_local int        nt_someVar    = 3;           // n + thread_local
-    static thread_local int nst_someVar   = 4;           // n + static thread_local
-    const int               nc_someVar    = 5;           // n + const
-    const volatile int      ncv_someVar   = 0;           // n + const volatile
-    E_DeviceState           ne_someState  = STATE_IDLE;  // n + enum
-    const E_DeviceState     nce_someState = STATE_IDLE;  // n + const + enum
+    int                     someVar_n     = 1;           // scope = n
+    static int              someVar_ns    = 2;           // n + static
+    thread_local int        someVar_nt    = 3;           // n + thread_local
+    static thread_local int someVar_nst   = 4;           // n + static thread_local
+    const int               someVar_nc    = 5;           // n + const
+    const volatile int      someVar_ncv   = 0;           // n + const volatile
+    E_DeviceState           someState_ne  = STATE_IDLE;  // n + enum
+    const E_DeviceState     someState_nce = STATE_IDLE;  // n + const + enum
 
-    int*                    np_ptr = nullptr;            // n + pointer
-    E_DeviceState*          npe_ptr = &ne_someState;     // n + pointer to enum
-    E_DeviceState&          nre_ref = ne_someState;      // n + reference to enum
+    int*                    ptr_np = nullptr;            // n + pointer
+    E_DeviceState*          ptr_npe = &someState_ne;     // n + pointer to enum
+    E_DeviceState&          ref_nre = someState_ne;      // n + reference to enum
 
-    extern thread_local int nxt_someVar;                 // n + extern declaration (definition is elsewhere) of thread_local variable
+    extern thread_local int someVar_nxt;                 // n + extern declaration (definition is elsewhere) of thread_local variable
 
     int computeFrameSum(int lhs, int rhs) { return lhs + rhs; }  // function: camelCase
 }
 
 // ============================================================================
-// Anonymous namespace (prefix `a`; mutually exclusive with `static`)
+// Anonymous namespace (marker `a`; mutually exclusive with `static`)
 // ============================================================================
 namespace
 {
-    int                  a_someVar      = 10;            // scope = a
-    const int            ac_someVar     = 11;            // a + const
-    E_DeviceState        ae_someState   = STATE_IDLE;    // a + enum
-    int*                 ap_someVar     = &a_someVar;    // a + pointer
-    const E_DeviceState& arce_someState = ae_someState;  // a + reference to const enum
+    int                  someVar_a      = 10;            // scope = a
+    const int            someVar_ac     = 11;            // a + const
+    E_DeviceState        someState_ae   = STATE_IDLE;    // a + enum
+    int*                 someVar_ap     = &someVar_a;    // a + pointer
+    const E_DeviceState& someState_arce = someState_ae;  // a + reference to const enum
 }
 
 // ============================================================================
 // Free function (camelCase) demonstrating local-scope variables
-// (block scope: no scope prefix; name starts at the storage slot)
+// (block scope: no scope marker; the marker block starts at the storage slot)
 // ============================================================================
 void demonstrateLocals()
 {
-    int                 someVar      = 0;            // local (no prefix)
-    static int          s_someLocal  = 0;            // local + static
-    thread_local int    t_someVar    = 0;            // local + thread_local
-    const int           c_someLocal  = 1;            // local + const
-    E_DeviceState       e_someState  = STATE_IDLE;   // local + enum
-    const E_DeviceState ce_someState = STATE_IDLE;   // local + const enum
-    int*                p_dataBuffer = nullptr;      // local + pointer
-    const int&          rc_someVar   = someVar;      // local + reference to const
-    E_DeviceState&      re_someState = e_someState;  // local + reference to enum
+    int                 someVar      = 0;            // local (no markers)
+    static int          someLocal_s  = 0;            // local + static
+    thread_local int    someVar_t    = 0;            // local + thread_local
+    const int           someLocal_c  = 1;            // local + const
+    E_DeviceState       someState_e  = STATE_IDLE;   // local + enum
+    const E_DeviceState someState_ce = STATE_IDLE;   // local + const enum
+    int*                dataBuffer_p = nullptr;      // local + pointer
+    const int&          someVar_rc   = someVar;      // local + reference to const
+    E_DeviceState&      someState_re = someState_e;  // local + reference to enum
 }
 
 int sendRequest(int value) { return value; }  // free function: camelCase
 
 // ============================================================================
-// Class members: access suffixes (public: none, protected: `_`, private: `__`)
-// Non-static members/methods accessed via this->; static members/methods via C_Logger::...
+// Class members: access markers (public: `pub_`, protected: `prot_`, private: `priv_`)
+// Fields bare (no this->); non-static methods via this->; static members/methods via C_Logger::...
 // ============================================================================
 class C_Logger
 {
 public:
-    int         someField;        // public: no suffix
-    mutable int accessCount;      // public, mutable: no suffix (mutable not encoded)
-    int*        p_publicBuffer;   // public pointer member: no suffix
-    static int  s_instanceCount;  // public static member (declaration)
+    int         pub_someField;        // public: access marker only
+    mutable int pub_accessCount;      // public, mutable: access marker only (mutable not encoded)
+    int*        pub_publicBuffer_p;   // public pointer member: access marker + pointer marker
+    static int  pub_instanceCount_s;  // public static member (declaration)
 
 protected:
-    int            protectedField_;    // protected: suffix `_`
-    E_DeviceState  e_logState_;        // protected enum member
-    E_DeviceState* pe_operatingMode_;  // protected pointer-to-enum member
+    int            prot_protectedField;    // protected: access marker only
+    E_DeviceState  prot_logState_e;        // protected enum member
+    E_DeviceState* prot_operatingMode_pe;  // protected pointer-to-enum member
 
 private:
-    int           privateField__;   // private: suffix `__`
-    E_DeviceState e_targetState__;  // private enum member
-    static int    s_someCounter__;  // private static member
+    int           priv_privateField;   // private: access marker only
+    E_DeviceState priv_targetState_e;  // private enum member
+    static int    priv_someCounter_s;  // private static member (declaration)
 
 public:
-    static inline thread_local int st_cache = 0;  // static thread_local member
+    static inline thread_local int pub_cache_st = 0;  // static thread_local member
 
     C_Logger()
-        : someField(0), accessCount(0), p_publicBuffer(nullptr),
-          protectedField_(0), e_logState_(STATE_IDLE), pe_operatingMode_(nullptr),
-          privateField__(0), e_targetState__(STATE_IDLE)
+        : pub_someField(0), pub_accessCount(0), pub_publicBuffer_p(nullptr),
+          prot_protectedField(0), prot_logState_e(STATE_IDLE), prot_operatingMode_pe(nullptr),
+          priv_privateField(0), priv_targetState_e(STATE_IDLE)
     {}
 
     void flushBuffer()  // non-static helper method (camelCase)
     {
-        this->someField = 0;
+        pub_someField = 0;
     }
 
     void logMessage()
     {
-        this->someField++;
-        this->accessCount++;
-        this->protectedField_++;
-        this->e_logState_ = STATE_RUNNING;
-        this->pe_operatingMode_ = &this->e_logState_;
-        this->privateField__++;
-        this->e_targetState__ = STATE_ERROR;
+        pub_someField++;
+        pub_accessCount++;
+        prot_protectedField++;
+        prot_logState_e = STATE_RUNNING;
+        prot_operatingMode_pe = &prot_logState_e;
+        priv_privateField++;
+        priv_targetState_e = STATE_ERROR;
         this->flushBuffer();          // non-static method call: this->method()
-        C_Logger::s_instanceCount++;
-        C_Logger::s_someCounter__++;
+        C_Logger::pub_instanceCount_s++;
+        C_Logger::priv_someCounter_s++;
         C_Logger::resetCount();       // static method call: C_Logger::method()
     }
 
-    void touch() const { this->accessCount++; }  // mutable modified through const method
+    void touch() const { pub_accessCount++; }  // mutable modified through const method
 
     static int resetCount()
     {
-        C_Logger::s_someCounter__ = 0;
-        return C_Logger::s_instanceCount;
+        C_Logger::priv_someCounter_s = 0;
+        return C_Logger::pub_instanceCount_s;
     }
 };
 
-// static member definitions: keyword `static` omitted; same `s_` prefixed name
-int C_Logger::s_instanceCount = 0;
-int C_Logger::s_someCounter__ = 0;
+// static member definitions: keyword `static` omitted; the same name, storage marker included
+int C_Logger::pub_instanceCount_s = 0;
+int C_Logger::priv_someCounter_s = 0;
 
 // ============================================================================
 // Role-marked types: interface / abstract / protocol / abstract protocol
@@ -737,7 +756,7 @@ public:
     void draw() const override = 0;
 
 protected:
-    int width_;
+    int prot_width;
 };
 
 class C_Button final : public AC_WidgetBase  // concrete implementation
@@ -767,14 +786,14 @@ public:
     void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
 
 protected:
-    int width_;
+    int prot_width;
 };
 
 class C_MainPanel final : public PAC_PanelBase<C_MainPanel>
 {
 public:
     void draw() const override {}
-    void onRefresh() { ++this->width_; }
+    void onRefresh() { ++prot_width; }
 };
 
 // ============================================================================
@@ -795,28 +814,28 @@ template <typename TTP_Value,                           // type template paramet
 class C_Container
 {
 public:
-    C_Container() : value_(), e_state_(STATE_IDLE), internal__(0) {}
+    C_Container() : prot_value(), prot_state_e(STATE_IDLE), priv_internal(0) {}
 
-    TTP_Value retrieve() const { return this->value_; }
+    TTP_Value retrieve() const { return prot_value; }
 
     void update()
     {
-        this->value_ = TTP_Value{};
-        this->e_state_ = STATE_RUNNING;
-        this->internal__++;
-        C_Container::s_sharedCount++;
-        C_Container::s_privateTotal__++;
+        prot_value = TTP_Value{};
+        prot_state_e = STATE_RUNNING;
+        priv_internal++;
+        C_Container::pub_sharedCount_s++;
+        C_Container::priv_privateTotal_s++;
     }
 
-    static inline int s_sharedCount = 0;  // public static inline member
+    static inline int pub_sharedCount_s = 0;  // public static inline member
 
 protected:
-    TTP_Value     value_;    // protected (suffix `_`)
-    E_DeviceState e_state_;  // protected enum member
+    TTP_Value     prot_value;    // protected: access marker only
+    E_DeviceState prot_state_e;  // protected enum member
 
 private:
-    int               internal__;            // private (suffix `__`)
-    static inline int s_privateTotal__ = 0;  // private static member (suffix `__`)
+    int               priv_internal;            // private: access marker only
+    static inline int priv_privateTotal_s = 0;  // private static inline member
 };
 
 // ============================================================================
@@ -825,14 +844,14 @@ private:
 int main()
 {
     C_Logger logger;
-    logger.logMessage();                // method (camelCase); internal access via this->
+    logger.logMessage();                // method (camelCase); calling a non-static method via this->
     logger.touch();
-    logger.p_publicBuffer = nullptr;    // public field access from outside (obj.member)
-    int v = C_Logger::s_instanceCount;  // static member access qualified by class name
+    logger.pub_publicBuffer_p = nullptr;    // public field access from outside (obj.member)
+    int v = C_Logger::pub_instanceCount_s;  // static member access qualified by class name
     C_Logger::resetCount();
 
-    C_Logger* p_logger = &logger;       // local pointer variable (block scope: p_)
-    p_logger->someField = 0;            // public field access via pointer (ptr->member)
+    C_Logger* logger_p = &logger;       // local pointer variable (block scope: no scope marker)
+    logger_p->pub_someField = 0;            // public field access via pointer (ptr->member)
 
     sendRequest(0);
     frame_renderer::computeFrameSum(1, 2);
@@ -843,8 +862,8 @@ int main()
 
     C_MainPanel panel;
     panel.refresh();                    // abstract protocol forwarding
-    IS_Drawable& r_drawable = panel;    // local reference to interface (block scope: r_)
-    r_drawable.draw();                  // virtual dispatch through the interface
+    IS_Drawable& drawable_r = panel;    // local reference to interface (block scope: no scope marker)
+    drawable_r.draw();                  // virtual dispatch through the interface
 
     (void) v;
     
@@ -854,27 +873,27 @@ int main()
 
 This example covers:
 
-- **Anonymous namespace** variables (`a`, `ac`, `ae`, `ap`, `arce`) and the mutual exclusion of `a` with `static`.
-- **cv-qualifier prefixes** (`c`, `v`, `cv`) at namespace and local scope.
-- **Enum prefixes** (`e`, `ce`, `cve`) for plain-enum and enum-class variables.
+- **Anonymous namespace** variables (`a`, `ac`, `ae`, `ap`, `arce` markers) and the mutual exclusion of `a` with `static`.
+- **cv-qualifier markers** (`c`, `v`, `cv`) at namespace and local scope.
+- **Enum markers** (`e`, `ce`, `cve`) for plain-enum and enum-class variables.
 - **Enumerator naming**: `UPPER_SNAKE_CASE` for plain `enum` (`STATE_IDLE`, …) and `PascalCase` for `enum class` (`DeepPurple`, …).
-- **Extern declarations** (`gx`, `gxt`, `nxt`) marked as declarations only, defined elsewhere.
+- **Extern declarations** (`gx`, `gxt`, `nxt` markers) marked as declarations only, defined elsewhere.
 - **File-name convention** represented by the artifact name `ultimate_example.cpp`.
 - **Function-like macro** (`SAVE_DATA()`) and **object-like macro** (`MAX_BUFFER_SIZE`).
 - **Functions/methods in `camelCase`** (`sendRequest`, `computeFrameSum`, `logMessage`, `touch`, `resetCount`, `retrieve`, `update`, `main`).
-- **Local (block) scope** variables with no scope prefix (`someVar`, `s_someLocal`, `p_dataBuffer`, `p_logger`, …).
-- **Member access suffixes**: `public` (none), `protected` (`_`), `private` (`__`), including on pointer/enum members and static members.
-- **Member access discipline**: non-static fields/methods via `this->…`; static members/methods via `C_Logger::s_…` / `C_Logger::resetCount()` / `C_Container::s_…`.
+- **Local (block) scope** variables with no scope marker (`someVar`, `someLocal`\_`s`, `dataBuffer`\_`p`, `logger`\_`p`, …).
+- **Member access markers**: `pub_` / `prot_` / `priv_`, applied to plain, pointer, enum and static members alike.
+- **Member access discipline**: fields accessed bare (no `this->`); non-static methods via `this->…`; static members/methods via `C_Logger`::`pub`\_`instanceCount`\_`s` / `C_Logger::resetCount()` / `C_Container`::`pub`\_`sharedCount`\_`s`.
 - **Namespace convention** via the `snake_case` namespace `frame_renderer`.
-- **Pointer prefixes** — all 8 variants (`p`, `pc`, `pv`, `pcv`, `pe`, `pce`, `pve`, `pcve`) and the note that they apply to smart pointers alike.
-- **Reference prefixes** — all 8 variants (`r`, `rc`, `rv`, `rcv`, `re`, `rce`, `rve`, `rcve`), with the cv-qualifier prefix slot intentionally omitted.
-- **Scope prefixes** (`g`, `n`, `a`) and their omission at local/member scope.
-- **Static linkage/storage prefixes** (`s`, `t`, `st`) at namespace scope and as class members, plus the out-of-line static-member definition pattern (keyword `static` omitted, `s_` name retained).
-- **Static thread_local** namespace (`gst`, `nst`) and member (`st`) forms.
+- **Pointer markers** — all 8 variants (`p`, `pc`, `pv`, `pcv`, `pe`, `pce`, `pve`, `pcve`) and the note that they apply to smart pointers alike.
+- **Reference markers** — all 8 variants (`r`, `rc`, `rv`, `rcv`, `re`, `rce`, `rve`, `rcve`), with the cv-qualifier marker slot intentionally omitted.
+- **Scope markers** (`g`, `n`, `a`) and their omission at local/member scope.
+- **Static linkage/storage markers** (`s`, `t`, `st`) at namespace scope and as class members, plus the out-of-line static-member definition pattern (keyword `static` omitted, the name retained unchanged).
+- **Static thread_local** namespace (`gst`, `nst` markers) and member (`st`) forms.
 - **Type prefixes** (`C`, `S`, `E`, `U`) and **type-alias prefixes** (`TA`, `TAC`, `TAS`, `TAE`, `TAU`, `TAP`, `TAR`, `TAF`).
 - **Template parameter prefixes** — all 6 kinds (`TTP`, `TTPP`, `NTTP`, `NTTPP`, `TeTP`, `TeTPP`).
-- **Ultimate compound forms** (`gscvpcve_state`, `gsrcve_state`) combining scope + storage + cv + pointer/reference-to-const-volatile-enum.
+- **Ultimate compound forms** (`state`\_`gscvpcve`, `state`\_`gsrcve`) combining scope + storage + cv + pointer/reference-to-const-volatile-enum.
 - **`mutable` members** following the same naming rules as non-`mutable` members of the same access level, modifiable through a `const` method (`touch()`).
 - **Role-marker type prefixes** — `IS_`, `AC_`, `PC_`, `PAC_` demonstrated directly (remaining forms `IC_/AS_/PS_/PAS_` follow from the five-combination marker rule: *(none)*, `I`, `A`, `P`, `PA`), including the mechanical classification algorithm and the impossibility of combining `I` with `P`.
 - **Marker-aware type aliases** (`TAIS_Drawable`; family `TAIC_/TAAC_/TAAS_/TAPC_/TAPS_/TAPAC_/TAPAS_`).
-- **Protocol forwarding** through non-virtual members (`ticker.refresh()`, `panel.refresh()`) alongside virtual dispatch through an interface reference (`r_drawable.draw()`).
+- **Protocol forwarding** through non-virtual members (`ticker.refresh()`, `panel.refresh()`) alongside virtual dispatch through an interface reference (`drawable_r.draw()`).
