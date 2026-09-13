@@ -215,7 +215,7 @@ Terms used by the clauses below:
   *Consequences*: an interface inherits only from interfaces (`I3` and `I5`) — which admits the *composite* form, an interface that aggregates several contracts and declares nothing of its own (it passes `I2` on what it inherits) — and no helper implementation may be added to one: helpers belong to an abstract type. Clause `I4` is not a matter of taste: a user holding the interface sees exactly its virtual functions, so a member that is not virtual is not part of the contract at all, and an obligation toward a derived type is never visible through the interface.
 - **`A` (abstract)** — an incomplete base that exists to be completed:
   1. it is abstract;
-  2. it fails at least one `I` clause — that is what distinguishes it from an interface. Any of `I2`–`I6` can be the failing one: most often `I5` (it carries a data member, that is the state its derived types share) or `I3` (it carries an implementation), occasionally `I2` (its member set holds no pure virtual non-special member function — the only pure virtual function it has, if any, is a special member such as a destructor), `I4` (it declares a contract member, which also makes it `PA` — see clause 3 below) or `I6` (an unsafe destructor). `I1` holds by definition and `I7` only permits, so neither can fail; a type that fails none of `I1`–`I7` is an interface itself;
+  2. it fails at least one `I` clause — that is what distinguishes it from an interface. Any of `I2`–`I6` can be the failing one: most often `I5` (it carries a data member, that is the state its derived types share) or `I3` (it carries an implementation), occasionally `I2` (its member set holds no pure virtual non-special member function — the only pure virtual function it has, if any, is a special member such as a destructor), `I4` (it declares a contract member, which also makes it `PA` — see clause `A3` below) or `I6` (an unsafe destructor). `I1` holds by definition and `I7` only permits, so neither can fail; a type that fails none of `I1`–`I7` is an interface itself;
   3. it declares no contract member (a contract member makes it `PA`);
   4. it states no contract of its own: unlike `I` it is not a complete handle for its users, and unlike `P` it names no obligations for a single derived type. Own pure virtual functions, `override = 0` re-declarations, data members and implementations are otherwise allowed, and whether objects are destroyed through it is left to the destruction rule below.
 - **`P` (protocol)** — a compile-time contract on a statically known derived type:
@@ -242,7 +242,7 @@ Mechanical classification algorithm:
 2. Is the type abstract in the standard C++ sense — at least one pure virtual function (declared by the type or inherited) has no final overrider in it?
    - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g. `C_Button final : public IS_Drawable`).
    - Yes → `PAC_`/`PAS_` if marker `P` was remembered (the contract member already breaks clauses `I3` and `I4`, so there is nothing left to ask); otherwise continue.
-3. Are all `I` clauses (1–7 above) satisfied?
+3. Are all `I` clauses (`I1`–`I7` above) satisfied?
    - Yes → `IC_`/`IS_`.
    - No → `AC_`/`AS_`.
 
