@@ -181,7 +181,7 @@ A type prefix consists of optional `role markers` followed by a `type letter`.
 - `A`: `abstract` type — a base that is not yet complete: abstract, yet failing at least one `I` clause — typically it carries state or implementation (`A` - `A`bstract)
 - `P`: `protocol` type — a compile-time contract on a statically known derived type: a mixin that states what its host owes (`P` - `P`rotocol)
 
-`Role markers` concatenate in the fixed order and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. In particular, the combination `PI` cannot exist: `P` requires a contract member (clause `P1`), and an interface is forbidden to declare one (clause `I4`).
+`Role markers` concatenate in the fixed order (`P` must be before `A`) and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. In particular, the combination `PI` cannot exist: `P` requires a contract member (clause `P1`), and an interface is forbidden to declare one (clause `I4`).
 
 Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC`, `PAS`.
 
@@ -231,7 +231,7 @@ Contract forms:
 
 Composition rules:
 
-- `Role markers` concatenate in the fixed order. Exactly five marker combinations exist: *(none)*, `I`, `A`, `P`, `PA`.
+- `Role markers` concatenate in the fixed order (`P` must be before `A`). Exactly five marker combinations exist: *(none)*, `I`, `A`, `P`, `PA`.
 - **`I` and `P` are mutually exclusive by clause, not by argument**: `P` requires a contract member (clause `P1`), and an interface is forbidden to declare one (clause `I4`) — `PI` cannot be written.
 - **`PA` (`PAC_`, `PAS_`)** is the only hybrid: a protocol that is abstract. Its abstractness may come from a pure virtual function it declares itself or from an inherited pure virtual function it does not override.
 - One type bears exactly one resulting prefix; no other combinations exist.
