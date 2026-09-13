@@ -4,7 +4,7 @@
 
 ### `1.1. Variable markers`
 
-A variable name is a meaningful noun in `camelCase` followed by a **marker block**: every marker that applies to the variable, written as lowercase letters after a single `_`, in the fixed order below (each applicable marker appears at most once, in the specified order, with the cv-qualifier slot intentionally absent for references — see the notice below).
+A variable name is a meaningful noun in `camelCase` followed by a **marker block**: every marker that applies to the variable, written as lowercase letters after a single `_`, in the fixed order below (each marker listed below appears at most once, in the specified order, with the [`cv-qualifier`] marker intentionally absent for references — see the notice below).
 
 - `normal-var` (non-enum and non-pointer and non-reference) variable: `camelCase`\_[`scope`][`storage-class`][`cv-qualifier`]
 - `enum-var` variable: `camelCase`\_[`scope`][`storage-class`][`cv-qualifier`][`enum`]
@@ -20,6 +20,10 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 **Important notice for references**:
 
 > Unlike pointers, references in C++ cannot carry cv-qualifiers (const, volatile) themselves. Therefore, the [`cv-qualifier`] marker is intentionally omitted from the reference variable naming formula. The cv-qualifiers of the referenced object are fully captured by the [`reference`] marker (e.g., `rc` for `reference to const`, `rcv` for `reference to const volatile`). The [`cv-qualifier`] marker is never written together with the [`reference`] marker.
+
+**Important notice for cv-qualifiers inside the `pointer` and `reference` markers**:
+
+> The letters of a [`pointer`] or [`reference`] marker describe the *pointed-to* / *referred-to* type, not the variable's own type: `pcve` is a `pointer` to an object of `const volatile` `enum` type. A cv-qualified variable of such a type therefore carries cv letters in two different markers — `someVar`\_`gcpc` is a `const` pointer to a `const` object, while `someVar`\_`gpc` is a non-`const` pointer to a `const` object. The order of the markers separates the two readings: the variable's own [`cv-qualifier`] always precedes the kind marker, and the cv-qualifiers of the pointed-to / referred-to type are always inside it.
 
 #### `1.1.1. Scope markers`
 
@@ -39,7 +43,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for local (function/block) scope**:
 
-> Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the [`scope`] marker** entirely. The marker block of a local variable therefore starts at the [`storage-class`] slot (e.g., a `static` local is `someLocal`\_`s`, never `someLocal`\_`gs`), and a local that has nothing to mark at all is written with no block and no trailing underscore (e.g., `someVar`). Recall that the minimal forms shown in the [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) table (such as `operatingMode`\_`e`, `dataBuffer`\_`p`) are valid only at local scope.
+> Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the [`scope`] marker** entirely — `g`, `n` and `a` describe namespace scope only, so no name of a local variable ever carries one. The marker block of a local variable therefore starts with the [`storage-class`] marker (e.g., a `static` local is `someLocal`\_`s`, a `thread_local` local is `someVar`\_`t`, a `const` local is `someLocal`\_`c`), and a local that has nothing to mark at all is written with no block and no trailing underscore (e.g., `someVar`). Recall that the minimal forms shown in the [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) table (such as `operatingMode`\_`e`, `dataBuffer`\_`p`) are valid only at local scope.
 
 **Important notice for function parameters**:
 
@@ -61,7 +65,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for the `x` marker**:
 
-> The `x` marker marks a variable that is *declared* in one translation unit and *defined* in another one. The `extern` keyword belongs to that declaration only, but the name does not change among translation untis: a variable has exactly one name, so the definition is written with the same marked name (`extern int someVar_gx;` declares it; `int someVar_gx = 42;` defines it). `s` and `x` never combine, because `s` marks a name that only its own translation unit can see, while `x` marks a name another translation unit has to provide — no name can be both, and declaring a `static` variable `extern` fails when the program is linked, not when it is compiled. The `xt` marker is the `thread_local` counterpart and follows the same rule.
+> The `x` marker marks a variable that is *declared* in one translation unit and *defined* in another one. The `extern` keyword belongs to that declaration only, but the name does not change among translation units: a variable has exactly one name, so the definition is written with the same marked name (`extern int someVar_gx;` declares it; `int someVar_gx = 42;` defines it). `s` and `x` never combine, because `s` marks a name that only its own translation unit can see, while `x` marks a name another translation unit has to provide — no name can be both, and declaring a `static` variable `extern` fails when the program is linked, not when it is compiled. The `xt` marker is the `thread_local` counterpart and follows the same rule.
 
 ***Example 1***: `someVar`\_`gx` - `extern` variable in a `global` namespace with name `someVar` (e.g. declared in this translation unit, defined elsewhere)
 
@@ -170,14 +174,14 @@ A type prefix consists of optional `role markers` followed by a `type letter`.
 - `E`: `enum` or `enum class` (`E` - `E`num)
 - `U`: `union` (`U` - `U`nion)
 
-`Role markers` (definitions in [Abstraction & Protocol Markers](#122-abstraction--protocol-markers)):
+`Role markers` (normative clauses in [Abstraction & Protocol Markers](#122-abstraction--protocol-markers); the lines below are a summary only):
 
 - *(none)*: concrete type
-- `I`: `interface` type — every non-static member function is pure virtual, with no data fields (`I` - `I`nterface)
-- `A`: `abstract` type — cannot be instantiated, yet does not qualify as an interface (carries data fields or non-pure-virtual methods) (`A` - `A`bstract)
-- `P`: `protocol` type — base for static polymorphism (typically CRTP): imposes obligations on its derived type via non-virtual member functions only, with no virtual functions of its own (`P` - `P`rotocol)
+- `I`: `interface` type — a complete dynamic contract: pure virtual functions only, no data member, destruction through the base is well-defined or impossible to write (`I` - `I`nterface)
+- `A`: `abstract` type — a base that is not yet complete: abstract, yet failing at least one `I` clause — typically it carries state or implementation (`A` - `A`bstract)
+- `P`: `protocol` type — a compile-time contract on a statically known derived type: a mixin that states what its host owes (`P` - `P`rotocol)
 
-`Role markers` concatenate in the fixed order and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. In particular, the combination `PI` cannot exist — any non-virtual contract member degrades an interface to an abstract type (see [Abstraction & Protocol Markers](#122-abstraction--protocol-markers)).
+`Role markers` concatenate in the fixed order and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. In particular, the combination `PI` cannot exist: `P` requires a contract member (clause `P1`), and an interface is forbidden to declare one (clause `I4`).
 
 Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC`, `PAS`.
 
@@ -187,33 +191,68 @@ Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC
 
 #### `1.2.2. Abstraction & Protocol Markers`
 
-- **`I` (interface)**: an abstract type in which every non-static member function is pure virtual (`= 0`), with no data fields. The destructor is exempt from the purity check (`virtual ~X() = default;` is allowed and mandatory for polymorphic deletion). Static members are permitted and lie outside the purity requirement — they can never be virtual, so the check does not apply to them; they affect neither object layout nor the vtable.
-- **`A` (abstract)**: an abstract type that fails the `I` contract — it carries data fields, or declares non-pure-virtual non-static member functions. *Abstract* is meant in the standard C++ sense: at least one pure virtual function (declared by the type or inherited) has no final overrider in it, so the type cannot be instantiated. Overriding every remaining pure virtual function makes the type concrete again — inheriting a pure virtual function alone does not make a type permanently abstract.
-- **`P` (protocol)**: the type defines contract obligations toward a derived type through non-virtual members (typically CRTP forwarding such as `static_cast<TTP_Derived&>(*this).onRefresh();`). A virtual destructor is not required because there is no virtual dispatch.
+Terms used by the clauses below:
+
+- **declared by the type** — written in the type's own definition; **inherited** — brought in with a base class; together they form the type's **member set**. Implicitly-declared special member functions are neither: they appear in no definition, so they never satisfy a clause. `I6` is the exception — it reads the **effective destructor** (the one the type ends up with, declared or implicitly declared), because that is what a `delete` through the type actually runs.
+- **own virtual function** — a virtual function declared by the type (an `override` counts; a declared destructor counts; an implicitly-declared virtual destructor does not).
+- **special member function** — default constructor, copy/move constructor, copy/move assignment operator, destructor, in any form (defaulted, deleted, pure).
+- **data member** — a non-static data member; static data members are not fields and carry no per-object state.
+- **contract member** — a member declared by the type that names its derived-type template parameter `TTP_Derived` (a non-static member function, a static member function or a member function template, e.g. `void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }`).
+- **mixin** — a class template that hands functionality to the class deriving from it, typically through CRTP; a **protocol** is this document's name for the mixin form that obliges its host (see `P` below).
+- **abstract** — standard C++ sense: at least one pure virtual function in the member set has no final overrider in the type (`std::is_abstract_v<T>`); otherwise the type is **concrete**.
+
+`Role markers`:
+
+- **`I` (interface)** — a complete dynamic contract:
+  1. the type is abstract;
+  2. it declares or inherits at least one pure virtual non-special member function;
+  3. every non-special member function in its member set is pure virtual;
+  4. it declares no contract member;
+  5. it has no data member;
+  6. destroying an object through the interface is well-defined. Only two destructor forms qualify: a `public` `virtual` destructor, so that `delete` through the interface runs the whole destruction chain, or a destructor that is not `public` (`protected` or `private`), so that `delete` through the interface cannot be written at all. The single forbidden form is a `public` non-`virtual` destructor — declared or implicitly declared — where `delete` through the interface compiles, runs only the base part of the chain and leaves the derived type's own destructor unrun, which is undefined behavior;
+  7. static members are permitted and lie outside `I2`, `I3` and `I5`.
+
+  *Consequences*: an interface inherits only from interfaces (`I3` and `I5`) — which admits the *composite* form, an interface that aggregates several contracts and declares nothing of its own (it passes `I2` on what it inherits) — and no helper implementation may be added to one: helpers belong to an abstract type. Clause `I4` is not a matter of taste: a user holding the interface sees exactly its virtual functions, so a member that is not virtual is not part of the contract at all, and an obligation toward a derived type is never visible through the interface.
+- **`A` (abstract)** — an incomplete base that exists to be completed:
+  1. it is abstract;
+  2. it fails at least one `I` clause — that is what distinguishes it from an interface. Any of `I2`–`I6` can be the failing one: most often `I5` (it carries a data member, that is the state its derived types share) or `I3` (it carries an implementation), occasionally `I2` (its member set holds no pure virtual non-special member function — the only pure virtual function it has, if any, is a special member such as a destructor), `I4` (it declares a contract member, which also makes it `PA` — see clause 3 below) or `I6` (an unsafe destructor). `I1` holds by definition and `I7` only permits, so neither can fail; a type that fails none of `I1`–`I7` is an interface itself;
+  3. it declares no contract member (a contract member makes it `PA`);
+  4. it states no contract of its own: unlike `I` it is not a complete handle for its users, and unlike `P` it names no obligations for a single derived type. Own pure virtual functions, `override = 0` re-declarations, data members and implementations are otherwise allowed, and whether objects are destroyed through it is left to the destruction rule below.
+- **`P` (protocol)** — a compile-time contract on a statically known derived type:
+  1. it declares at least one contract member (the derived type passes itself as `TTP_Derived`);
+  2. everything else is optional: data members, static members, non-virtual implementations and virtual members are all allowed;
+  3. the marker states what the type *requires* of its derived type, not what it *implements* itself: whether a protocol carries a vtable is visible from its declarations, not from its name. A protocol is the contract side of a **mixin** (see *Protocol and mixin* below), and a protocol that also implements a dynamic contract is a **mixin over an interface**, named by these same clauses (`PC_`/`PAC_`); the Guidance below still recommends decomposing it into a dynamic base plus a standalone protocol.
+
+Contract forms:
+
+- An `I` type states a **dynamic** contract: everything a user may do with an object is reachable through the type itself, so every member of the contract is virtual, and the implementor's obligation is to override every pure virtual function — a derived type that leaves one unoverridden stays abstract.
+- A `P` type states a **static** contract: the obligations are the members named by its contract members, and they are visible to the compiler only, never through the type — no handle exists over a protocol, and `PC_X<C_A>` and `PC_X<C_B>` are unrelated types.
+- Both markers oblige a derived type; they differ in the form of the contract and in what the type gives its users (a handle, or nothing). An `A` type states no contract of its own.
 
 Composition rules:
 
 - `Role markers` concatenate in the fixed order. Exactly five marker combinations exist: *(none)*, `I`, `A`, `P`, `PA`.
-- **`I` and `P` are mutually exclusive by construction**: any non-virtual contract member is an implemented non-static member function and therefore degrades the `I` facet to `A`. Hence the only possible hybrid is `PA` (`PAC_`, `PAS_`).
+- **`I` and `P` are mutually exclusive by clause, not by argument**: `P` requires a contract member (clause `P1`), and an interface is forbidden to declare one (clause `I4`) — `PI` cannot be written.
+- **`PA` (`PAC_`, `PAS_`)** is the only hybrid: a protocol that is abstract. Its abstractness may come from a pure virtual function it declares itself or from an inherited pure virtual function it does not override.
 - One type bears exactly one resulting prefix; no other combinations exist.
 
 Mechanical classification algorithm:
 
-1. Does the type contain non-virtual contract members toward a derived type (typically CRTP forwarding such as `static_cast<TTP_Derived&>(*this).onRefresh();`)? Every such member is an *implemented* non-static member function. If any exist, remember marker `P`.
+1. Does the type declare a contract member (a member that names `TTP_Derived`)? If any exist, remember marker `P`.
 2. Is the type abstract in the standard C++ sense — at least one pure virtual function (declared by the type or inherited) has no final overrider in it?
-   - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g., `C_Button final : public IS_Drawable`).
-   - Yes → continue.
-3. Was marker `P` remembered?
-   - Yes → `PAC_`/`PAS_`. The contract member is already an implemented non-static member function, so the interface purity requirement checked next can never hold — there is nothing left to ask.
-   - No → continue.
-4. Are all non-static member functions pure virtual, with no data fields?
+   - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g. `C_Button final : public IS_Drawable`).
+   - Yes → `PAC_`/`PAS_` if marker `P` was remembered (the contract member already breaks clauses `I3` and `I4`, so there is nothing left to ask); otherwise continue.
+3. Are all `I` clauses (1–7 above) satisfied?
    - Yes → `IC_`/`IS_`.
    - No → `AC_`/`AS_`.
 
 Additional rules:
 
-- **Base restriction for `PC_`/`PS_`**: they inherit only from concrete or other `P`-only types — an inherited pure virtual function would reclassify them as `PAC_`/`PAS_`. `PAC_`/`PAS_` types may inherit from anything, including `IC_`/`IS_`.
 - A class implementing every inherited pure virtual function stays concrete and keeps ordinary naming: `C_Button final : public IS_Drawable` (implementations marked `override`).
+- **When an obligation is checked** — an interface's obligation is checked wherever the type is used: a derived type that leaves any pure virtual function unoverridden stays abstract, so the first attempt to create an object fails. A protocol's obligation is checked where the contract member is instantiated, i.e. at its first use: a protocol whose contract member is never used checks nothing, and a type that violates it can be declared, instantiated and run. To check a protocol early, either make the contract member virtual (the diagnostic then arrives earlier, though how early depends on the compiler — Clang instantiates a virtual member with the class, GCC when the class is first used and its vtable is needed), or assert the obligation outside the protocol once the derived type is complete (`static_assert(requires (C_Derived& derived_r) { derived_r.onRefresh(); });`), or constrain the point of use with a concept. A `static_assert` inside the protocol's own body does not work: the derived type is still incomplete there, so the assertion fails even for a derived type that provides everything.
+- **Destruction rule** — an object is deleted through a pointer or reference to a base only if that base's destructor is `virtual` (declared or implicitly declared); a base that must not be destroyed through itself declares a *protected non-virtual* destructor, so that the mistake is a compile error instead of undefined behavior. Deletion through a base pointer is therefore always either well-defined or impossible to write, and a base is never left with a public non-virtual destructor. A polymorphic base offered for ownership declares a virtual destructor; a protocol that is never owned through itself takes the protected non-virtual form — the `P` marker says nothing about dispatch, so a protocol that carries a vtable follows the ownership rule like any other base. A public non-virtual destructor on a type with virtual functions is a defect, and both GCC and Clang diagnose it (`-Wnon-virtual-dtor`).
+- **Template rule** — a class template is classified by its primary definition, and its role must not depend on its template arguments; a template whose role varies with its arguments must be constrained so that the role is fixed.
+- **Protocol and mixin** — a protocol *is* a mixin: the class template hands functionality to the class deriving from it (typically through CRTP) and, by the members its contract members call, states what that class owes back. `P` types are therefore a proper subset of mixins — the ones that state obligations — and the marker names the contract side of a mixin, not a different construct. A mixin that requires nothing of its host declares no contract member and is no protocol: it carries no `P` marker and is classified by the ordinary clauses (`C_`/`S_`).
 - **Guidance**: prefer decomposing hybrid designs into orthogonal bases — a dynamic base (`IC_`/`AC_`) plus standalone `PC_` mixins — over `PAC_` hierarchies.
 - **Variable markers never encode role markers**: the abstraction level and protocol nature of a type are carried by the type name alone (`renderable`\_`p` regardless of whether it points to an `IC_`, `AC_` or `C_` type). Pairing a protocol with a same-named concept (`PC_Drawable` ↔ `concept Drawable`) is recommended; concept naming itself is out of scope of this document.
 
@@ -263,6 +302,23 @@ struct IS_Drawable                            // interface struct
 {
     virtual ~IS_Drawable() = default;
     virtual void draw() const = 0;
+};
+
+struct IS_Serializable                        // interface struct: a second, independent contract
+{
+    virtual ~IS_Serializable() = default;
+    virtual void serialize() const = 0;
+};
+
+struct IS_Savable : IS_Drawable, IS_Serializable   // composite interface: declares nothing of its own
+{
+};
+
+class C_Icon final : public IS_Savable        // implements both aggregated contracts
+{
+public:
+    void draw() const override;
+    void serialize() const override;
 };
 
 class AC_WidgetBase : public IS_Drawable      // abstract class: adds a field
@@ -553,8 +609,8 @@ A single, self-contained translation unit (example) that exercises every naming 
 // ---- Types ----
 enum       E_DeviceState { STATE_IDLE, STATE_RUNNING, STATE_ERROR };  // plain enum; enumerators UPPER_SNAKE_CASE
 enum class E_Color       { DeepPurple, LightBlue };                   // enum class; enumerators PascalCase
-struct     S_Point       { int x; int y; };                           // struct type
-union      U_Packet      { int raw; float floating; };                // union type
+struct     S_Point       { int pub_x; int pub_y; };                   // struct type
+union      U_Packet      { int pub_raw; float pub_floating; };        // union type
 class      C_Renderer;                                                // class type (forward)
 struct     IS_Drawable;                                               // interface struct type (forward)
 
@@ -612,7 +668,7 @@ volatile E_DeviceState*                             state_gpve     = &state_gve;
 const volatile E_DeviceState*                       state_gpcve    = &state_gcve;     // global pointer to const volatile enum
 static const volatile E_DeviceState* const volatile state_gscvpcve = &state_gcve;     // global static const volatile pointer to const volatile enum
 
-// reference variables — no cv-qualifier marker slot for references
+// reference variables — no cv-qualifier marker for references
 int&                                 intTarget_gr   = intTarget_g;    // global reference
 const int&                           intTarget_grc  = intTarget_gc;   // global reference to const
 volatile int&                        intTarget_grv  = intTarget_gv;   // global reference to volatile
@@ -660,7 +716,7 @@ namespace
 
 // ============================================================================
 // Free function (camelCase) demonstrating local-scope variables
-// (block scope: no scope marker; the marker block starts at the storage slot)
+// (block scope: no scope marker; the marker block starts with the storage-class marker)
 // ============================================================================
 void demonstrateLocals()
 {
@@ -770,6 +826,9 @@ class PC_Refreshable  // protocol class (static contract, no virtual functions)
 {
 public:
     void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+
+protected:
+    ~PC_Refreshable() = default;  // destruction rule: protected non-virtual, so deletion through a protocol pointer cannot be written
 };
 
 class C_Ticker final : public PC_Refreshable<C_Ticker>
@@ -794,6 +853,21 @@ class C_MainPanel final : public PAC_PanelBase<C_MainPanel>
 public:
     void draw() const override {}
     void onRefresh() { ++prot_width; }
+};
+
+template <typename TTP_Derived>
+class PC_DrawMixin : public IS_Drawable  // mixin over an interface: static + dynamic contract
+{
+public:
+    void draw() const override { static_cast<const TTP_Derived&>(*this).onDraw(); }
+    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+};
+
+class C_Tile final : public PC_DrawMixin<C_Tile>
+{
+public:
+    void onDraw() const {}
+    void onRefresh() {}
 };
 
 // ============================================================================
@@ -865,6 +939,10 @@ int main()
     IS_Drawable& drawable_r = panel;    // local reference to interface (block scope: no scope marker)
     drawable_r.draw();                  // virtual dispatch through the interface
 
+    C_Tile tile;
+    tile.refresh();                     // mixin over an interface: static obligation served through the protocol
+    tile.draw();                        // mixin over an interface: implemented dynamic contract
+
     (void) v;
     
     return 0;
@@ -882,11 +960,11 @@ This example covers:
 - **Function-like macro** (`SAVE_DATA()`) and **object-like macro** (`MAX_BUFFER_SIZE`).
 - **Functions/methods in `camelCase`** (`sendRequest`, `computeFrameSum`, `logMessage`, `touch`, `resetCount`, `retrieve`, `update`, `main`).
 - **Local (block) scope** variables with no scope marker (`someVar`, `someLocal`\_`s`, `dataBuffer`\_`p`, `logger`\_`p`, …).
-- **Member access markers**: `pub_` / `prot_` / `priv_`, applied to plain, pointer, enum and static members alike.
+- **Member access markers**: `pub_` / `prot_` / `priv_`, applied to plain, pointer, enum and static members alike, in `class`, `struct` and `union` types.
 - **Member access discipline**: fields accessed bare (no `this->`); non-static methods via `this->…`; static members/methods via `C_Logger`::`pub`\_`instanceCount`\_`s` / `C_Logger::resetCount()` / `C_Container`::`pub`\_`sharedCount`\_`s`.
 - **Namespace convention** via the `snake_case` namespace `frame_renderer`.
 - **Pointer markers** — all 8 variants (`p`, `pc`, `pv`, `pcv`, `pe`, `pce`, `pve`, `pcve`) and the note that they apply to smart pointers alike.
-- **Reference markers** — all 8 variants (`r`, `rc`, `rv`, `rcv`, `re`, `rce`, `rve`, `rcve`), with the cv-qualifier marker slot intentionally omitted.
+- **Reference markers** — all 8 variants (`r`, `rc`, `rv`, `rcv`, `re`, `rce`, `rve`, `rcve`), with the [`cv-qualifier`] marker intentionally omitted.
 - **Scope markers** (`g`, `n`, `a`) and their omission at local/member scope.
 - **Static linkage/storage markers** (`s`, `t`, `st`) at namespace scope and as class members, plus the out-of-line static-member definition pattern (keyword `static` omitted, the name retained unchanged).
 - **Static thread_local** namespace (`gst`, `nst` markers) and member (`st`) forms.
@@ -894,6 +972,8 @@ This example covers:
 - **Template parameter prefixes** — all 6 kinds (`TTP`, `TTPP`, `NTTP`, `NTTPP`, `TeTP`, `TeTPP`).
 - **Ultimate compound forms** (`state`\_`gscvpcve`, `state`\_`gsrcve`) combining scope + storage + cv + pointer/reference-to-const-volatile-enum.
 - **`mutable` members** following the same naming rules as non-`mutable` members of the same access level, modifiable through a `const` method (`touch()`).
-- **Role-marker type prefixes** — `IS_`, `AC_`, `PC_`, `PAC_` demonstrated directly (remaining forms `IC_/AS_/PS_/PAS_` follow from the five-combination marker rule: *(none)*, `I`, `A`, `P`, `PA`), including the mechanical classification algorithm and the impossibility of combining `I` with `P`.
+- **Role-marker type prefixes** — `IS_`, `AC_`, `PC_`, `PAC_` demonstrated directly (remaining forms `IC_/AS_/PS_/PAS_` follow from the five-combination marker rule: *(none)*, `I`, `A`, `P`, `PA`), including the clause-based classification algorithm and the clause-based exclusion of `PI_` (`P` requires a contract member, clause `I4` forbids one).
 - **Marker-aware type aliases** (`TAIS_Drawable`; family `TAIC_/TAAC_/TAAS_/TAPC_/TAPS_/TAPAC_/TAPAS_`).
 - **Protocol forwarding** through non-virtual members (`ticker.refresh()`, `panel.refresh()`) alongside virtual dispatch through an interface reference (`drawable_r.draw()`).
+- **Mixin over an interface** (`PC_DrawMixin`) — a protocol that also implements a dynamic contract: it is named by the same clauses (`PC_`), and it satisfies the destruction rule through the virtual destructor inherited from `IS_Drawable`; the Guidance below still prefers decomposing it into a dynamic base plus a standalone protocol.
+- **Destruction rule** — `IS_Drawable` declares a virtual destructor, so objects are destroyed through the interface; `PC_Refreshable` declares a protected non-virtual one, so deleting through a protocol pointer is a compile error rather than undefined behavior.
