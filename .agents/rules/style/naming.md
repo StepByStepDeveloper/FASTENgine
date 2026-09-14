@@ -1,5 +1,32 @@
 # `TAPAS (C++ Naming Conventions)`
 
+## `Scope and permitted deviations`
+
+Every entity created in this project is named by the rules of this document. When a name is ours to choose, these conventions win; the two situations that may override a rule are:
+
+- the name is fixed by the language or by an existing system / third-party interface — `main`, constructors, destructors, conversion operators, `operator+`, and an override that has to keep the library's name (e.g. `std::exception::what()`);
+- the entity is legacy code, carries established terminology, or has to be named so that it unifies with third-party code it is used together with — there the accepted name may be kept as it stands (a vendor method name kept so that the two hierarchies stay interchangeable, `dot()` / `cross()` kept because that is what the operations are called).
+
+A deviation covers only the name that is forced; everything else about the entity keeps the conventions — the type keeps its prefix, a pointer to it keeps its marker, the file keeps its `snake_case.cpp` name, the namespace keeps its `snake_case` name. When the forced name is not self-evident, the declaration carries a comment that names the reason (`// Deviation: the name is fixed by std::exception`).
+
+***Example***:
+
+```C++
+class C_FileError final : public std::exception   // C_ prefix and final: convention
+{
+public:
+    const char* what() const noexcept override;   // Deviation: the name is fixed by std::exception
+    int errorCode() const;                        // our own method: imperative verb, no deviation
+
+private:
+    int priv_errorCode;                           // member: access marker and marker block, no deviation
+};
+```
+
+- `C_FileError` — the type keeps its `C_` prefix: the deviation applies to `what()` alone.
+- `what()` — the only name in the class that does not follow these conventions; the comment states why.
+- `errorCode()` / `priv`\_`errorCode` — ordinary members of the same class, named by the rules as usual.
+
 ## `1. Identifier markers`
 
 ### `1.1. Variable markers`
@@ -73,11 +100,19 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 #### `1.1.3. CV-qualifier markers`
 
-- `c`: `const` variable (`c` - `c`onst)
+- `c`: `const`-like variable — `const`, `constexpr` (`c` - `c`onst)
 - `v`: `volatile` variable (`v` - `v`olatile)
 - `cv`: `const` `volatile` variable (`cv` - `c`onst `v`olatile)
 
 ***Example***: `someVar`\_`cv` - `const` `volatile` variable with name `someVar`
+
+**Important notice for `const`-like declarations**:
+
+> Every declaration that gives a variable a `const`-qualified type carries the `c` marker, whichever keyword produced that type: `const` and `constexpr` are the same case, because for an object declaration `constexpr` implies `const` already. The marker keeps its usual position: a `constexpr` local is `someConstVarName`\_`c`, a `static constexpr` local is `someConstVarName`\_`sc`, a `constexpr` variable at `global` namespace scope is `someConstVarName`\_`gc`, and a `global` `static constexpr` one is `someConstVarName`\_`gsc`. `constexpr` is not the `static` keyword, so it never adds the `s` [`storage-class`] marker on its own — `s` still tracks an explicit `static`. At member scope the same letters follow the access marker and the base name (a `static constexpr` member is `pub`\_`someConstVarName`\_`sc`, a `const` member is `pub`\_`someConstVarName`\_`c`).
+
+**Important notice for what the `c` marker does not cover**:
+
+> Two keywords carry `const` in their name without making a variable `const`, so neither adds the `c` marker: `consteval` describes a function, and functions are named by the [Function-like Macro and Function/Method naming conventions](#5-function-like-macro-and-functionmethod-naming-conventions) without a marker; `constinit` demands constant initialization only — the object it declares stays modifiable — so such a variable keeps its ordinary name. Constants that are not variables are the other exception: an object-like macro and an enumerator carry no marker at all and are named by the [Object-like Macro and Enumerator naming conventions](#6-object-like-macro-and-enumerator-naming-conventions).
 
 #### `1.1.4. Enum markers`
 
@@ -187,7 +222,7 @@ Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC
 
 **Important notice for `union` and `enum`**:
 
-> `Role markers` never combine with the `U`/`E` `type letters` — unions cannot declare virtual member functions or participate in inheritance, and enums have no members at all.
+> `Role markers` never combine with the `U`/`E` `type letters` — unions cannot declare virtual member functions or participate in inheritance, and an enum declares nothing but its enumerators: no data members and no virtual functions.
 
 #### `1.2.2. Abstraction & Protocol Markers`
 
@@ -197,7 +232,7 @@ Terms used by the clauses below:
 - **own virtual function** — a virtual function declared by the type (an `override` counts; a declared destructor counts; an implicitly-declared virtual destructor does not).
 - **special member function** — default constructor, copy/move constructor, copy/move assignment operator, destructor, in any form (defaulted, deleted, pure).
 - **data member** — a non-static data member; static data members are not fields and carry no per-object state.
-- **contract member** — a member declared by the type that names its derived-type template parameter `TTP_Derived` (a non-static member function, a static member function or a member function template, e.g. `void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }`).
+- **contract member** — a member declared by the type that names its derived-type template parameter `TTP_Derived` (a non-static member function, a static member function or a member function template, e.g. `void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }`).
 - **mixin** — a class template that hands functionality to the class deriving from it, typically through CRTP; a **protocol** is this document's name for the mixin form that obliges its host (see `P` below).
 - **abstract** — standard C++ sense: at least one pure virtual function in the member set has no final overrider in the type (`std::is_abstract_v<T>`); otherwise the type is **concrete**.
 
@@ -221,7 +256,7 @@ Terms used by the clauses below:
 - **`P` (protocol)** — a compile-time contract on a statically known derived type:
   1. it declares at least one contract member (the derived type passes itself as `TTP_Derived`);
   2. everything else is optional: data members, static members, non-virtual implementations and virtual members are all allowed;
-  3. the marker states what the type *requires* of its derived type, not what it *implements* itself: whether a protocol carries a vtable is visible from its declarations, not from its name. A protocol is the contract side of a **mixin** (see *Protocol and mixin* below), and a protocol that also implements a dynamic contract is a **mixin over an interface**, named by these same clauses (`PC_`/`PAC_`); the Guidance below still recommends decomposing it into a dynamic base plus a standalone protocol.
+  3. the marker states what the type *requires* of its derived type, not what it *implements* itself: whether a protocol carries a vtable is visible from its declarations, not from its name. A protocol is the contract side of a **mixin** (see *Protocol and mixin* below), and a protocol that also implements a dynamic contract is a **mixin over an interface**, named by these same clauses (`PC_`/`PAC_`); the Guidance above still recommends decomposing it into a dynamic base plus a standalone protocol.
 
 Contract forms:
 
@@ -242,14 +277,14 @@ Mechanical classification algorithm:
 2. Is the type abstract in the standard C++ sense — at least one pure virtual function (declared by the type or inherited) has no final overrider in it?
    - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g. `C_Button final : public IS_Drawable`).
    - Yes → `PAC_`/`PAS_` if marker `P` was remembered (the contract member already breaks clauses `I3` and `I4`, so there is nothing left to ask); otherwise continue.
-3. Are all `I` clauses (`I1`–`I7` above) satisfied?
+3. Are all checkable `I` clauses (`I1`–`I6` above; `I7` merely permits static members and cannot fail) satisfied?
    - Yes → `IC_`/`IS_`.
    - No → `AC_`/`AS_`.
 
 Additional rules:
 
 - A class implementing every inherited pure virtual function stays concrete and keeps ordinary naming: `C_Button final : public IS_Drawable` (implementations marked `override`).
-- **When an obligation is checked** — an interface's obligation is checked wherever the type is used: a derived type that leaves any pure virtual function unoverridden stays abstract, so the first attempt to create an object fails. A protocol's obligation is checked where the contract member is instantiated, i.e. at its first use: a protocol whose contract member is never used checks nothing, and a type that violates it can be declared, instantiated and run. To check a protocol early, either make the contract member virtual (the diagnostic then arrives earlier, though how early depends on the compiler — Clang instantiates a virtual member with the class, GCC when the class is first used and its vtable is needed), or assert the obligation outside the protocol once the derived type is complete (`static_assert(requires (C_Derived& derived_r) { derived_r.onRefresh(); });`), or constrain the point of use with a concept. A `static_assert` inside the protocol's own body does not work: the derived type is still incomplete there, so the assertion fails even for a derived type that provides everything.
+- **When an obligation is checked** — an interface's obligation is checked wherever the type is used: a derived type that leaves any pure virtual function unoverridden stays abstract, so the first attempt to create an object fails. A protocol's obligation is checked where the contract member is instantiated, i.e. at its first use: a protocol whose contract member is never used checks nothing, and a type that violates it can be declared, instantiated and run. To check a protocol early, either make the contract member virtual (the diagnostic then arrives earlier, though how early depends on the compiler — Clang instantiates a virtual member with the class, GCC when the class is first used and its vtable is needed), or assert the obligation outside the protocol once the derived type is complete (`static_assert(requires (C_Derived& derived_r) { derived_r.refreshState(); });`), or constrain the point of use with a concept. A `static_assert` inside the protocol's own body does not work: the derived type is still incomplete there, so the assertion fails even for a derived type that provides everything.
 - **Destruction rule** — a base class is the only handle the user of a hierarchy holds, so every base is a potential deletion site, and deletion is the one operation whose mistake is silent: with a `public` non-`virtual` destructor, `delete` through a pointer or reference to the base compiles, runs the destruction chain as if the object were of the base's own type — the derived type's destructor never runs — and asks for a deallocation of the base's size although the derived object was allocated with its own, which the standard calls undefined behavior (in practice: the derived part is left un-destroyed and the heap can be corrupted). The rule therefore lets the base's own declaration settle the question once, so that deleting through a base is always either well-defined or impossible to write:
   - a base through which objects are owned declares a **`public` `virtual` destructor** — declared, or implicitly declared as `virtual` by the language (`IS_Drawable` in the example below);
   - a base through which objects are never owned declares a **`protected` (or `private`) non-`virtual` destructor**, so that deleting through a pointer or reference to it cannot be written at all and the mistake becomes a compile error instead of undefined behavior (`PC_Refreshable` in the example below);
@@ -260,7 +295,7 @@ Additional rules:
   - the marker is chosen from the **primary definition** — a specialization that would change the role breaks the rule, because the name would then be read differently depending on the argument list;
   - a template whose role varies with its arguments must be **constrained** so that only arguments preserving the role are accepted — a `requires`-clause (`requires (!std::is_abstract_v<TTP_Base>)`), a concept, or a `static_assert` in the body; the constraint has to *reject* the offending arguments, not merely warn about them.
 
-  *CRTP parameters are the safe case*: `TTP_Derived` is never used as a base — it appears only inside the protocol's own members (`static_cast<TTP_Derived&>(*this).onRefresh();`) — so `PC_Refreshable` and `PC_DrawMixin` bear the same role for every derived type, and a protocol can be named `PC_` without asking what it will be instantiated with.
+  *CRTP parameters are the safe case*: `TTP_Derived` is never used as a base — it appears only inside the protocol's own members (`static_cast<TTP_Derived&>(*this).refreshState();`) — so `PC_Refreshable` and `PC_DrawMixin` bear the same role for every derived type, and a protocol can be named `PC_` without asking what it will be instantiated with.
 - **Protocol and mixin** — a protocol *is* a mixin: the class template hands functionality to the class deriving from it (typically through CRTP) and, by the members its contract members call, states what that class owes back. `P` types are therefore a proper subset of mixins — the ones that state obligations — and the marker names the contract side of a mixin, not a different construct. A mixin that requires nothing of its host declares no contract member and is no protocol: it carries no `P` marker and is classified by the ordinary clauses (`C_`/`S_`).
 - **Guidance**: prefer decomposing hybrid designs into orthogonal bases — a dynamic base (`IC_`/`AC_`) plus standalone `PC_` mixins — over `PAC_` hierarchies.
 - **Variable markers never encode role markers**: the abstraction level and protocol nature of a type are carried by the type name alone (`renderable`\_`p` regardless of whether it points to an `IC_`, `AC_` or `C_` type). Pairing a protocol with a same-named concept (`PC_Drawable` ↔ `concept Drawable`) is recommended; concept naming itself is out of scope of this document.
@@ -353,13 +388,16 @@ template <typename TTP_Derived>
 class PC_Refreshable                          // protocol class (CRTP mixin)
 {
 public:
-    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+    void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }
+
+protected:
+    ~PC_Refreshable() = default;              // destruction rule: protected non-virtual, so deletion through a protocol pointer cannot be written
 };
 
 class C_Ticker final : public PC_Refreshable<C_Ticker>
 {
 public:
-    void onRefresh();
+    void refreshState();
 };
 
 template <typename TTP_Derived>
@@ -367,7 +405,7 @@ class PAC_PanelBase : public IS_Drawable      // abstract protocol: pure virtual
 {
 public:
     void draw() const override = 0;
-    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+    void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }
 
 protected:
     int prot_width;
@@ -377,7 +415,7 @@ class C_MainPanel final : public PAC_PanelBase<C_MainPanel>
 {
 public:
     void draw() const override;
-    void onRefresh();
+    void refreshState();
 };
 ```
 
@@ -500,6 +538,10 @@ const TAS_SomeType& someVar_grc = var_g;
 
 > Non-`static` member methods **must** be called from within the class's own methods exclusively via the `this->` qualifier (e.g., `this->resizeBuffer()`). The `this->` qualifier **must never** be omitted so that it is always obvious a call targets an instance method rather than a free function. `static` member methods, conversely, **must** be qualified with the enclosing class name (e.g., `C_SomeType::create()`) and **must never** be called via `this->`. Member *fields* are the exact opposite: they are never accessed through `this->`, because the access marker already identifies them (see [Member variable naming conventions](#8-member-variable-naming-conventions)).
 
+**Important notice for function and method names**:
+
+> The imperative-verb form applies to every function and method this document names, hooks included: a protocol's hook is an action of the host type like any other method, so the forwarder stays `refresh()` and the hook it calls is `refreshState()` — a hook name such as `onRefresh` is not valid. The only function names the rule cannot cover are the ones fixed for us: names the language itself defines (`main`, constructors, destructors, conversion operators, `operator+`) and names an existing system or third-party interface keeps in place (an override of a library virtual such as `std::exception::what()`). These are the function-side cases of the deviations listed in [Scope and permitted deviations](#scope-and-permitted-deviations).
+
 ## `6. Object-like Macro and Enumerator naming conventions`
 
 | Entity                              | Convention                                | Example           |
@@ -511,6 +553,10 @@ const TAS_SomeType& someVar_grc = var_g;
 **Rationale for enumerator naming**:
 
 > For backward compatibility with C-style conventions, plain `enum` enumerators use `UPPER_SNAKE_CASE` (e.g., `DEEP_PURPLE`). For `enum class` enumerators, the mandatory type-name qualifier `E_EnumType::` allows the enumerator name itself to be written in `PascalCase` instead of `UPPER_SNAKE_CASE`, yielding the full form `E_Color::DeepPurple`.
+
+**Important notice for constants without a marker**:
+
+> An object-like macro and an enumerator are the only constant-like names in this document that carry no marker: neither is a variable, so the `c` [`cv-qualifier`] marker never applies to them (see the notice in [CV-qualifier markers](#113-cv-qualifier-markers)). The boundary is the declaration, not the value: `#define MAX_BUFFER_SIZE 256` is a macro and stays `MAX_BUFFER_SIZE`, while a variable holding the same value — `constexpr int maxBufferSize = 256;` — is a variable and takes the marker (`maxBufferSize`\_`gc`). A `const`-like variable is therefore never written in `UPPER_SNAKE_CASE`, and a macro is never given a marker block.
 
 ## `7. Non-Member variable naming conventions`
 
@@ -531,7 +577,7 @@ The base name of a member variable follows the same rules as for non-member vari
 >
 > - An ordinary (instance) non-static member carries **no storage-class marker** (e.g., `pub`\_`operatingMode`, `prot`\_`operatingMode`\_`pe`).
 > - A `static` class member carries the **`s`** storage-class marker (e.g., `pub`\_`instanceCount`\_`s`). Note carefully: at *namespace* scope `s` means internal linkage, but a `static` class member has **external linkage**. The `s` marker on a member therefore denotes *class-level (shared) storage only*, not internal linkage — there is no contradiction because the scope marker is absent and the class scope, not the storage marker, governs linkage. The `x` (`extern`) marker is **never** used on members: `static` members are defined exactly once and resolved by the linker; a declaration of one is written in the header with the plain `s` marker and defined in one source file with the same `s` marker (the keyword `static` is omitted at the definition).
-> - `thread_local` members additionally carry **`t`** (e.g., `prot`\_`threadStorage`\_`t`), and `static thread_local` members carry **`st`** (e.g., `pub`\_`cache`\_`st`), mirroring the namespace-scope storage-class markers.
+> - `static thread_local` members carry **`st`** (e.g., `pub`\_`cache`\_`st`), mirroring the namespace-scope storage-class markers. A bare `t` never appears on a member: a non-`static` data member cannot be declared `thread_local` at all, so `static thread_local` is the only `thread_local` form a member can take.
 >
 > The access marker is always the leading prefix and the marker block is always trailing; the two never merge, swap places, or absorb one another (see [Members combining the access marker and the marker block](#82-members-combining-the-access-marker-and-the-marker-block)).
 
@@ -547,7 +593,7 @@ A member's name is identical wherever it is written, inside or outside the class
 |:------------ |:-------------- |:----------------------------- | ------------------------------------------------------------------------------------------------- |
 | `public`     | `pub_`         | `pub`\_`accessCount`          | `obj`.`pub`\_`accessCount` / `ptr`->`pub`\_`accessCount`                                          |
 | `protected`  | `prot_`        | `prot`\_`operatingMode`\_`pe` | `obj`.`prot`\_`operatingMode`\_`pe` / `ptr`->`prot`\_`operatingMode`\_`pe` (derived classes only) |
-| `private`    | `priv_`        | `priv`\_`targetState`\_`e`    | Not accessible                                                                                    |
+| `private`    | `priv_`        | `priv`\_`targetState`\_`e`    | Not accessible (except to `friend`s and nested classes)                                           |
 
 ### `8.1. mutable members`
 
@@ -645,6 +691,8 @@ static thread_local int someVar_gst = 23;                    // g + static threa
 const int               someVar_gc  = 24;                    // g + const
 volatile int            someVar_gv  = 25;                    // g + volatile
 const volatile int      someVar_gcv = 0;                     // g + const volatile
+constexpr int           someConstVar_gc  = 26;               // g + constexpr (const-like -> `c`)
+static constexpr int    someConstVar_gsc = 27;               // g + static + constexpr (const-like -> `c`)
 
 extern int              someVar_gx;                          // extern declaration (defined elsewhere)
 extern thread_local int someVar_gxt;                         // extern thread_local declaration
@@ -653,6 +701,7 @@ extern thread_local int someVar_gxt;                         // extern thread_lo
 E_DeviceState                someState_ge     = STATE_IDLE;  // scope = g + enum
 const E_DeviceState          someState_gce    = STATE_IDLE;  // g + const + enum
 const volatile E_DeviceState targetState_gcve = STATE_IDLE;  // g + const volatile + enum
+constexpr E_Color            someColor_gce     = E_Color::DeepPurple;  // g + constexpr + enum (const-like)
 
 // targets for pointers / references
 int                          intTarget_g     = 30;
@@ -733,6 +782,7 @@ void demonstrateLocals()
     static int          someLocal_s  = 0;            // local + static
     thread_local int    someVar_t    = 0;            // local + thread_local
     const int           someLocal_c  = 1;            // local + const
+    constexpr int       someConstVar_c = 7;          // local + constexpr (const-like)
     E_DeviceState       someState_e  = STATE_IDLE;   // local + enum
     const E_DeviceState someState_ce = STATE_IDLE;   // local + const enum
     int*                dataBuffer_p = nullptr;      // local + pointer
@@ -762,15 +812,17 @@ protected:
 private:
     int           priv_privateField;   // private: access marker only
     E_DeviceState priv_targetState_e;  // private enum member
+    const int     priv_limit_c;        // private const member: access marker + cv-qualifier marker
     static int    priv_someCounter_s;  // private static member (declaration)
 
 public:
     static inline thread_local int pub_cache_st = 0;  // static thread_local member
+    static constexpr int pub_maxBufferSize_sc = MAX_BUFFER_SIZE;  // static constexpr member (const-like)
 
     C_Logger()
         : pub_someField(0), pub_accessCount(0), pub_publicBuffer_p(nullptr),
           prot_protectedField(0), prot_logState_e(STATE_IDLE), prot_operatingMode_pe(nullptr),
-          priv_privateField(0), priv_targetState_e(STATE_IDLE)
+          priv_privateField(0), priv_targetState_e(STATE_IDLE), priv_limit_c(MAX_BUFFER_SIZE)
     {}
 
     void flushBuffer()  // non-static helper method (camelCase)
@@ -834,7 +886,7 @@ template <typename TTP_Derived>
 class PC_Refreshable  // protocol class (static contract, no virtual functions)
 {
 public:
-    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+    void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }
 
 protected:
     ~PC_Refreshable() = default;  // destruction rule: protected non-virtual, so deletion through a protocol pointer cannot be written
@@ -843,7 +895,7 @@ protected:
 class C_Ticker final : public PC_Refreshable<C_Ticker>
 {
 public:
-    void onRefresh() {}
+    void refreshState() {}
 };
 
 template <typename TTP_Derived>
@@ -851,7 +903,7 @@ class PAC_PanelBase : public IS_Drawable  // abstract protocol: pure virtual + f
 {
 public:
     void draw() const override = 0;
-    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+    void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }
 
 protected:
     int prot_width;
@@ -861,22 +913,22 @@ class C_MainPanel final : public PAC_PanelBase<C_MainPanel>
 {
 public:
     void draw() const override {}
-    void onRefresh() { ++prot_width; }
+    void refreshState() { ++prot_width; }
 };
 
 template <typename TTP_Derived>
 class PC_DrawMixin : public IS_Drawable  // mixin over an interface: static + dynamic contract
 {
 public:
-    void draw() const override { static_cast<const TTP_Derived&>(*this).onDraw(); }
-    void refresh() { static_cast<TTP_Derived&>(*this).onRefresh(); }
+    void draw() const override { static_cast<const TTP_Derived&>(*this).drawContent(); }
+    void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }
 };
 
 class C_Tile final : public PC_DrawMixin<C_Tile>
 {
 public:
-    void onDraw() const {}
-    void onRefresh() {}
+    void drawContent() const {}
+    void refreshState() {}
 };
 
 // ============================================================================
@@ -930,7 +982,7 @@ int main()
     logger.logMessage();                // method (camelCase); calling a non-static method via this->
     logger.touch();
     logger.pub_publicBuffer_p = nullptr;    // public field access from outside (obj.member)
-    int v = C_Logger::pub_instanceCount_s;  // static member access qualified by class name
+    int instanceCount = C_Logger::pub_instanceCount_s;  // static member access qualified by class name
     C_Logger::resetCount();
 
     C_Logger* logger_p = &logger;       // local pointer variable (block scope: no scope marker)
@@ -952,7 +1004,7 @@ int main()
     tile.refresh();                     // mixin over an interface: static obligation served through the protocol
     tile.draw();                        // mixin over an interface: implemented dynamic contract
 
-    (void) v;
+    (void) instanceCount;
     
     return 0;
 }
@@ -961,13 +1013,13 @@ int main()
 This example covers:
 
 - **Anonymous namespace** variables (`a`, `ac`, `ae`, `ap`, `arce` markers) and the mutual exclusion of `a` with `static`.
-- **cv-qualifier markers** (`c`, `v`, `cv`) at namespace and local scope.
+- **cv-qualifier markers** (`c`, `v`, `cv`) at namespace, local and member scope, including the `const`-like case: a `constexpr` variable takes the same `c` marker as a `const` one (`someConstVar_gc`, `someConstVar_gsc`, `someConstVar_c`, `someColor_gce`, `priv_limit_c`, `pub_maxBufferSize_sc`).
 - **Enum markers** (`e`, `ce`, `cve`) for plain-enum and enum-class variables.
 - **Enumerator naming**: `UPPER_SNAKE_CASE` for plain `enum` (`STATE_IDLE`, …) and `PascalCase` for `enum class` (`DeepPurple`, …).
 - **Extern declarations** (`gx`, `gxt`, `nxt` markers) marked as declarations only, defined elsewhere.
 - **File-name convention** represented by the artifact name `ultimate_example.cpp`.
 - **Function-like macro** (`SAVE_DATA()`) and **object-like macro** (`MAX_BUFFER_SIZE`).
-- **Functions/methods in `camelCase`** (`sendRequest`, `computeFrameSum`, `logMessage`, `touch`, `resetCount`, `retrieve`, `update`, `main`).
+- **Functions/methods in `camelCase`** (`sendRequest`, `computeFrameSum`, `logMessage`, `touch`, `resetCount`, `retrieve`, `update`, `refreshState`, `drawContent`, `main` — the last one is a name the language fixes, one of the deviations listed in [Scope and permitted deviations](#scope-and-permitted-deviations)).
 - **Local (block) scope** variables with no scope marker (`someVar`, `someLocal`\_`s`, `dataBuffer`\_`p`, `logger`\_`p`, …).
 - **Member access markers**: `pub_` / `prot_` / `priv_`, applied to plain, pointer, enum and static members alike, in `class`, `struct` and `union` types.
 - **Member access discipline**: fields accessed bare (no `this->`); non-static methods via `this->…`; static members/methods via `C_Logger`::`pub`\_`instanceCount`\_`s` / `C_Logger::resetCount()` / `C_Container`::`pub`\_`sharedCount`\_`s`.
@@ -984,5 +1036,5 @@ This example covers:
 - **Role-marker type prefixes** — `IS_`, `AC_`, `PC_`, `PAC_` demonstrated directly (remaining forms `IC_/AS_/PS_/PAS_` follow from the five-combination marker rule: *(none)*, `I`, `A`, `P`, `PA`), including the clause-based classification algorithm and the clause-based exclusion of `PI_` (`P` requires a contract member, clause `I4` forbids one).
 - **Marker-aware type aliases** (`TAIS_Drawable`; family `TAIC_/TAAC_/TAAS_/TAPC_/TAPS_/TAPAC_/TAPAS_`).
 - **Protocol forwarding** through non-virtual members (`ticker.refresh()`, `panel.refresh()`) alongside virtual dispatch through an interface reference (`drawable_r.draw()`).
-- **Mixin over an interface** (`PC_DrawMixin`) — a protocol that also implements a dynamic contract: it is named by the same clauses (`PC_`), and it satisfies the destruction rule through the virtual destructor inherited from `IS_Drawable`; the Guidance below still prefers decomposing it into a dynamic base plus a standalone protocol.
+- **Mixin over an interface** (`PC_DrawMixin`) — a protocol that also implements a dynamic contract: it is named by the same clauses (`PC_`), and it satisfies the destruction rule through the virtual destructor inherited from `IS_Drawable`; the Guidance above still prefers decomposing it into a dynamic base plus a standalone protocol.
 - **Destruction rule** — `IS_Drawable` declares a virtual destructor, so objects are destroyed through the interface; `PC_Refreshable` declares a protected non-virtual one, so deleting through a protocol pointer is a compile error rather than undefined behavior.
