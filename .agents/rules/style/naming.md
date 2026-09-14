@@ -11,26 +11,28 @@ Every entity created in this project is named by the rules of this document. Whe
 
 A deviation covers only the name that is forced; everything else about the entity keeps the conventions — the type keeps its prefix, a pointer to it keeps its marker, the file keeps its `snake_case.cpp` name, the namespace keeps its `snake_case` name. When the forced name is not self-evident, the declaration carries a comment that names the reason (`// Deviation: the name is fixed by std::exception`).
 
+Every code fragment in this document is written to compile as C++17; where a rule's prose names a C++20 form (a `requires`-clause, a concept), that form is an optional refinement of the same rule rather than a requirement of the conventions.
+
 ***Example***:
 
 ```C++
 #include <exception>
 
-class C_FileError final : public std::exception   // C_ prefix and final: convention
+class C_FileError final : public std::exception   // C_ prefix: convention
 {
 public:
     const char* what() const noexcept override;   // Deviation: the name is fixed by std::exception
     int retrieveErrorCode() const;                // our own method: imperative verb, no deviation
 
 private:
-    int priv_errorCode;                           // member: access marker and marker block, no deviation
+    int priv_errorCode;                           // member: access marker only; no block, no deviation
 };
 ```
 
 - `C_FileError` — the type keeps its `C_` prefix: the deviation applies to `what()` alone.
 - `what()` — the only name in the class that does not follow these conventions; the comment states why.
 - `retrieveErrorCode()` — a method of the same class: imperative verb, so the rule applies and nothing is deviated (`errorCode()` would be a noun, and nouns belong to variables).
-- `priv`\_`errorCode` — a field of the same class: a noun with the access marker and the marker block, again with no deviation.
+- `priv`\_`errorCode` — a field of the same class: a noun with the access marker and no marker block (an ordinary `int` field has nothing to mark), again with no deviation.
 
 ## `1. Identifier markers`
 
@@ -77,7 +79,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for local (function/block) scope**:
 
-> Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the [`scope`] marker** entirely — `g`, `n` and `a` describe namespace scope only, so no name of a local variable ever carries one. The marker block of a local variable therefore starts with the [`storage-class`] marker (e.g., a `static` local is `someLocal`\_`s`, a `thread_local` local is `someVar`\_`t`, a `const` local is `someLocal`\_`c`), and a local that has nothing to mark at all is written with no block and no trailing underscore (e.g., `someVar`). Recall that the minimal forms shown in the [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) table (such as `operatingMode`\_`e`, `dataBuffer`\_`p`) are valid only at local scope.
+> Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the [`scope`] marker** entirely — `g`, `n` and `a` describe namespace scope only, so no name of a local variable ever carries one. The marker block of a local variable therefore starts with the [`storage-class`] marker (e.g., a `static` local is `someVar`\_`s`, a `thread_local` local is `someVar`\_`t`, a `const` local is `someVar`\_`c`), and a local that has nothing to mark at all is written with no block and no trailing underscore (e.g., `someVar`). The minimal forms shown in the [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) table (such as `operatingMode`\_`e`, `dataBuffer`\_`p`) are valid only at local scope.
 
 **Important notice for function parameters**:
 
@@ -115,7 +117,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for `const`-like declarations**:
 
-> Every declaration that gives a variable a `const`-qualified type carries the `c` marker, whichever keyword produced that type: `const` and `constexpr` are the same case, because for an object declaration `constexpr` implies `const` already. The marker keeps its usual position: a `constexpr` local is `someConstVarName`\_`c`, a `static constexpr` local is `someConstVarName`\_`sc`, a `constexpr` variable at `global` namespace scope is `someConstVarName`\_`gc`, and a `global` `static constexpr` one is `someConstVarName`\_`gsc`. `constexpr` is not the `static` keyword, so it never adds the `s` [`storage-class`] marker on its own — `s` still tracks an explicit `static`. At member scope the same letters follow the access marker and the base name (a `static constexpr` member is `pub`\_`someConstVarName`\_`sc`, a `const` member is `pub`\_`someConstVarName`\_`c`). A reference is the declaration where `constexpr` adds no `c` marker: `constexpr int& someVar`\_`gr = intTarget`\_`g;` gives the variable no `const`-qualified type — the keyword asks for a constant-initialized reference, not a `const` referent, and the object it names stays modifiable — so the name keeps the plain [`reference`] marker (see [Reference markers](#116-reference-markers)).
+> Every declaration that gives a variable a `const`-qualified type carries the `c` marker, whichever keyword produced that type: `const` and `constexpr` are the same case, because for an object declaration `constexpr` implies `const` already. The marker keeps its usual position: a `constexpr` local is `someConstVar`\_`c`, a `static constexpr` local is `someConstVar`\_`sc`, a `constexpr` variable at `global` namespace scope is `someConstVar`\_`gc`, and a `global` `static constexpr` one is `someConstVar`\_`gsc`. `constexpr` is not the `static` keyword, so it never adds the `s` [`storage-class`] marker on its own — `s` still tracks an explicit `static`. At member scope the same letters follow the access marker and the base name (see [Member variable naming conventions](#8-member-variable-naming-conventions)): a `static constexpr` member is `pub`\_`someConstVar`\_`sc`, a `const` member is `pub`\_`someConstVar`\_`c`. A reference is the declaration where `constexpr` adds no `c` marker: `constexpr int& someVar`\_`gr = intTarget`\_`g;` gives the variable no `const`-qualified type — the keyword asks for a constant-initialized reference, not a `const` referent, and the object it names stays modifiable — so the name keeps the plain [`reference`] marker (see [Reference markers](#116-reference-markers)).
 
 **Important notice for what the `c` marker does not cover**:
 
@@ -282,7 +284,7 @@ Mechanical classification algorithm:
 
 1. Does the type declare a contract member (a member that names `TTP_Derived`)? If any exist, remember marker `P`.
 2. Is the type abstract in the standard C++ sense — at least one pure virtual function (declared by the type or inherited) has no final overrider in it?
-   - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g. `C_Button final : public IS_Drawable`).
+   - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g. `C_Button final : public AC_WidgetBase`).
    - Yes → `PAC_`/`PAS_` if marker `P` was remembered (the contract member already breaks clauses `I3` and `I4`, so there is nothing left to ask); otherwise continue.
 3. Are all checkable `I` clauses (`I1`–`I6` above; `I7` merely permits static members and cannot fail) satisfied?
    - Yes → `IC_`/`IS_`.
@@ -290,12 +292,12 @@ Mechanical classification algorithm:
 
 Additional rules:
 
-- A class implementing every inherited pure virtual function stays concrete and keeps ordinary naming: `C_Button final : public IS_Drawable` (implementations marked `override`).
+- A class implementing every inherited pure virtual function stays concrete and keeps ordinary naming: `C_Button final : public AC_WidgetBase` (implementations marked `override`).
 - **When an obligation is checked** — an interface's obligation is checked wherever the type is used: a derived type that leaves any pure virtual function unoverridden stays abstract, so the first attempt to create an object fails. A protocol's obligation is checked where the contract member is instantiated, i.e. at its first use: a protocol whose contract member is never used checks nothing, and a type that violates it can be declared, instantiated and run. To check a protocol early, either make the contract member virtual (the diagnostic then arrives earlier, though how early depends on the compiler — Clang instantiates a virtual member with the class, GCC when the class is first used and its vtable is needed), or assert the obligation outside the protocol once the derived type is complete (`static_assert(requires (C_Derived& derived_r) { derived_r.refreshState(); });`), or constrain the point of use with a concept. A `static_assert` inside the protocol's own body does not work: the derived type is still incomplete there, so the assertion fails even for a derived type that provides everything.
 - **Destruction rule** — a base class is the only handle the user of a hierarchy holds, so every base is a potential deletion site, and deletion is the one operation whose mistake is silent: with a `public` non-`virtual` destructor, `delete` through a pointer or reference to the base compiles, runs the destruction chain as if the object were of the base's own type — the derived type's destructor never runs — and asks for a deallocation of the base's size although the derived object was allocated with its own, which the standard calls undefined behavior (in practice: the derived part is left un-destroyed and the heap can be corrupted). The rule therefore lets the base's own declaration settle the question once, so that deleting through a base is always either well-defined or impossible to write:
   - a base through which objects are owned declares a **`public` `virtual` destructor** — declared, or implicitly declared as `virtual` by the language (`IS_Drawable` in the example below);
   - a base through which objects are never owned declares a **`protected` (or `private`) non-`virtual` destructor**, so that deleting through a pointer or reference to it cannot be written at all and the mistake becomes a compile error instead of undefined behavior (`PC_Refreshable` in the example below);
-  - a **`public` non-`virtual` destructor on a type with virtual functions** is therefore a defect — it is exactly the form that permits the undefined deletion. Both GCC and Clang diagnose the declaration (`-Wnon-virtual-dtor`); the delete site itself is diagnosed as well (`-Wdelete-non-virtual-dtor` in GCC, `-Wdelete-non-abstract-non-virtual-dtor` in Clang), and `-Wall` already enables that check.
+  - a **`public` non-`virtual` destructor on a type with virtual functions** is therefore a defect — it is exactly the form that permits the undefined deletion. Both GCC and Clang diagnose the declaration (`-Wnon-virtual-dtor`); the delete site itself is diagnosed as well (`-Wdelete-non-virtual-dtor` in GCC, `-Wdelete-abstract-non-virtual-dtor` in Clang). `-Wall` enables the delete-site diagnostic but not the declaration one, so a project that wants to hear about the declaration names `-Wnon-virtual-dtor` itself.
 
   *Ownership, not dispatch*: the rule asks what happens to the type, not how it dispatches. Whether a type carries a vtable is visible from its declarations, never from its marker, so a `P` type that happens to be polymorphic — a mixin over an interface such as `PC_DrawMixin` — follows the rule like any other base, while a mixin that is never owned through its base form declares the protected non-virtual destructor even though it declares no virtual function at all: ownership is closed off by the rule, and closing it costs nothing here.
 - **Template rule** — an ordinary class decides its role once and the name records that decision; a class template is a family of types instead, and whether an instantiation is abstract, declares a contract member or carries a data member can depend on its arguments. A wrapper that inherits its own parameter — `template <typename TTP_Base> class C_Wrapper : TTP_Base {};` — is abstract for `TTP_Base` = `IS_Drawable` and concrete for `TTP_Base` = `C_Line`, so one and the same name would promise a concrete type to one user and an incomplete base to another. A name cannot carry two roles, so the rule fixes the role at the primary definition and demands that every accepted argument preserve it:
@@ -391,7 +393,14 @@ public:
 ***Example 5***:
 
 ```C++
-// IS_Drawable: the interface declared in Example 4 above, not repeated here
+// IS_Drawable: the interface of Example 4 above, declared again here so that this
+// fragment compiles on its own
+struct IS_Drawable
+{
+    virtual ~IS_Drawable() = default;
+    virtual void draw() const = 0;
+};
+
 template <typename TTP_Derived>
 class PC_Refreshable                          // protocol class (CRTP mixin)
 {
@@ -585,7 +594,7 @@ The base name of a member variable follows the same rules as for non-member vari
 
 **Important notice for the access marker and member scope**:
 
-> Every member carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. What follows the base name is the same trailing marker block as for any other variable, i.e. [`access-marker`]\_`camelCase`\_[`storage-class`][`cv-qualifier`][`enum`|`pointer`|`reference`]:
+> Every member carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. What follows the base name is the same trailing marker block as for any other variable, i.e. [`access-marker`]\_`camelCase`\_[`storage-class`][`cv-qualifier`][`enum`|`pointer`|`reference`] — and, exactly as for a non-member variable, a member whose block has nothing to mark is written without the trailing underscore (`pub`\_`operatingMode`):
 >
 > - An ordinary (instance) non-static member carries **no storage-class marker** (e.g., `pub`\_`operatingMode`, `prot`\_`operatingMode`\_`pe`).
 > - A `static` class member carries the **`s`** storage-class marker (e.g., `pub`\_`instanceCount`\_`s`). Note carefully: at *namespace* scope `s` means internal linkage, but a `static` class member has **external linkage**. The `s` marker on a member therefore denotes *class-level (shared) storage only*, not internal linkage — there is no contradiction because the scope marker is absent and the class scope, not the storage marker, governs linkage. The `x` (`extern`) marker is **never** used on members: `static` members are defined exactly once and resolved by the linker; a declaration of one is written in the header with the plain `s` marker and defined in one source file with the same `s` marker (the keyword `static` is omitted at the definition).
@@ -672,7 +681,7 @@ private:
 
 ## `10. Ultimate Compilable Example`
 
-A single, self-contained translation unit (example) that exercises every naming convention defined in this document. This example is artificial by design. The file-name convention is represented by the hypothetical artifact name `ultimate_example.cpp`, and the namespace-name convention is demonstrated by the `snake_case` namespaces below.
+A single, self-contained translation unit (example) that exercises every naming convention defined in this document. This example is artificial by design. The file-name convention is represented by the hypothetical artifact name `ultimate_example.cpp`, and the namespace-name convention is demonstrated by the `snake_case` namespaces below. Several declarations exist only to show a naming form and are never read, so a build that enables `-Wunused-variable` (or Clang's `-Wunused-private-field`) reports them; the fragment itself compiles without errors.
 
 ```C++
 // ============================================================================
@@ -802,9 +811,9 @@ namespace
 void demonstrateLocals()
 {
     int                 someVar      = 0;            // local (no markers)
-    static int          someLocal_s  = 0;            // local + static
+    static int          someVar_s    = 0;            // local + static
     thread_local int    someVar_t    = 0;            // local + thread_local
-    const int           someLocal_c  = 1;            // local + const
+    const int           someVar_c    = 1;            // local + const
     constexpr int       someConstVar_c = 7;          // local + constexpr (const-like)
     E_DeviceState       someState_e  = STATE_IDLE;   // local + enum
     const E_DeviceState someState_ce = STATE_IDLE;   // local + const enum
@@ -1038,18 +1047,18 @@ int main()
 This example covers:
 
 - **Anonymous namespace** variables (`a`, `ac`, `ae`, `ap`, `arce` markers) and the mutual exclusion of `a` with `static`.
-- **cv-qualifier markers** (`c`, `v`, `cv`) at namespace, local and member scope, including the `const`-like case: a `constexpr` variable takes the same `c` marker as a `const` one (`someConstVar_gc`, `someConstVar_gsc`, `someConstVar_c`, `someColor_gce`, `priv_limit_c`, `pub_maxBufferSize_sc`).
+- **cv-qualifier markers** — all three (`c`, `v`, `cv`) at namespace scope, and the `c` case at local and member scope, including the `const`-like form: a `constexpr` variable takes the same `c` marker as a `const` one (`someConstVar_gc`, `someConstVar_gsc`, `someConstVar_c`, `someColor_gce`, `priv_limit_c`, `pub_maxBufferSize_sc`).
 - **Enum markers** (`e`, `ce`, `cve`) for plain-enum and enum-class variables.
 - **Enumerator naming**: `UPPER_SNAKE_CASE` for plain `enum` (`STATE_IDLE`, …) and `PascalCase` for `enum class` (`DeepPurple`, …).
 - **Extern declarations** (`gx`, `gxt`, `nxt` markers) marked as declarations only, defined elsewhere.
 - **File-name convention** represented by the artifact name `ultimate_example.cpp`.
 - **Function-like macro** (`SAVE_DATA()`) and **object-like macro** (`MAX_BUFFER_SIZE`).
 - **Functions/methods in `camelCase`** (`sendRequest`, `computeFrameSum`, `logMessage`, `touch`, `resetCount`, `retrieve`, `update`, `refreshState`, `drawContent`, `main` — the last one is a name the language fixes, one of the deviations listed in [Scope and permitted deviations](#scope-and-permitted-deviations)).
-- **Local (block) scope** variables with no scope marker (`someVar`, `someLocal`\_`s`, `dataBuffer`\_`p`, `logger`\_`p`, …).
+- **Local (block) scope** variables with no scope marker (`someVar`, `someVar`\_`s`, `dataBuffer`\_`p`, `logger`\_`p`, …).
 - **Member access markers**: `pub_` / `prot_` / `priv_`, applied to plain, pointer, enum and static members alike, in `class`, `struct` and `union` types.
 - **Member access discipline**: fields accessed bare (no `this->`); non-static methods via `this->…`; static members/methods via `C_Logger`::`pub`\_`instanceCount`\_`s` / `C_Logger::resetCount()` / `C_Container`::`pub`\_`sharedCount`\_`s`.
 - **Namespace convention** via the `snake_case` namespace `frame_renderer`.
-- **Pointer markers** — all 8 variants (`p`, `pc`, `pv`, `pcv`, `pe`, `pce`, `pve`, `pcve`) and the note that they apply to smart pointers alike.
+- **Pointer markers** — all 8 variants (`p`, `pc`, `pv`, `pcv`, `pe`, `pce`, `pve`, `pcve`); the note that they apply to smart pointers alike is stated in [Pointer markers](#115-pointer-markers).
 - **Reference markers** — all 8 variants (`r`, `rc`, `rv`, `rcv`, `re`, `rce`, `rve`, `rcve`), with the [`cv-qualifier`] marker intentionally omitted.
 - **Scope markers** (`g`, `n`, `a`) and their omission at local/member scope.
 - **Static linkage/storage markers** (`s`, `t`, `st`) at namespace scope and as class members, plus the out-of-line static-member definition pattern (keyword `static` omitted, the name retained unchanged).
@@ -1058,8 +1067,8 @@ This example covers:
 - **Template parameter prefixes** — all 6 kinds (`TTP`, `TTPP`, `NTTP`, `NTTPP`, `TeTP`, `TeTPP`).
 - **Ultimate compound forms** (`state`\_`gscvpcve`, `state`\_`gsrcve`) combining scope + storage + cv + pointer/reference-to-const-volatile-enum.
 - **`mutable` members** following the same naming rules as non-`mutable` members of the same access level, modifiable through a `const` method (`touch()`).
-- **Role-marker type prefixes** — `IS_`, `AC_`, `PC_`, `PAC_` demonstrated directly (remaining forms `IC_/AS_/PS_/PAS_` follow from the five-combination marker rule: *(none)*, `I`, `A`, `P`, `PA`), including the clause-based classification algorithm and the clause-based exclusion of `PI_` (`P` requires a contract member, clause `I4` forbids one).
+- **Role-marker type prefixes** — `IS_`, `AC_`, `PC_`, `PAC_` demonstrated directly (remaining forms `IC_/AS_/PS_/PAS_` follow from the five-combination marker rule: *(none)*, `I`, `A`, `P`, `PA`); the classification algorithm and the clause-based exclusion of `PI_` (`P` requires a contract member, clause `I4` forbids one) are stated in [Abstraction & protocol markers](#122-abstraction--protocol-markers).
 - **Marker-aware type aliases** (`TAIS_Drawable`; family `TAIC_/TAAC_/TAAS_/TAPC_/TAPS_/TAPAC_/TAPAS_`).
 - **Protocol forwarding** through non-virtual members (`ticker.refresh()`, `panel.refresh()`) alongside virtual dispatch through an interface reference (`drawable_r.draw()`).
-- **Mixin over an interface** (`PC_DrawMixin`) — a protocol that also implements a dynamic contract: it is named by the same clauses (`PC_`), and it satisfies the destruction rule through the virtual destructor inherited from `IS_Drawable`; the Guidance above still prefers decomposing it into a dynamic base plus a standalone protocol.
+- **Mixin over an interface** (`PC_DrawMixin`) — a protocol that also implements a dynamic contract: it is named by the same clauses (`PC_`), and it satisfies the destruction rule through the destructor that is implicitly declared `virtual` because the base's destructor is; the Guidance above still prefers decomposing it into a dynamic base plus a standalone protocol.
 - **Destruction rule** — `IS_Drawable` declares a virtual destructor, so objects are destroyed through the interface; `PC_Refreshable` declares a protected non-virtual one, so deleting through a protocol pointer is a compile error rather than undefined behavior.
