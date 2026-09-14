@@ -121,7 +121,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for the `x` marker**:
 
-> The `x` marker marks a variable that is *declared* in one translation unit and *defined* in another one. The `extern` keyword belongs to that declaration only, but the name does not change among translation units: a variable has exactly one name, so the definition is written with the same marked name (`extern int someVar_gx;` declares it; `int someVar_gx = 42;` defines it). `s` and `x` never combine, because `s` marks a name that only its own translation unit can see, while `x` marks a name another translation unit has to provide — no name can be both, and declaring a `static` variable `extern` fails when the program is linked, not when it is compiled. The `xt` marker is the `thread_local` counterpart and follows the same rule.
+> The `x` marker marks a variable that is *declared* in one translation unit and *defined* in another one. The `extern` keyword belongs to that declaration only, but the name does not change among translation units: a variable has exactly one name, so the definition is written with the same marked name (`extern int someVar_gx;` declares it; `int someVar_gx = 42;` defines it). `s` and `x` never combine, because `s` marks a name that only its own translation unit can see, while `x` marks a name another translation unit has to provide — no name can be both. A later `extern` redeclaration in the same translation unit does not even break the build: it inherits the internal linkage of the earlier `static` declaration, so the program compiles and links; the failure surfaces at link time only when another translation unit that saw the `extern` declaration asks for an external definition no one provides. The `xt` marker is the `thread_local` counterpart and follows the same rule.
 
 ***Example 1***: `someVar`\_`gx` - `extern` variable in a `global` namespace with name `someVar` (e.g. declared in this translation unit, defined elsewhere)
 
@@ -249,7 +249,7 @@ A type prefix consists of optional `role markers` followed by a `type letter`.
 - `A`: `abstract` type — a base that is not yet complete: abstract, yet failing at least one `I` clause — typically it carries state or implementation (`A` - `A`bstract)
 - `P`: `protocol` type — a compile-time contract on a statically known derived type: a mixin that states what its host owes (`P` - `P`rotocol)
 
-`Role markers` concatenate in the fixed order (`P` must be before `A`) and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. In particular, the combination `PI` cannot exist: `P` requires a contract member (clause `P1`), and an interface is forbidden to declare one (clause `I4`).
+`Role markers` concatenate in the fixed order (`P` must be before `A`) and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. In particular, the combination `PI` cannot exist: `P` requires a contract member (clause `P1`), and an interface is forbidden to declare one (clause `I4`). The combination `IA` cannot exist either: `A` is defined as a type that fails at least one `I` clause (clause `A2`), so a type satisfying every `I` clause is an interface itself and the `I` marker leaves nothing for `A` to add — the two markers are alternatives for one classification, not composable roles.
 
 Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC`, `PAS`.
 
