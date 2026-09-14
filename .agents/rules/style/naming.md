@@ -117,7 +117,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for the `s` marker at namespace scope**:
 
-> All namespace-scope variables in C++ inherently have static storage duration. However, the `s` marker at namespace scope (e.g., `someVar`\_`gs` or `someVar`\_`ns`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope markers. The marker records the keyword written in the declaration, not the linkage the variable ends up with: a namespace-scope `const` object that is not `volatile` already has internal linkage without any marker, while a `const volatile` one keeps external linkage.
+> All namespace-scope variables in C++ inherently have static storage duration. However, the `s` marker at namespace scope (e.g., `someVar`\_`gs` or `someVar`\_`ns`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope markers. The marker records the keyword written in the declaration, not the linkage the variable ends up with: a namespace-scope `const` object that is not `volatile` already has internal linkage without any marker, while a `const volatile` one keeps external linkage. One letter, two readings: the same `s` appears on class members, where it records class-level shared storage and says nothing about linkage — the member notice in [Member variable naming conventions](#8-member-variable-naming-conventions) explains the difference; the kind of scope the variable sits in always decides which reading applies.
 
 **Important notice for the `x` marker**:
 
@@ -561,6 +561,10 @@ const TAS_SomeType& someVar_grc = var_g;
 | Implementation/Source file name | noun in `snake_case.cpp` style-form | `frame_renderer.cpp` |
 | Header file name                | noun in `snake_case.hpp` style-form | `frame_renderer.hpp` |
 
+**Important notice for the file name and the entity it holds**:
+
+> The noun names what the file exists to declare: a file that declares one primary type names it with the type prefix dropped (`C_FrameRenderer` lives in `frame_renderer.cpp` and `frame_renderer.hpp`); a file that declares no single primary type — a utility translation unit, a set of free functions — takes the name of what the file as a whole provides. A few illustrative fragments in this document name no entity at all (the ultimate example is a rules exercise, not a component), and their hypothetical artifact names follow the same style-form without corresponding to any type.
+
 ## `3. Namespace naming conventions`
 
 | Entity     | Convention   | Example          |
@@ -731,7 +735,7 @@ enum       E_DeviceState { STATE_IDLE, STATE_RUNNING, STATE_ERROR };  // plain e
 enum class E_Color       { DeepPurple, LightBlue };                   // enum class; enumerators PascalCase
 struct     S_Point       { int pub_x; int pub_y; };                   // struct type
 union      U_Packet      { int pub_raw; float pub_floating; };        // union type
-class      C_Renderer;                                                // class type (forward)
+class      C_Renderer {};                                             // class type
 struct     IS_Drawable;                                               // interface struct type (forward)
 
 // ---- Type aliases (using) ----
@@ -834,6 +838,8 @@ namespace frame_renderer
     int computeFrameSum(int leftValue, int rightValue) { return leftValue + rightValue; }  // function: camelCase
 }
 
+namespace render = frame_renderer;  // namespace alias: snake_case
+
 // ============================================================================
 // Anonymous namespace (marker `a`; mutually exclusive with `static`)
 // ============================================================================
@@ -844,6 +850,8 @@ namespace
     E_DeviceState        someState_ae   = STATE_IDLE;    // a + enum
     int*                 someVar_ap     = &someVar_a;    // a + pointer
     const E_DeviceState& someState_arce = someState_ae;  // a + reference to const enum
+    thread_local int     someVar_at     = 12;            // a + thread_local (duration, not linkage)
+    // a static here is forbidden: the `a` marker excludes `s`, linkage stays internal
 }
 
 // ============================================================================
@@ -1069,6 +1077,7 @@ int main()
 
     sendRequest(0);
     frame_renderer::computeFrameSum(1, 2);
+    render::computeFrameSum(3, 4);      // the same function through the namespace alias
     demonstrateLocals();
 
     C_Ticker ticker;
@@ -1101,15 +1110,15 @@ This example covers:
 - **Enumerator naming**: `UPPER_SNAKE_CASE` for plain `enum` (`STATE_IDLE`, …) and `PascalCase` for `enum class` (`DeepPurple`, …).
 - **Extern declarations** (`gx`, `gxt`, `nxt` markers) marked as declarations only, defined elsewhere.
 - **File-name convention** represented by the artifact name `ultimate_example.cpp`.
-- **Function-like macro** (`SAVE_DATA()`) and **object-like macro** (`MAX_BUFFER_SIZE`).
+- **Function-like macro** (`SAVE_DATA`) and **object-like macro** (`MAX_BUFFER_SIZE`), the macro's parameters being nouns without markers (`destination`, `source`).
 - **Functions/methods in `camelCase`** (`sendRequest`, `computeFrameSum`, `logMessage`, `touch`, `resetCount`, `retrieve`, `update`, `refreshState`, `drawContent`, `main` — the last one is a name the language fixes, one of the deviations listed in [Scope and permitted deviations](#scope-and-permitted-deviations)).
 - **Local (block) scope** variables with no scope marker (`someVar`, `someVar`\_`s`, `dataBuffer`\_`p`, `logger`\_`p`, …), and a name introduced by a structured binding (`xCoordinate`, `yCoordinate`), which carries no marker block at all.
 - **Member access markers**: `pub_` / `prot_` / `priv_`, applied to plain, pointer, enum and static members alike, in `class`, `struct` and `union` types.
 - **Member access discipline**: fields accessed bare (no `this->`); non-static methods via `this->…`; static members/methods via `C_Logger`::`pub`\_`instanceCount`\_`s` / `C_Logger::resetCount()` / `C_Container`::`pub`\_`sharedCount`\_`s`.
-- **Namespace convention** via the `snake_case` namespace `frame_renderer`.
+- **Namespace convention** via the `snake_case` namespace `frame_renderer`, reached also through the `snake_case` alias `render`.
 - **Pointer markers** — all 8 variants (`p`, `pc`, `pv`, `pcv`, `pe`, `pce`, `pve`, `pcve`); the note that they apply to smart pointers alike is stated in [Pointer markers](#115-pointer-markers).
 - **Reference markers** — all 8 variants (`r`, `rc`, `rv`, `rcv`, `re`, `rce`, `rve`, `rcve`), with the [`cv-qualifier`] marker intentionally omitted.
-- **Scope markers** (`g`, `n`, `a`) and their omission at local/member scope.
+- **Scope markers** (`g`, `n`, `a`) and their omission at local/member scope, including the `a` + `thread_local` combination (`at`) and the forbidden `as`/`ax`/`axt`.
 - **Static linkage/storage markers** — `s`, `t` and `st` at namespace scope, and `s` and `st` as class members (a bare `t` has no member form; see [Member variable naming conventions](#8-member-variable-naming-conventions)) — plus the out-of-line static-member definition pattern (keyword `static` omitted, the name retained unchanged).
 - **Static thread_local** namespace (`gst`, `nst` markers) and member (`st`) forms.
 - **Type prefixes** (`C`, `S`, `E`, `U`) and **type-alias prefixes** (`TA`, `TAC`, `TAS`, `TAE`, `TAU`, `TAP`, `TAR`, `TAF`, `TAA`, `TAM`).
