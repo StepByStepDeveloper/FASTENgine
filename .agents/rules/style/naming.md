@@ -48,11 +48,11 @@ A reader who is here to name things rather than to read the document through nee
 
 A variable is the one entity whose rules are spread over the places below — one per scope it can be declared in, plus the style-form table its own section carries; this table says where to look instead of repeating the grammar:
 
-| Variable scope                               | Where its rules are                                                                                          | Examples                                          |
-|:-------------------------------------------- |:------------------------------------------------------------------------------------------------------------ |:------------------------------------------------- |
-| Namespace (`g`lobal / `n`amed / `a`nonymous) | [Variable markers](#11-variable-markers) and [Scope markers](#111-scope-markers)                               | `someVar`\_`g`, `someVar`\_`ns`, `someVar`\_`a`   |
+| Variable scope                               | Where its rules are                                                                                            | Examples                                           |
+|:-------------------------------------------- |:-------------------------------------------------------------------------------------------------------------- |:-------------------------------------------------- |
+| Namespace (`g`lobal / `n`amed / `a`nonymous) | [Variable markers](#11-variable-markers) and [Scope markers](#111-scope-markers)                               | `someVar`\_`g`, `someVar`\_`ns`, `someVar`\_`a`    |
 | Block (function or block)                    | The *local (function/block) scope* and *function parameters* notices under [Scope markers](#111-scope-markers) | `someVar`, `someVar`\_`s`, `dataBuffer`\_`p`       |
-| Class member                                 | [Member variable naming conventions](#8-member-variable-naming-conventions)                                    | `pub`\_`accessCount`, `priv`\_`targetState`\_`e`  |
+| Class member                                 | [Member variable naming conventions](#8-member-variable-naming-conventions)                                    | `pub`\_`accessCount`, `priv`\_`targetState`\_`e`   |
 
 The style-forms themselves are tabulated in [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) for a variable that is not a member — the minimal, marker-free rendering shown there is valid at block scope only — and in [Member variable naming conventions](#8-member-variable-naming-conventions) for a member.
 
@@ -109,7 +109,7 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 
 **Important notice for local (function/block) scope**:
 
-> Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the [`scope`] marker** entirely — `g`, `n` and `a` describe namespace scope only, so no name of a local variable ever carries one. The marker block of a local variable therefore starts with the [`storage-class`] marker (e.g., a `static` local is `someVar`\_`s`, a `thread_local` local is `someVar`\_`t`, a `const` local is `someVar`\_`c`), and a local that has nothing to mark at all is written with no block and no trailing underscore (e.g., `someVar`). A name introduced by a structured binding (`auto [xCoordinate, yCoordinate] = S_Point{1, 2};`) is a block-scope name as well, but it binds to a subobject instead of declaring a variable of its own, so it carries no marker block and no separating underscore. The minimal forms shown in the [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) table (such as `operatingMode`\_`e`, `dataBuffer`\_`p`) are valid only at local scope.
+> Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the [`scope`] marker** entirely — `g`, `n` and `a` describe namespace scope only, so no name of a local variable ever carries one. The marker block of a local variable therefore starts at the [`storage-class`] position (e.g., a `static` local is `someVar`\_`s`, a `thread_local` local is `someVar`\_`t`, a `const` local is `someVar`\_`c`), and a local that has nothing to mark at all is written with no block and no trailing underscore (e.g., `someVar`). A name introduced by a structured binding (`auto [xCoordinate, yCoordinate] = S_Point{1, 2};`) is a block-scope name as well, but it binds to a subobject instead of declaring a variable of its own, so it carries no marker block and no separating underscore. The minimal forms shown in the [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) table (such as `operatingMode`\_`e`, `dataBuffer`\_`p`) are valid only at local scope.
 
 **Important notice for function parameters**:
 
@@ -161,7 +161,7 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 
 **Rationale for the enum marker**:
 
-> The `e` marker on a variable (e.g., `varName`\_`e`) makes it possible to recognize that the variable is an enumeration. This is especially important when the variable is of a plain `enum` (not `enum class`), because plain enumerators can be assigned directly as `VAL` instead of `E_EnumType::VAL`. If a reader sees `var = VAL`, they might not realize the variable is an enumeration, because in that representation `VAL` may be taken for some constant rather than an enumerator. The `e` marker (`var_e = VAL`) solves that problem. The marker describes the variable's own type, so a type that merely holds enumerators does not receive it — the cases are listed in the notice in [Reference markers](#116-reference-markers).
+> The `e` marker on a variable (e.g., `varName`\_`e`) makes it possible to recognize that the variable is an enumeration. This is especially important when the variable is of a plain `enum` (not `enum class`), because plain enumerators can be assigned directly as `VAL` instead of `E_EnumType::VAL`. If a reader sees `var = VAL`, they might not realize the variable is an enumeration, because in that representation `VAL` may be taken for some constant rather than an enumerator. The `e` marker (`var_e = VAL`) solves that problem. The marker describes the variable's own type, so a variable whose type merely holds enumerators does not receive it — the cases are listed in the notice in [Reference markers](#116-reference-markers).
 
 #### `1.1.5. Pointer markers`
 
@@ -267,7 +267,48 @@ Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC
 
 > `Role markers` never combine with the `U`/`E` `type letters` — unions cannot declare virtual member functions or participate in inheritance, and an enum declares nothing but its enumerators: no data members and no virtual functions.
 
+***Example 1***:
+
+```C++
+enum class E_SomeType { Enum1, Enum2 };
+
+const E_SomeType someVar_gce = E_SomeType::Enum1;
+```
+
+- `E_SomeType`: An `enum class` type with name `SomeType`
+- `someVar`\_`gce`: A `global const enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum` marker (`e`)
+
+***Example 2***:
+
+```C++
+class C_SomeType {};
+
+C_SomeType var_g;
+
+const C_SomeType* someVar_gpc = &var_g;
+```
+
+- `C_SomeType`: A `class` type with name `SomeType`
+- `var`\_`g`: A `global` variable (instance) of `class` type (`C_SomeType`)
+- `someVar`\_`gpc`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-to-const` variant of the `pointer` marker (`pc`)
+
+***Example 3***:
+
+```C++
+struct S_SomeType {};
+
+S_SomeType var_g;
+
+const S_SomeType& someVar_grc = var_g;
+```
+
+- `S_SomeType`: A `struct` type with name `SomeType`
+- `var`\_`g`: A `global` variable (instance) of `struct` type (`S_SomeType`)
+- `someVar`\_`grc`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-to-const` variant of the `reference` marker (`rc`)
+
 #### `1.2.2. Abstraction & protocol markers`
+
+The summary above is enough to write a prefix: the clauses below are what decides a type's role, with the algorithm that applies them.
 
 Terms used by the clauses below:
 
@@ -319,7 +360,7 @@ Mechanical classification algorithm:
 2. Is the type abstract in the standard C++ sense — at least one pure virtual function (declared by the type or inherited) has no final overrider in it?
    - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g. `C_Button final : public AC_WidgetBase`).
    - Yes → `PAC_`/`PAS_` if marker `P` was remembered (a contract member already breaks clause `I4`, and the remembered `P` settles the role, so there is nothing left to ask); otherwise continue.
-3. Are all checkable `I` clauses (`I1`–`I6` above; `I7` merely permits static members and cannot fail) satisfied?
+3. Are the remaining `I` clauses (`I2`, `I3`, `I5` and `I6` — `I1` and `I4` are settled by the two steps above; `I7` merely permits static members and cannot fail) satisfied?
    - Yes → `IC_`/`IS_`.
    - No → `AC_`/`AS_`.
 
@@ -342,45 +383,6 @@ Additional rules:
 - **Variable markers never encode role markers**: the abstraction level and protocol nature of a type are carried by the type name alone (`renderable`\_`p` regardless of whether it points to an `IC_`, `AC_` or `C_` type). Pairing a protocol with a same-named concept (`PC_Drawable` ↔ `concept Drawable`) is a common arrangement, but concept naming lies outside this document: the pair above is an illustration, not a rule.
 
 ***Example 1***:
-
-```C++
-enum class E_SomeType { Enum1, Enum2 };
-
-const E_SomeType someVar_gce = E_SomeType::Enum1;
-```
-
-- `E_SomeType`: An `enum class` type with name `SomeType`
-- `someVar`\_`gce`: A `global const enum` variable (instance) of `enum class` type (`E_SomeType`), marked with the `enum` marker (`e`)
-
-***Example 2***:
-
-```C++
-class C_SomeType {};
-
-C_SomeType var_g;
-
-const C_SomeType* someVar_gpc = &var_g;
-```
-
-- `C_SomeType`: A `class` type with name `SomeType`
-- `var`\_`g`: A `global` variable (instance) of `class` type (`C_SomeType`)
-- `someVar`\_`gpc`: A `global pointer to const` object of `class` type (`C_SomeType`), marked with the `pointer-to-const` variant of the `pointer` marker (`pc`)
-
-***Example 3***:
-
-```C++
-struct S_SomeType {};
-
-S_SomeType var_g;
-
-const S_SomeType& someVar_grc = var_g;
-```
-
-- `S_SomeType`: A `struct` type with name `SomeType`
-- `var`\_`g`: A `global` variable (instance) of `struct` type (`S_SomeType`)
-- `someVar`\_`grc`: A `global reference to const` object of `struct` type (`S_SomeType`), marked with the `reference-to-const` variant of the `reference` marker (`rc`)
-
-***Example 4***:
 
 ```C++
 struct IS_Drawable                            // interface struct
@@ -422,10 +424,10 @@ public:
 };
 ```
 
-***Example 5***:
+***Example 2***:
 
 ```C++
-// IS_Drawable: the interface of Example 4 above, declared again here so that this
+// IS_Drawable: the interface of Example 1 above, declared again here so that this
 // fragment compiles on its own
 struct IS_Drawable
 {
@@ -602,7 +604,7 @@ const TAS_SomeType& someVar_grc = var_g;
 
 **Important notice for function and method names**:
 
-> The imperative-verb form applies to every function and method this document names, hooks included: a protocol's hook is an action of the host type like any other method, so the forwarder stays `refresh()` and the hook it calls is `refreshState()` — a hook name such as `onRefresh` is not valid. The only function names the rule cannot cover are the ones fixed for us: names the language itself defines (`main`, constructors, destructors, conversion operators, `operator+`) and names an existing system or third-party interface keeps in place (an override of a library virtual such as `std::exception::what()`). These are the function-side cases of the deviations listed in [Scope and permitted deviations](#scope-and-permitted-deviations). A method that answers a question rather than performs an action keeps the verb-first predicate form (`isVisible()`, `hasError()`): `is` and `has` are the verbs this style-form admits for a question (see the Boolean notice in [Variable markers](#11-variable-markers)).
+> The imperative-verb form applies to every function and method this document names, hooks included: a protocol's hook is an action of the host type like any other method, so the forwarder stays `refresh()` and the hook it calls is `refreshState()` — a hook name such as `onRefresh` is not valid. The only function names the rule cannot cover are the ones fixed for us: names the language itself defines (`main`, constructors, destructors, conversion operators, `operator+`) and names an existing system or third-party interface keeps in place (an override of a library virtual such as `std::exception::what()`). These are the function-side cases of the deviations listed in [Scope and permitted deviations](#scope-and-permitted-deviations). A method that answers a question rather than performs an action keeps the verb-first predicate form (`isVisible()`, `hasError()`), with the same predicate verbs a `bool` variable takes (see the Boolean notice in [Variable markers](#11-variable-markers)).
 
 **Important notice for a function's own linkage**:
 
@@ -700,8 +702,6 @@ private:
 ```
 
 ### `8.2. Members combining the access marker and the marker block`
-
-A member always carries both mechanisms at once: the access marker as its leading prefix (from the access level) and the marker block trailing the base name (from the variable's own storage, qualifiers and type). Neither mechanism is ever folded into the other, and the block keeps the same order it has for a non-member variable.
 
 ***Example***:
 
@@ -828,7 +828,7 @@ E_DeviceState&                       state_gre      = state_ge;       // referen
 const E_DeviceState&                 state_grce     = state_gce;      // reference to const enum
 volatile E_DeviceState&              state_grve     = state_gve;      // reference to volatile enum
 const volatile E_DeviceState&        state_grcve    = state_gcve;     // reference to const volatile enum
-static const volatile E_DeviceState& state_gsrcve   = state_gcve;     // static cv reference to cv enum
+static const volatile E_DeviceState& state_gsrcve   = state_gcve;     // static reference to a cv enum
 
 // array and member-pointer variables: no kind marker — an array is not a pointer,
 // and a member pointer designates a member rather than an object
@@ -880,7 +880,7 @@ namespace
 
 // ============================================================================
 // Free function (camelCase) demonstrating local-scope variables
-// (block scope: no scope marker; the marker block starts with the storage-class marker)
+// (block scope: no scope marker; the marker block starts at the storage-class position)
 // ============================================================================
 void demonstrateLocals()
 {
