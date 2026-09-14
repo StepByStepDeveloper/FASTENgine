@@ -38,7 +38,7 @@ private:
 
 The rules are layered, and this is the order they expect to be read in:
 
-- **Marker grammar — §1.** What a marker family is, which markers exist, in what order they concatenate, and what each letter means: `1.1` variables, `1.2` types, `1.3` template parameters. No later section adds a marker or redefines one.
+- **Marker grammar — §1.** What a marker family is, which markers exist, in what order they concatenate, and what each letter means: `1.1` variables, `1.2` types, `1.3` template parameters. No later section adds a marker to this grammar; the one family defined outside it is the member's leading **access marker** (`pub_`, `prot_` or `priv_`), introduced in [Member variable naming conventions](#8-member-variable-naming-conventions).
 - **One table per entity — §2 to §9.** Each table names an entity and the style-form it has to follow; the style-forms themselves are defined in §1.
 - **One worked example — §10.** A single translation unit that exercises every rule above.
 
@@ -63,7 +63,7 @@ A variable name is a meaningful noun in `camelCase` followed by a **marker block
 - `pointer-var` variable: `camelCase`\_[`scope`][`storage-class`][`cv-qualifier`][`pointer`]
 - `reference-var` variable: `camelCase`\_[`scope`][`storage-class`][`reference`]
 
-The four forms differ in their **kind marker** — the marker that says what the variable's own type is: `[`enum`]`, `[`pointer`]` or `[`reference`]`. A variable carries at most one of them, because each kind marker already encodes what its type designates (a pointer to an enum object is `pe`, never `ep`; a reference to an enum object is `re`), and it is the last position of the block.
+The four forms differ in their **kind marker** — the marker that says what the variable's own type is: `[`enum`]`, `[`pointer`]` or `[`reference`]`, with no kind marker at all for `normal-var`. A variable carries at most one of them, because each kind marker already encodes what its type designates (a pointer to an enum object is `pe`, never `ep`; a reference to an enum object is `re`), and it is the last position of the block.
 
 *Placeholders*: the names used in the examples of this document (`someVar`, `var_g`, `ptr_np`, `someType`) show the shape of a name, not the name of anything real; a name written in code states what the entity holds.
 
@@ -117,7 +117,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for the `s` marker at namespace scope**:
 
-> All namespace-scope variables in C++ inherently have static storage duration. However, the `s` marker at namespace scope (e.g., `someVar`\_`gs` or `someVar`\_`ns`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope markers. The marker records the keyword written in the declaration, not the linkage the variable ends up with: a namespace-scope `const` object that is not `volatile` already has internal linkage without any marker, while a `const volatile` one keeps external linkage. One letter, two readings: the same `s` appears on class members, where it records class-level shared storage and says nothing about linkage — the member notice in [Member variable naming conventions](#8-member-variable-naming-conventions) explains the difference; the kind of scope the variable sits in always decides which reading applies.
+> All namespace-scope variables in C++ inherently have static storage duration. However, the `s` marker at namespace scope (e.g., `someVar`\_`gs` or `someVar`\_`ns`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope markers. The marker records the keyword written in the declaration, not the linkage the variable ends up with: a namespace-scope `const` object that is not `volatile` already has internal linkage without any marker, while a `const volatile` one keeps external linkage. One letter, two readings: the same `s` appears on class members, where it records class-level shared storage and says nothing about linkage — the member notice in [Member variable naming conventions](#8-member-variable-naming-conventions) explains the difference; the kind of scope the variable sits in always decides which reading applies. `inline` is not a keyword the markers name either: a namespace-scope `inline` variable keeps its plain [`scope`] marker — declaring it `inline` changes nothing a marker records — while an `inline static` member keeps its `s` (see `C_Container`::`pub`\_`sharedCount`\_`s` in §10).
 
 **Important notice for the `x` marker**:
 
@@ -279,7 +279,7 @@ Terms used by the clauses below:
   6. destroying an object through the interface is well-defined. Only two destructor forms qualify: a `public` `virtual` destructor, so that `delete` through the interface runs the whole destruction chain, or a destructor that is not `public` (`protected` or `private`, `virtual` or not), so that `delete` through the interface cannot be written at all. The single forbidden form is a `public` non-`virtual` destructor that is not deleted — declared or implicitly declared — where `delete` through the interface compiles, runs only the base part of the chain and leaves the derived type's own destructor unrun, which is undefined behavior; a deleted destructor is safe rather than forbidden, because deleting through it does not compile;
   7. static members are permitted and lie outside `I2`, `I3` and `I5`.
 
-  *Consequences*: an interface inherits only from interfaces (`I3` and `I5`) — which admits the *composite* form, an interface that aggregates several contracts and declares nothing of its own (it passes `I2` on what it inherits) — and no helper implementation may be added to one: helpers belong to an abstract type. Clause `I4` is not a matter of taste: a user holding the interface sees exactly its virtual functions, so a member that is not virtual is not part of the contract at all, and an obligation toward a derived type is never visible through the interface.
+  *Consequences*: an interface inherits only from interfaces (`I3`, `I5` and `I6` keep an implementation, a data member and an unsafe destructor out; a base whose only failing clause is `I2` — its single pure virtual function is a special member — is the one exception) — which admits the *composite* form, an interface that aggregates several contracts and declares nothing of its own (it passes `I2` on what it inherits) — and no helper implementation may be added to one: helpers belong to an abstract type. Clause `I4` is not a matter of taste: a user holding the interface sees exactly its virtual functions, so a member that is not virtual is not part of the contract at all, and an obligation toward a derived type is never visible through the interface.
 - **`A` (abstract)** — an incomplete base that exists to be completed:
   1. it is abstract;
   2. it fails at least one `I` clause — that is what distinguishes it from an interface. Any of `I2`, `I3`, `I5` or `I6` can be the failing one: most often `I5` (it carries a data member, that is the state its derived types share) or `I3` (it carries an implementation), occasionally `I2` (its member set holds no pure virtual non-special member function — the only pure virtual function it has, if any, is a special member such as a destructor) or `I6` (an unsafe destructor). `I1` holds by definition and `I7` only permits, so neither can fail; `I4` cannot be the failing clause here either — it fails exactly when the type declares a contract member, and clause `A3` below requires a type marked `A` to declare none, so that type is `PA`, never `A`; a type that fails none of `I1`–`I7` is an interface itself;
@@ -318,7 +318,7 @@ Additional rules:
 - **When an obligation is checked** — an interface's obligation is checked wherever the type is used: a derived type that leaves any pure virtual function unoverridden stays abstract, so the first attempt to create an object fails. A protocol's obligation is checked where the contract member is instantiated, i.e. at its first use: a protocol whose contract member is never used checks nothing, and a type that violates it can be declared, instantiated and run. To check a protocol early, either make the contract member virtual (the diagnostic then arrives at the first use of the derived type that needs its vtable — an object creation, or a virtual member the derived type defines out of line — instead of at the first call of the contract member), or assert the obligation outside the protocol once the derived type is complete (`static_assert(requires (C_Derived& derived_r) { derived_r.refreshState(); });`), or constrain the point of use with a concept. A `static_assert` inside the protocol's own body does not work: the derived type is still incomplete there, so the assertion fails even for a derived type that provides everything.
 - **Destruction rule** — a base class is the only handle the user of a hierarchy holds, so every base is a potential deletion site, and deletion is the one operation whose mistake is silent: with a `public` non-`virtual` destructor, `delete` through a pointer or reference to the base compiles, runs the destruction chain as if the object were of the base's own type — the derived type's destructor never runs — and asks for a deallocation of the base's size although the derived object was allocated with its own, which the standard calls undefined behavior (in practice: the derived part is left un-destroyed and the heap can be corrupted). The rule therefore lets the base's own declaration settle the question once, so that deleting through a base is always either well-defined or impossible to write:
   - a base through which objects are owned declares a **`public` `virtual` destructor** — declared, or implicitly declared as `virtual` by the language (`IS_Drawable` in the example below);
-  - a base through which objects are never owned closes ownership off with a **destructor that is not `public`** — `protected` (or `private`) and non-`virtual`, so that deleting through a pointer or reference to it cannot be written at all and the mistake becomes a compile error instead of undefined behavior (`PC_Refreshable` in the example below). A `protected virtual` destructor satisfies clause `I6` just as well and is equally safe; the non-`virtual` form is the one this document expects for such a base, because a base that is never owned needs no vtable entry for its destructor;
+  - a base that declares no virtual function at all is never owned through, so it closes ownership off with a **destructor that is not `public`** — `protected` (or `private`) and non-`virtual`, so that deleting through a pointer or reference to it cannot be written at all and the mistake becomes a compile error instead of undefined behavior (`PC_Refreshable` in the example below); a base that carries virtual functions needs no closure — its `public` `virtual` destructor, declared or inherited from the interface (`PC_DrawMixin` in §10), already makes deletion through it well-defined. A `protected virtual` destructor satisfies clause `I6` just as well and is equally safe; the non-`virtual` form is the one this document expects for such a base, because a base that is never owned needs no vtable entry for its destructor;
   - a **`public` non-`virtual` destructor that is not deleted, on a type with virtual functions** is therefore a defect — it is exactly the form that permits the undefined deletion. An explicitly deleted destructor is not this case, even though both GCC and Clang name the declaration in `-Wnon-virtual-dtor`: deleting through it does not compile, so there is no undefined deletion to permit. Both GCC and Clang diagnose the declaration (`-Wnon-virtual-dtor`); the delete site itself is diagnosed as well (`-Wdelete-non-virtual-dtor`, accepted by both GCC and Clang; Clang prints it under `-Wdelete-non-abstract-non-virtual-dtor` for a non-abstract base and under `-Wdelete-abstract-non-virtual-dtor` for an abstract one). `-Wall` enables the delete-site diagnostic but not the declaration one, so a project that wants to hear about the declaration names `-Wnon-virtual-dtor` itself.
 
   *Ownership, not dispatch*: the rule asks what happens to the type, not how it dispatches. Whether a type carries a vtable is visible from its declarations, never from its marker, so a `P` type that happens to be polymorphic — a mixin over an interface such as `PC_DrawMixin` — follows the rule like any other base, while a mixin that is never owned through its base form declares the protected non-virtual destructor even though it declares no virtual function at all: ownership is closed off by the rule, and closing it costs nothing here.
@@ -334,7 +334,7 @@ Additional rules:
 ***Example 1***:
 
 ```C++
-enum class E_SomeType { Enum1, Enum2};
+enum class E_SomeType { Enum1, Enum2 };
 
 const E_SomeType someVar_gce = E_SomeType::Enum1;
 ```
@@ -492,7 +492,7 @@ public:
 ***Example 1***:
 
 ```C++
-enum class E_SomeType { Enum1, Enum2};
+enum class E_SomeType { Enum1, Enum2 };
 
 using TAE_SomeType = E_SomeType;
 
@@ -608,7 +608,7 @@ const TAS_SomeType& someVar_grc = var_g;
 
 **Rationale for enumerator naming**:
 
-> For backward compatibility with C-style conventions, plain `enum` enumerators use `UPPER_SNAKE_CASE` (e.g., `DEEP_PURPLE`). For `enum class` enumerators, the mandatory type-name qualifier `E_EnumType::` allows the enumerator name itself to be written in `PascalCase` instead of `UPPER_SNAKE_CASE`, yielding the full form `E_Color::DeepPurple`.
+> For backward compatibility with C-style conventions, plain `enum` enumerators use `UPPER_SNAKE_CASE` (e.g., `DEEP_PURPLE`). For `enum class` enumerators, the mandatory type-name qualifier `E_EnumType::` allows the enumerator name itself to be written in `PascalCase` instead of `UPPER_SNAKE_CASE`, yielding the full form `E_Color::DeepPurple`. Neither enumerator row asks for a noun: unlike a variable or an object-like macro, an enumerator names a value rather than an object, so its casing is the only requirement.
 
 **Important notice for constants without a marker**:
 
@@ -641,7 +641,7 @@ The **base name** of a member variable is the same meaningful noun in `camelCase
 
 Access rules:
 
-- Non-`static` fields declared in a class are accessed **bare** inside the class's own methods (e.g., `operatingMode`). The `this->` qualifier is **forbidden** on fields: the access marker already makes it obvious that the name denotes a class field, so the qualifier adds nothing but noise.
+- Non-`static` fields declared in a class are accessed **bare** — without the `this->` qualifier, but always with the marker the name carries (e.g., `prot`\_`operatingMode`\_`pe`, never `this->prot_operatingMode_pe`). The `this->` qualifier is **forbidden** on fields: the access marker already makes it obvious that the name denotes a class field, so the qualifier adds nothing but noise.
 - `static` members are **not** accessed via `this->` (they have no instance). They **must** be qualified with their enclosing class name (e.g., `C_SomeType`::`pub`\_`instanceCount`\_`s`) even from within the class's own methods, so that the access is unambiguously a class-level entity.
 - Access from outside the class uses the object or the pointer — `obj`.`pub`\_`operatingMode` and `ptr`->`pub`\_`operatingMode` — once again with the member's full name.
 
@@ -851,7 +851,7 @@ namespace
     int*                 someVar_ap     = &someVar_a;    // a + pointer
     const E_DeviceState& someState_arce = someState_ae;  // a + reference to const enum
     thread_local int     someVar_at     = 12;            // a + thread_local (duration, not linkage)
-    // a static here is forbidden: the `a` marker excludes `s`, linkage stays internal
+    // a static (`as`) or extern (`ax`, `axt`) here is forbidden: the `a` marker excludes `s` and `x`
 }
 
 // ============================================================================
@@ -1066,7 +1066,7 @@ private:
 int main()
 {
     C_Logger logger;
-    logger.logMessage();                // external call on an object; inside the class, its own methods are called via this->
+    logger.logMessage();                // external call on an object; inside the class, methods are called via this->
     logger.touch();
     logger.pub_publicBuffer_p = nullptr;    // public field access from outside (obj.member)
     int instanceCount = C_Logger::pub_instanceCount_s;  // static member access qualified by class name
