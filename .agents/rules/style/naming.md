@@ -1,5 +1,7 @@
 # `TAPAS (C++ Naming Conventions)`
 
+The scheme takes its name from the Spanish *tapas* — small dishes that combine into a full meal, as these small markers combine into a name — and from the longest prefix of its own alias family, `TAPAS` (`T`ype `A`lias `P`rotocol `A`bstract `S`truct).
+
 ## `Scope and permitted deviations`
 
 Every entity created in this project is named by the rules of this document. When a name is ours to choose, these conventions win; the two situations that may override a rule are:
@@ -113,7 +115,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for `const`-like declarations**:
 
-> Every declaration that gives a variable a `const`-qualified type carries the `c` marker, whichever keyword produced that type: `const` and `constexpr` are the same case, because for an object declaration `constexpr` implies `const` already. The marker keeps its usual position: a `constexpr` local is `someConstVarName`\_`c`, a `static constexpr` local is `someConstVarName`\_`sc`, a `constexpr` variable at `global` namespace scope is `someConstVarName`\_`gc`, and a `global` `static constexpr` one is `someConstVarName`\_`gsc`. `constexpr` is not the `static` keyword, so it never adds the `s` [`storage-class`] marker on its own — `s` still tracks an explicit `static`. At member scope the same letters follow the access marker and the base name (a `static constexpr` member is `pub`\_`someConstVarName`\_`sc`, a `const` member is `pub`\_`someConstVarName`\_`c`).
+> Every declaration that gives a variable a `const`-qualified type carries the `c` marker, whichever keyword produced that type: `const` and `constexpr` are the same case, because for an object declaration `constexpr` implies `const` already. The marker keeps its usual position: a `constexpr` local is `someConstVarName`\_`c`, a `static constexpr` local is `someConstVarName`\_`sc`, a `constexpr` variable at `global` namespace scope is `someConstVarName`\_`gc`, and a `global` `static constexpr` one is `someConstVarName`\_`gsc`. `constexpr` is not the `static` keyword, so it never adds the `s` [`storage-class`] marker on its own — `s` still tracks an explicit `static`. At member scope the same letters follow the access marker and the base name (a `static constexpr` member is `pub`\_`someConstVarName`\_`sc`, a `const` member is `pub`\_`someConstVarName`\_`c`). A reference is the declaration where `constexpr` adds no `c` marker: `constexpr int& someVar`\_`gr = intTarget`\_`g;` gives the variable no `const`-qualified type — the keyword asks for a constant-initialized reference, not a `const` referent, and the object it names stays modifiable — so the name keeps the plain [`reference`] marker (see [Reference markers](#116-reference-markers)).
 
 **Important notice for what the `c` marker does not cover**:
 
@@ -214,7 +216,7 @@ A type prefix consists of optional `role markers` followed by a `type letter`.
 - `E`: `enum` or `enum class` (`E` - `E`num)
 - `U`: `union` (`U` - `U`nion)
 
-`Role markers` (normative clauses in [Abstraction & Protocol Markers](#122-abstraction--protocol-markers); the lines below are a summary only):
+`Role markers` (normative clauses in [Abstraction & protocol markers](#122-abstraction--protocol-markers); the lines below are a summary only):
 
 - *(none)*: concrete type
 - `I`: `interface` type — a complete dynamic contract: pure virtual functions only, no data member, destruction through the base is well-defined or impossible to write (`I` - `I`nterface)
@@ -229,7 +231,7 @@ Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC
 
 > `Role markers` never combine with the `U`/`E` `type letters` — unions cannot declare virtual member functions or participate in inheritance, and an enum declares nothing but its enumerators: no data members and no virtual functions.
 
-#### `1.2.2. Abstraction & Protocol Markers`
+#### `1.2.2. Abstraction & protocol markers`
 
 Terms used by the clauses below:
 
@@ -389,6 +391,7 @@ public:
 ***Example 5***:
 
 ```C++
+// IS_Drawable: the interface declared in Example 4 above, not repeated here
 template <typename TTP_Derived>
 class PC_Refreshable                          // protocol class (CRTP mixin)
 {
@@ -396,7 +399,9 @@ public:
     void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }
 
 protected:
-    ~PC_Refreshable() = default;              // destruction rule: protected non-virtual, so deletion through a protocol pointer cannot be written
+    // destruction rule: protected non-virtual, so deletion through a protocol
+    // pointer cannot be written
+    ~PC_Refreshable() = default;
 };
 
 class C_Ticker final : public PC_Refreshable<C_Ticker>
@@ -502,7 +507,7 @@ const TAS_SomeType& someVar_grc = var_g;
 - `TTP`: `type` `template` `parameter` (`TTP` - `T`ype `T`emplate `P`arameter)
 - `TTPP`: `type` `template` `parameter` `pack` (`TTPP` - `T`ype `T`emplate `P`arameter `P`ack)
 
-#### `1.3.2. Non-Type template parameter prefixes`
+#### `1.3.2. Non-type template parameter prefixes`
 
 - `NTTP`: `non` `type` `template` `parameter` (`NTTP` - `N`on `T`ype `T`emplate `P`arameter)
 - `NTTPP`: `non` `type` `template` `parameter` `pack` (`NTTPP` - `N`on `T`ype `T`emplate `P`arameter `P`ack)
@@ -541,7 +546,7 @@ const TAS_SomeType& someVar_grc = var_g;
 
 **Important notice for member-method calls**:
 
-> Non-`static` member methods **must** be called from within the class's own methods exclusively via the `this->` qualifier (e.g., `this->resizeBuffer()`). The `this->` qualifier **must never** be omitted so that it is always obvious a call targets an instance method rather than a free function. `static` member methods, conversely, **must** be qualified with the enclosing class name (e.g., `C_SomeType::create()`) and **must never** be called via `this->`. Member *fields* are the exact opposite: they are never accessed through `this->`, because the access marker already identifies them (see [Member variable naming conventions](#8-member-variable-naming-conventions)). A call that does not go through `this` is not a `this->` call and keeps the form of its own expression — a CRTP hook reached as `static_cast<TTP_Derived&>(*this).refreshState()` (see [Abstraction & Protocol Markers](#122-abstraction--protocol-markers)), a call on another object, and a call on a base subobject.
+> Non-`static` member methods **must** be called from within the class's own methods exclusively via the `this->` qualifier (e.g., `this->resizeBuffer()`). The `this->` qualifier **must never** be omitted so that it is always obvious a call targets an instance method rather than a free function. `static` member methods, conversely, **must** be qualified with the enclosing class name (e.g., `C_SomeType::create()`) and **must never** be called via `this->`. Member *fields* are the exact opposite: they are never accessed through `this->`, because the access marker already identifies them (see [Member variable naming conventions](#8-member-variable-naming-conventions)). A call that does not go through `this` is not a `this->` call and keeps the form of its own expression — a CRTP hook reached as `static_cast<TTP_Derived&>(*this).refreshState()` (see [Abstraction & protocol markers](#122-abstraction--protocol-markers)), a call on another object, and a call on a base subobject.
 
 **Important notice for function and method names**:
 
@@ -609,6 +614,8 @@ The `mutable` keyword is orthogonal to access level and to all marker categories
 ***Example***:
 
 ```C++
+#include <cstddef>
+
 enum E_CacheState { CACHE_EMPTY, CACHE_FILLED };
 
 class C_Cache {
@@ -661,7 +668,7 @@ private:
 
 **Important notice for the derived-type parameter**:
 
-> A protocol's derived-type template parameter is always named `TTP_Derived`: the clause that recognizes a contract member (clause `P1`) reads that name, so it is part of the protocol form rather than a free noun — see [Abstraction & Protocol Markers](#122-abstraction--protocol-markers).
+> A protocol's derived-type template parameter is always named `TTP_Derived`: the clause that recognizes a contract member (clause `P1`) reads that name, so it is part of the protocol form rather than a free noun — see [Abstraction & protocol markers](#122-abstraction--protocol-markers).
 
 ## `10. Ultimate Compilable Example`
 
@@ -732,26 +739,26 @@ volatile E_DeviceState       state_gve  = STATE_RUNNING;
 const volatile E_DeviceState state_gcve = STATE_RUNNING;
 
 // pointer variables
-int*                                                intTarget_gp   = &intTarget_g;    // global pointer
-const int*                                          intTarget_gpc  = &intTarget_gc;   // global pointer to const
-volatile int*                                       intTarget_gpv  = &intTarget_gv;   // global pointer to volatile
-const volatile int*                                 intTarget_gpcv = &intTarget_gcv;  // global pointer to const volatile
-E_DeviceState*                                      state_gpe      = &state_ge;       // global pointer to enum
-const E_DeviceState*                                state_gpce     = &state_gce;      // global pointer to const enum
-volatile E_DeviceState*                             state_gpve     = &state_gve;      // global pointer to volatile enum
-const volatile E_DeviceState*                       state_gpcve    = &state_gcve;     // global pointer to const volatile enum
-static const volatile E_DeviceState* const volatile state_gscvpcve = &state_gcve;     // global static const volatile pointer to const volatile enum
+int*                                                intTarget_gp   = &intTarget_g;    // pointer
+const int*                                          intTarget_gpc  = &intTarget_gc;   // pointer to const
+volatile int*                                       intTarget_gpv  = &intTarget_gv;   // pointer to volatile
+const volatile int*                                 intTarget_gpcv = &intTarget_gcv;  // pointer to const volatile
+E_DeviceState*                                      state_gpe      = &state_ge;       // pointer to enum
+const E_DeviceState*                                state_gpce     = &state_gce;      // pointer to const enum
+volatile E_DeviceState*                             state_gpve     = &state_gve;      // pointer to volatile enum
+const volatile E_DeviceState*                       state_gpcve    = &state_gcve;     // pointer to const volatile enum
+static const volatile E_DeviceState* const volatile state_gscvpcve = &state_gcve;     // static cv pointer to cv enum
 
 // reference variables — no cv-qualifier marker for references
-int&                                 intTarget_gr   = intTarget_g;    // global reference
-const int&                           intTarget_grc  = intTarget_gc;   // global reference to const
-volatile int&                        intTarget_grv  = intTarget_gv;   // global reference to volatile
-const volatile int&                  intTarget_grcv = intTarget_gcv;  // global reference to const volatile
-E_DeviceState&                       state_gre      = state_ge;       // global reference to enum
-const E_DeviceState&                 state_grce     = state_gce;      // global reference to const enum
-volatile E_DeviceState&              state_grve     = state_gve;      // global reference to volatile enum
-const volatile E_DeviceState&        state_grcve    = state_gcve;     // global reference to const volatile enum
-static const volatile E_DeviceState& state_gsrcve   = state_gcve;     // global static reference to const volatile enum
+int&                                 intTarget_gr   = intTarget_g;    // reference
+const int&                           intTarget_grc  = intTarget_gc;   // reference to const
+volatile int&                        intTarget_grv  = intTarget_gv;   // reference to volatile
+const volatile int&                  intTarget_grcv = intTarget_gcv;  // reference to const volatile
+E_DeviceState&                       state_gre      = state_ge;       // reference to enum
+const E_DeviceState&                 state_grce     = state_gce;      // reference to const enum
+volatile E_DeviceState&              state_grve     = state_gve;      // reference to volatile enum
+const volatile E_DeviceState&        state_grcve    = state_gcve;     // reference to const volatile enum
+static const volatile E_DeviceState& state_gsrcve   = state_gcve;     // static cv reference to cv enum
 
 // ============================================================================
 // Named namespace (snake_case): frame_renderer
@@ -771,7 +778,7 @@ namespace frame_renderer
     E_DeviceState*          ptr_npe = &someState_ne;     // n + pointer to enum
     E_DeviceState&          ref_nre = someState_ne;      // n + reference to enum
 
-    extern thread_local int someVar_nxt;                 // n + extern declaration (definition is elsewhere) of thread_local variable
+    extern thread_local int someVar_nxt;                 // n + extern declaration; the definition is elsewhere
 
     int computeFrameSum(int lhs, int rhs) { return lhs + rhs; }  // function: camelCase
 }
@@ -905,7 +912,9 @@ public:
     void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }
 
 protected:
-    ~PC_Refreshable() = default;  // destruction rule: protected non-virtual, so deletion through a protocol pointer cannot be written
+    // destruction rule: protected non-virtual, so deletion through a
+    // protocol pointer cannot be written
+    ~PC_Refreshable() = default;
 };
 
 class C_Ticker final : public PC_Refreshable<C_Ticker>
