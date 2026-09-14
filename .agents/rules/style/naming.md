@@ -11,7 +11,7 @@ Every entity created in this project is named by the rules of this document. Whe
 
 A deviation covers only the name that is forced; everything else about the entity keeps the conventions — the type keeps its prefix, a pointer to it keeps its marker, the file keeps its `snake_case.cpp` name, the namespace keeps its `snake_case` name. When the forced name is not self-evident, the declaration carries a comment that names the reason (`// Deviation: the name is fixed by std::exception`).
 
-Every code fragment in this document is written to compile as C++17; where a rule's prose names a C++20 form (a `requires`-clause, a concept), that form is an optional refinement of the same rule rather than a requirement of the conventions. Fragments that exist only to show a naming form declare names nothing reads, so a build that enables `-Wunused-variable` (or Clang's `-Wunused-const-variable` / `-Wunused-private-field`) reports those declarations; no fragment in this document produces a compiler error.
+Every code fragment in this document is written to compile as C++17; where a rule's prose names a C++20 form (a `requires`-clause, a concept), that form is an optional refinement of the same rule rather than a requirement of the conventions. Fragments that exist only to show a naming form declare names nothing reads, so a build that enables `-Wunused-variable` (or Clang's `-Wunused-const-variable` / `-Wunused-private-field`) reports those declarations; no fragment in this document produces a compiler error. The fragments below illustrate names rather than the program itself: their `//` comments are deliberately not Doxygen documentation, and they are not held to the repository's formatting limits. This document decides the shape of identifiers; how the code carrying them is formatted and documented is decided by its own rules.
 
 ***Example***:
 
@@ -135,10 +135,10 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 #### `1.1.5. Pointer markers`
 
-- `p`: `pointer` to object of `class`/`struct`/`union`/`primitive` type (`p` - `p`ointer)
-- `pc`: `pointer` to object of `const` `class`/`struct`/`union`/`primitive` type (`pc` - `p`ointer `c`onst)
-- `pv`: `pointer` to object of `volatile` `class`/`struct`/`union`/`primitive` type (`pv` - `p`ointer `v`olatile)
-- `pcv`: `pointer` to object of `const` `volatile` `class`/`struct`/`union`/`primitive` type (`pcv` - `p`ointer `c`onst `v`olatile)
+- `p`: `pointer` to an object or a function of any type (`p` - `p`ointer)
+- `pc`: `pointer` to an object or a function of `const` type (`pc` - `p`ointer `c`onst)
+- `pv`: `pointer` to an object or a function of `volatile` type (`pv` - `p`ointer `v`olatile)
+- `pcv`: `pointer` to an object or a function of `const` `volatile` type (`pcv` - `p`ointer `c`onst `v`olatile)
 - `pe`: `pointer` to object of `enum` (or `enum class`) type (`pe` - `p`ointer `e`num)
 - `pce`: `pointer` to object of `const` `enum` (or `enum class`) type (`pce` - `p`ointer `c`onst `e`num)
 - `pve`: `pointer` to object of `volatile` `enum` (or `enum class`) type (`pve` - `p`ointer `v`olatile `e`num)
@@ -152,16 +152,20 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 #### `1.1.6. Reference markers`
 
-- `r`: `reference` to object of `class`/`struct`/`union`/`primitive` type (`r` - `r`eference)
-- `rc`: `reference` to object of `const` `class`/`struct`/`union`/`primitive` type (`rc` - `r`eference `c`onst)
-- `rv`: `reference` to object of `volatile` `class`/`struct`/`union`/`primitive` type (`rv` - `r`eference `v`olatile)
-- `rcv`: `reference` to object of `const` `volatile` `class`/`struct`/`union`/`primitive` type (`rcv` - `r`eference `c`onst `v`olatile)
+- `r`: `reference` to an object or a function of any type (`r` - `r`eference)
+- `rc`: `reference` to an object or a function of `const` type (`rc` - `r`eference `c`onst)
+- `rv`: `reference` to an object or a function of `volatile` type (`rv` - `r`eference `v`olatile)
+- `rcv`: `reference` to an object or a function of `const` `volatile` type (`rcv` - `r`eference `c`onst `v`olatile)
 - `re`: `reference` to object of `enum` (or `enum class`) type (`re` - `r`eference `e`num)
 - `rce`: `reference` to object of `const` `enum` (or `enum class`) type (`rce` - `r`eference `c`onst `e`num)
 - `rve`: `reference` to object of `volatile` `enum` (or `enum class`) type (`rve` - `r`eference `v`olatile `e`num)
 - `rcve`: `reference` to object of `const` `volatile` `enum` (or `enum class`) type (`rcve` - `r`eference `c`onst `v`olatile `e`num)
 
 ***Example***: `someVar`\_`rcve` - `reference to object of const-volatile-enum type` with name `someVar`
+
+**Important notice for the designated type**:
+
+> The designated type may itself be a `pointer` or a function: the marker names the outermost kind, while its letters describe the cv-qualification and the enum-ness of what it designates, not the full shape of the type. A pointer to a pointer (`int**`) is therefore `someVar`\_`gp`, a pointer to a function (`int (*)(int)`) is `someVar`\_`gp`, and a reference to a pointer (`int*&`) is `someVar`\_`gr`. Two kinds of variable take no kind marker at all and are written as `normal-var`: a raw array (`char buffer`\_`g`\[4\]) — an array is not a `pointer` — and a pointer to a member (`int C_X::* offset`\_`g`), which designates a member rather than an object.
 
 #### `1.1.7. Ultimate variable naming examples`
 
@@ -293,11 +297,11 @@ Mechanical classification algorithm:
 Additional rules:
 
 - A class implementing every inherited pure virtual function stays concrete and keeps ordinary naming: `C_Button final : public AC_WidgetBase` (implementations marked `override`).
-- **When an obligation is checked** — an interface's obligation is checked wherever the type is used: a derived type that leaves any pure virtual function unoverridden stays abstract, so the first attempt to create an object fails. A protocol's obligation is checked where the contract member is instantiated, i.e. at its first use: a protocol whose contract member is never used checks nothing, and a type that violates it can be declared, instantiated and run. To check a protocol early, either make the contract member virtual (the diagnostic then arrives earlier, though how early depends on the compiler — Clang instantiates a virtual member with the class, GCC when the class is first used and its vtable is needed), or assert the obligation outside the protocol once the derived type is complete (`static_assert(requires (C_Derived& derived_r) { derived_r.refreshState(); });`), or constrain the point of use with a concept. A `static_assert` inside the protocol's own body does not work: the derived type is still incomplete there, so the assertion fails even for a derived type that provides everything.
+- **When an obligation is checked** — an interface's obligation is checked wherever the type is used: a derived type that leaves any pure virtual function unoverridden stays abstract, so the first attempt to create an object fails. A protocol's obligation is checked where the contract member is instantiated, i.e. at its first use: a protocol whose contract member is never used checks nothing, and a type that violates it can be declared, instantiated and run. To check a protocol early, either make the contract member virtual (the diagnostic then arrives at the first use of the derived type that needs its vtable — an object creation, or a virtual member the derived type defines out of line — instead of at the first call of the contract member), or assert the obligation outside the protocol once the derived type is complete (`static_assert(requires (C_Derived& derived_r) { derived_r.refreshState(); });`), or constrain the point of use with a concept. A `static_assert` inside the protocol's own body does not work: the derived type is still incomplete there, so the assertion fails even for a derived type that provides everything.
 - **Destruction rule** — a base class is the only handle the user of a hierarchy holds, so every base is a potential deletion site, and deletion is the one operation whose mistake is silent: with a `public` non-`virtual` destructor, `delete` through a pointer or reference to the base compiles, runs the destruction chain as if the object were of the base's own type — the derived type's destructor never runs — and asks for a deallocation of the base's size although the derived object was allocated with its own, which the standard calls undefined behavior (in practice: the derived part is left un-destroyed and the heap can be corrupted). The rule therefore lets the base's own declaration settle the question once, so that deleting through a base is always either well-defined or impossible to write:
   - a base through which objects are owned declares a **`public` `virtual` destructor** — declared, or implicitly declared as `virtual` by the language (`IS_Drawable` in the example below);
   - a base through which objects are never owned declares a **`protected` (or `private`) non-`virtual` destructor**, so that deleting through a pointer or reference to it cannot be written at all and the mistake becomes a compile error instead of undefined behavior (`PC_Refreshable` in the example below);
-  - a **`public` non-`virtual` destructor on a type with virtual functions** is therefore a defect — it is exactly the form that permits the undefined deletion. Both GCC and Clang diagnose the declaration (`-Wnon-virtual-dtor`); the delete site itself is diagnosed as well (`-Wdelete-non-virtual-dtor` in GCC, `-Wdelete-abstract-non-virtual-dtor` in Clang). `-Wall` enables the delete-site diagnostic but not the declaration one, so a project that wants to hear about the declaration names `-Wnon-virtual-dtor` itself.
+  - a **`public` non-`virtual` destructor on a type with virtual functions** is therefore a defect — it is exactly the form that permits the undefined deletion. Both GCC and Clang diagnose the declaration (`-Wnon-virtual-dtor`); the delete site itself is diagnosed as well (`-Wdelete-non-virtual-dtor`, accepted by both GCC and Clang; Clang prints it under `-Wdelete-non-abstract-non-virtual-dtor` for a non-abstract base and under `-Wdelete-abstract-non-virtual-dtor` for an abstract one). `-Wall` enables the delete-site diagnostic but not the declaration one, so a project that wants to hear about the declaration names `-Wnon-virtual-dtor` itself.
 
   *Ownership, not dispatch*: the rule asks what happens to the type, not how it dispatches. Whether a type carries a vtable is visible from its declarations, never from its marker, so a `P` type that happens to be polymorphic — a mixin over an interface such as `PC_DrawMixin` — follows the rule like any other base, while a mixin that is never owned through its base form declares the protected non-virtual destructor even though it declares no virtual function at all: ownership is closed off by the rule, and closing it costs nothing here.
 - **Template rule** — an ordinary class decides its role once and the name records that decision; a class template is a family of types instead, and whether an instantiation is abstract, declares a contract member or carries a data member can depend on its arguments. A wrapper that inherits its own parameter — `template <typename TTP_Base> class C_Wrapper : TTP_Base {};` — is abstract for `TTP_Base` = `IS_Drawable` and concrete for `TTP_Base` = `C_Line`, so one and the same name would promise a concrete type to one user and an incomplete base to another. A name cannot carry two roles, so the rule fixes the role at the primary definition and demands that every accepted argument preserve it:
