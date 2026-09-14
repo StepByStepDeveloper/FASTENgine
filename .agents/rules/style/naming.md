@@ -12,6 +12,8 @@ A deviation covers only the name that is forced; everything else about the entit
 ***Example***:
 
 ```C++
+#include <exception>
+
 class C_FileError final : public std::exception   // C_ prefix and final: convention
 {
 public:
@@ -29,6 +31,8 @@ private:
 - `priv`\_`errorCode` — a field of the same class: a noun with the access marker and the marker block, again with no deviation.
 
 ## `1. Identifier markers`
+
+In this section, optional parts of a written form appear in square brackets, and a *style-form* is a written shape a name has to follow — the casing plus the markers or prefixes that shape prescribes. The tables of the later sections name the style-form they require, either one defined here (`normal-var`, `enum-var`, `type-name` and the rest) or a casing of their own (`snake_case.cpp` for a file).
 
 ### `1.1. Variable markers`
 
@@ -67,7 +71,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for the `a` marker**:
 
-> Variables declared inside an anonymous (unnamed) namespace have internal linkage by definition — the compiler guarantees this automatically, so there is no need (and it is an error) to additionally apply the `static` (`s`) storage-class marker. The `a` marker is therefore mutually exclusive with the `static` (`s`) and `extern` (`x`) storage-class markers (see the storage-class markers below). An anonymous-namespace variable with internal-linkage storage is written `someVar`\_`a`, never `someVar`\_`as`.
+> Variables declared inside an anonymous (unnamed) namespace have internal linkage by definition — the compiler guarantees this automatically, so there is no need for the `static` (`s`) storage-class marker, and these conventions forbid it. The `a` marker is therefore mutually exclusive with the `static` (`s`) and `extern` (`x`) storage-class markers (see the storage-class markers below). An anonymous-namespace variable with internal-linkage storage is written `someVar`\_`a`, never `someVar`\_`as`.
 
 **Important notice for local (function/block) scope**:
 
@@ -75,7 +79,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for function parameters**:
 
-> A function parameter is block-scoped exactly like any other local variable, so it omits the [`scope`] marker; and because `static` and `extern` cannot be applied to a parameter, no [`storage-class`] marker can appear on one either. What remains is the [`cv-qualifier`] and kind part of the block, so a pointer parameter is `vertices`\_`p` (never `p_vertices`), while an unqualified one keeps its bare name (`vertexCount`).
+> A function parameter is block-scoped exactly like any other local variable, so it omits the [`scope`] marker; and because `static` and `extern` cannot be applied to a parameter, no [`storage-class`] marker can appear on one either. What remains is the [`cv-qualifier`] and kind part of the block, so a pointer parameter is `vertices`\_`p` — the marker trails the name, it never precedes it — while an unqualified one keeps its bare name (`vertexCount`).
 
 #### `1.1.2. Storage-class markers`
 
@@ -89,7 +93,7 @@ Markers are trailing on purpose: the meaningful part of every name comes first, 
 
 **Important notice for the `s` marker at namespace scope**:
 
-> All namespace-scope variables in C++ inherently have static storage duration. However, the `s` marker at namespace scope (e.g., `someVar`\_`gs` or `someVar`\_`ns`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope markers.
+> All namespace-scope variables in C++ inherently have static storage duration. However, the `s` marker at namespace scope (e.g., `someVar`\_`gs` or `someVar`\_`ns`) additionally indicates internal linkage — the variable is declared with the `static` keyword and is visible only within the current translation unit. This is a crucial distinction for large projects with multiple source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope markers. The marker records the keyword written in the declaration, not the linkage the variable ends up with: a namespace-scope `const` object that is not `volatile` already has internal linkage without any marker, while a `const volatile` one keeps external linkage.
 
 **Important notice for the `x` marker**:
 
@@ -257,7 +261,7 @@ Terms used by the clauses below:
 - **`P` (protocol)** — a compile-time contract on a statically known derived type:
   1. it declares at least one contract member (the derived type passes itself as `TTP_Derived`);
   2. everything else is optional: data members, static members, non-virtual implementations and virtual members are all allowed;
-  3. the marker states what the type *requires* of its derived type, not what it *implements* itself: whether a protocol carries a vtable is visible from its declarations, not from its name. A protocol is the contract side of a **mixin** (see *Protocol and mixin* below), and a protocol that also implements a dynamic contract is a **mixin over an interface**, named by these same clauses (`PC_`/`PAC_`); the Guidance above still recommends decomposing it into a dynamic base plus a standalone protocol.
+  3. the marker states what the type *requires* of its derived type, not what it *implements* itself: whether a protocol carries a vtable is visible from its declarations, not from its name. A protocol is the contract side of a **mixin** (see *Protocol and mixin* below), and a protocol that also implements a dynamic contract is a **mixin over an interface**, named by these same clauses (`PC_`/`PAC_`); the Guidance below still recommends decomposing it into a dynamic base plus a standalone protocol.
 
 Contract forms:
 
@@ -537,7 +541,7 @@ const TAS_SomeType& someVar_grc = var_g;
 
 **Important notice for member-method calls**:
 
-> Non-`static` member methods **must** be called from within the class's own methods exclusively via the `this->` qualifier (e.g., `this->resizeBuffer()`). The `this->` qualifier **must never** be omitted so that it is always obvious a call targets an instance method rather than a free function. `static` member methods, conversely, **must** be qualified with the enclosing class name (e.g., `C_SomeType::create()`) and **must never** be called via `this->`. Member *fields* are the exact opposite: they are never accessed through `this->`, because the access marker already identifies them (see [Member variable naming conventions](#8-member-variable-naming-conventions)).
+> Non-`static` member methods **must** be called from within the class's own methods exclusively via the `this->` qualifier (e.g., `this->resizeBuffer()`). The `this->` qualifier **must never** be omitted so that it is always obvious a call targets an instance method rather than a free function. `static` member methods, conversely, **must** be qualified with the enclosing class name (e.g., `C_SomeType::create()`) and **must never** be called via `this->`. Member *fields* are the exact opposite: they are never accessed through `this->`, because the access marker already identifies them (see [Member variable naming conventions](#8-member-variable-naming-conventions)). A call that does not go through `this` is not a `this->` call and keeps the form of its own expression — a CRTP hook reached as `static_cast<TTP_Derived&>(*this).refreshState()` (see [Abstraction & Protocol Markers](#122-abstraction--protocol-markers)), a call on another object, and a call on a base subobject.
 
 **Important notice for function and method names**:
 
@@ -560,6 +564,8 @@ const TAS_SomeType& someVar_grc = var_g;
 > An object-like macro and an enumerator are the only constant-like names in this document that carry no marker: neither is a variable, so the `c` [`cv-qualifier`] marker never applies to them (see the notice in [CV-qualifier markers](#113-cv-qualifier-markers)). The boundary is the declaration, not the value: `#define MAX_BUFFER_SIZE 256` is a macro and stays `MAX_BUFFER_SIZE`, while a variable holding the same value — `constexpr int maxBufferSize = 256;` — is a variable and takes the marker (`maxBufferSize`\_`gc`). A `const`-like variable is therefore never written in `UPPER_SNAKE_CASE`, and a macro is never given a marker block.
 
 ## `7. Non-Member variable naming conventions`
+
+The forms below are minimal: the examples are block-scope names, so a non-member variable declared in a namespace adds its [`scope`] marker (`operatingMode`\_`ge`) and one declared in a class adds its access marker instead (see [Member variable naming conventions](#8-member-variable-naming-conventions)).
 
 | Entity                  | Convention                         | Example              |
 |:----------------------- | ---------------------------------- | -------------------- |
@@ -603,6 +609,8 @@ The `mutable` keyword is orthogonal to access level and to all marker categories
 ***Example***:
 
 ```C++
+enum E_CacheState { CACHE_EMPTY, CACHE_FILLED };
+
 class C_Cache {
 public:
     mutable std::size_t pub_accessCount;      // mutable public:    access marker only
@@ -625,6 +633,8 @@ A member always carries both mechanisms at once: the access marker as its leadin
 ***Example***:
 
 ```C++
+enum E_OperatingMode { MODE_READ, MODE_WRITE };
+
 class C_SomeType {
 protected:
     E_OperatingMode* prot_operatingMode_pe;  // protected pointer member
@@ -639,14 +649,19 @@ private:
 
 ## `9. Template parameter naming conventions`
 
-| Entity                           | Convention                            | Example          |
-|:-------------------------------- | ------------------------------------- | ---------------- |
-| Type template parameter          | noun in `TTP_PascalCase` style-form   | `TTP_Value`      |
-| Type template parameter pack     | noun in `TTPP_PascalCase` style-form  | `TTPP_Args`      |
-| Non-type template parameter      | noun in `NTTP_PascalCase` style-form  | `NTTP_Count`     |
-| Non-type template parameter pack | noun in `NTTPP_PascalCase` style-form | `NTTPP_Values`   |
-| Template template parameter      | noun in `TeTP_PascalCase` style-form  | `TeTP_Allocator` |
-| Template template parameter pack | noun in `TeTPP_PascalCase` style-form | `TeTPP_Policies` |
+| Entity                            | Convention                            | Example          |
+|:--------------------------------- | ------------------------------------- | ---------------- |
+| Type template parameter           | noun in `TTP_PascalCase` style-form   | `TTP_Value`      |
+| Protocol's derived-type parameter | fixed name `TTP_Derived`              | `TTP_Derived`    |
+| Type template parameter pack      | noun in `TTPP_PascalCase` style-form  | `TTPP_Args`      |
+| Non-type template parameter       | noun in `NTTP_PascalCase` style-form  | `NTTP_Count`     |
+| Non-type template parameter pack  | noun in `NTTPP_PascalCase` style-form | `NTTPP_Values`   |
+| Template template parameter       | noun in `TeTP_PascalCase` style-form  | `TeTP_Allocator` |
+| Template template parameter pack  | noun in `TeTPP_PascalCase` style-form | `TeTPP_Policies` |
+
+**Important notice for the derived-type parameter**:
+
+> A protocol's derived-type template parameter is always named `TTP_Derived`: the clause that recognizes a contract member (clause `P1`) reads that name, so it is part of the protocol form rather than a free noun — see [Abstraction & Protocol Markers](#122-abstraction--protocol-markers).
 
 ## `10. Ultimate Compilable Example`
 
@@ -1006,7 +1021,7 @@ int main()
     tile.draw();                        // mixin over an interface: implemented dynamic contract
 
     (void) instanceCount;
-    
+
     return 0;
 }
 ```
