@@ -1,6 +1,6 @@
 # `TAPAS (C++ Naming Conventions)`
 
-The scheme takes its name from the Spanish *tapas* — small dishes that combine into a full meal, as these small markers combine into a name — and from the longest prefix of its own alias family, `TAPAS` (`T`ype `A`lias `P`rotocol `A`bstract `S`truct).
+The scheme takes its name from the Spanish *tapas* — small dishes that combine into a full meal, as these small markers combine into a name — and from its own alias prefix `TAPAS` (`T`ype `A`lias `P`rotocol `A`bstract `S`truct), one of the two longest in that family (`TAPAC` is the other).
 
 ## `Scope and permitted deviations`
 
@@ -11,7 +11,7 @@ Every entity created in this project is named by the rules of this document. Whe
 
 A deviation covers only the name that is forced; everything else about the entity keeps the conventions — the type keeps its prefix, a pointer to it keeps its marker, the file keeps its `snake_case.cpp` name, the namespace keeps its `snake_case` name. When the forced name is not self-evident, the declaration carries a comment that names the reason (`// Deviation: the name is fixed by std::exception`).
 
-Every code fragment in this document is written to compile as C++17; where a rule's prose names a C++20 form (a `requires`-clause, a concept), that form is an optional refinement of the same rule rather than a requirement of the conventions.
+Every code fragment in this document is written to compile as C++17; where a rule's prose names a C++20 form (a `requires`-clause, a concept), that form is an optional refinement of the same rule rather than a requirement of the conventions. Fragments that exist only to show a naming form declare names nothing reads, so a build that enables `-Wunused-variable` (or Clang's `-Wunused-const-variable` / `-Wunused-private-field`) reports those declarations; no fragment in this document produces a compiler error.
 
 ***Example***:
 
@@ -36,7 +36,7 @@ private:
 
 ## `1. Identifier markers`
 
-In this section, optional parts of a written form appear in square brackets, and a *style-form* is a written shape a name has to follow — the casing plus the markers or prefixes that shape prescribes. The tables of the later sections name the style-form they require, either one defined here (`normal-var`, `enum-var`, `type-name` and the rest) or a casing of their own (`snake_case.cpp` for a file).
+In this document, a name in square brackets is a **marker family** — the position into which the rules write whichever marker of that family applies (`[`scope`]` for `g` / `n` / `a`, `[`type-prefix`]` for `C_` / `IS_` / `PAC_` and the rest), never a literal token; whether a position may stay empty is stated by the rules of the section that defines the style-form. A *style-form* is a written shape a name has to follow — the casing plus the markers or prefixes that shape prescribes. The tables of the later sections name the style-form they require, either one defined here (`normal-var`, `enum-var`, `type-name` and the rest) or a casing of their own (`snake_case.cpp` for a file).
 
 ### `1.1. Variable markers`
 
@@ -241,7 +241,7 @@ Terms used by the clauses below:
 - **own virtual function** — a virtual function declared by the type (an `override` counts; a declared destructor counts; an implicitly-declared virtual destructor does not).
 - **special member function** — default constructor, copy/move constructor, copy/move assignment operator, destructor, in any form (defaulted, deleted, pure).
 - **data member** — a non-static data member; static data members are not fields and carry no per-object state.
-- **contract member** — a member declared by the type that names its derived-type template parameter `TTP_Derived` (a non-static member function, a static member function or a member function template, e.g. `void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }`).
+- **contract member** — a member declared by the type whose own declaration names its derived-type template parameter `TTP_Derived` (a non-static member function, a static member function or a member function template, e.g. `void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }` — a body and a trailing return type written in the class count as part of that declaration). A separate out-of-line definition does not: a pure virtual member whose definition names `TTP_Derived` is not a contract member.
 - **mixin** — a class template that hands functionality to the class deriving from it, typically through CRTP; a **protocol** is this document's name for the mixin form that obliges its host (see `P` below).
 - **abstract** — standard C++ sense: at least one pure virtual function in the member set has no final overrider in the type (`std::is_abstract_v<T>`); otherwise the type is **concrete**.
 
@@ -259,7 +259,7 @@ Terms used by the clauses below:
   *Consequences*: an interface inherits only from interfaces (`I3` and `I5`) — which admits the *composite* form, an interface that aggregates several contracts and declares nothing of its own (it passes `I2` on what it inherits) — and no helper implementation may be added to one: helpers belong to an abstract type. Clause `I4` is not a matter of taste: a user holding the interface sees exactly its virtual functions, so a member that is not virtual is not part of the contract at all, and an obligation toward a derived type is never visible through the interface.
 - **`A` (abstract)** — an incomplete base that exists to be completed:
   1. it is abstract;
-  2. it fails at least one `I` clause — that is what distinguishes it from an interface. Any of `I2`–`I6` can be the failing one: most often `I5` (it carries a data member, that is the state its derived types share) or `I3` (it carries an implementation), occasionally `I2` (its member set holds no pure virtual non-special member function — the only pure virtual function it has, if any, is a special member such as a destructor), `I4` (it declares a contract member, which also makes it `PA` — see clause `A3` below) or `I6` (an unsafe destructor). `I1` holds by definition and `I7` only permits, so neither can fail; a type that fails none of `I1`–`I7` is an interface itself;
+  2. it fails at least one `I` clause — that is what distinguishes it from an interface. Any of `I2`, `I3`, `I5` or `I6` can be the failing one: most often `I5` (it carries a data member, that is the state its derived types share) or `I3` (it carries an implementation), occasionally `I2` (its member set holds no pure virtual non-special member function — the only pure virtual function it has, if any, is a special member such as a destructor) or `I6` (an unsafe destructor). `I1` holds by definition and `I7` only permits, so neither can fail; `I4` cannot be the failing clause here either — it fails exactly when the type declares a contract member, and clause `A3` below requires a type marked `A` to declare none, so that type is `PA`, never `A`; a type that fails none of `I1`–`I7` is an interface itself;
   3. it declares no contract member (a contract member makes it `PA`);
   4. it states no contract of its own: unlike `I` it is not a complete handle for its users, and unlike `P` it names no obligations for a single derived type. Own pure virtual functions, `override = 0` re-declarations, data members and implementations are otherwise allowed, and whether objects are destroyed through it is left to the destruction rule below.
 - **`P` (protocol)** — a compile-time contract on a statically known derived type:
@@ -285,7 +285,7 @@ Mechanical classification algorithm:
 1. Does the type declare a contract member (a member that names `TTP_Derived`)? If any exist, remember marker `P`.
 2. Is the type abstract in the standard C++ sense — at least one pure virtual function (declared by the type or inherited) has no final overrider in it?
    - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g. `C_Button final : public AC_WidgetBase`).
-   - Yes → `PAC_`/`PAS_` if marker `P` was remembered (the contract member already breaks clauses `I3` and `I4`, so there is nothing left to ask); otherwise continue.
+   - Yes → `PAC_`/`PAS_` if marker `P` was remembered (a contract member already breaks clause `I4`, and the remembered `P` settles the role, so there is nothing left to ask); otherwise continue.
 3. Are all checkable `I` clauses (`I1`–`I6` above; `I7` merely permits static members and cannot fail) satisfied?
    - Yes → `IC_`/`IS_`.
    - No → `AC_`/`AS_`.
@@ -590,11 +590,11 @@ The forms below are minimal: the examples are block-scope names, so a non-member
 
 ## `8. Member variable naming conventions`
 
-The base name of a member variable follows the same rules as for non-member variables (a meaningful noun in `camelCase` plus a marker block). On top of that, the requirements below apply.
+The **base name** of a member variable is the same meaningful noun in `camelCase` as for a non-member variable, and it carries the same marker block after it. On top of that, the requirements below apply.
 
 **Important notice for the access marker and member scope**:
 
-> Every member carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. What follows the base name is the same trailing marker block as for any other variable, i.e. [`access-marker`]\_`camelCase`\_[`storage-class`][`cv-qualifier`][`enum`|`pointer`|`reference`] — and, exactly as for a non-member variable, a member whose block has nothing to mark is written without the trailing underscore (`pub`\_`operatingMode`):
+> Every member carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. What follows the base name is the same trailing marker block as for any other variable, i.e. [`access-marker`]\_`camelCase`\_[`storage-class`][`cv-qualifier`][`enum`][`pointer`][`reference`] — and, exactly as for a non-member variable, a member whose block has nothing to mark is written without the trailing underscore (`pub`\_`operatingMode`):
 >
 > - An ordinary (instance) non-static member carries **no storage-class marker** (e.g., `pub`\_`operatingMode`, `prot`\_`operatingMode`\_`pe`).
 > - A `static` class member carries the **`s`** storage-class marker (e.g., `pub`\_`instanceCount`\_`s`). Note carefully: at *namespace* scope `s` means internal linkage, but a `static` class member has **external linkage**. The `s` marker on a member therefore denotes *class-level (shared) storage only*, not internal linkage — there is no contradiction because the scope marker is absent and the class scope, not the storage marker, governs linkage. The `x` (`extern`) marker is **never** used on members: `static` members are defined exactly once and resolved by the linker; a declaration of one is written in the header with the plain `s` marker and defined in one source file with the same `s` marker (the keyword `static` is omitted at the definition).
@@ -616,7 +616,7 @@ A member's name is identical wherever it is written, inside or outside the class
 | `protected`  | `prot_`        | `prot`\_`operatingMode`\_`pe` | `obj`.`prot`\_`operatingMode`\_`pe` / `ptr`->`prot`\_`operatingMode`\_`pe` (derived classes only) |
 | `private`    | `priv_`        | `priv`\_`targetState`\_`e`    | Not accessible (except to `friend`s and nested classes)                                           |
 
-### `8.1. mutable members`
+### `8.1. Mutable members`
 
 The `mutable` keyword is orthogonal to access level and to all marker categories: it governs whether a field may be modified through a `const`-qualified method, not the field's scope, storage, or type. `mutable` members therefore follow exactly the same naming rules as non-`mutable` members of the same access level; the `mutable` qualifier is intentionally not encoded in the name.
 
@@ -644,7 +644,7 @@ private:
 
 ### `8.2. Members combining the access marker and the marker block`
 
-A member always carries both mechanisms at once: the access marker as its leading prefix (from the access level) and the marker block as the tail of the base name (from the variable's own storage, qualifiers and type). Neither mechanism is ever folded into the other, and the block keeps the same order it has for a non-member variable.
+A member always carries both mechanisms at once: the access marker as its leading prefix (from the access level) and the marker block trailing the base name (from the variable's own storage, qualifiers and type). Neither mechanism is ever folded into the other, and the block keeps the same order it has for a non-member variable.
 
 ***Example***:
 
@@ -679,13 +679,13 @@ private:
 
 > A protocol's derived-type template parameter is always named `TTP_Derived`: the clause that recognizes a contract member (clause `P1`) reads that name, so it is part of the protocol form rather than a free noun — see [Abstraction & protocol markers](#122-abstraction--protocol-markers).
 
-## `10. Ultimate Compilable Example`
+## `10. Ultimate compilable example`
 
-A single, self-contained translation unit (example) that exercises every naming convention defined in this document. This example is artificial by design. The file-name convention is represented by the hypothetical artifact name `ultimate_example.cpp`, and the namespace-name convention is demonstrated by the `snake_case` namespaces below. Several declarations exist only to show a naming form and are never read, so a build that enables `-Wunused-variable` (or Clang's `-Wunused-private-field`) reports them; the fragment itself compiles without errors.
+A single, self-contained translation unit (example) that exercises every naming convention defined in this document. This example is artificial by design. The file-name convention is represented by the hypothetical artifact name `ultimate_example.cpp`, and the namespace-name convention is demonstrated by the `snake_case` namespaces below.
 
 ```C++
 // ============================================================================
-// Ultimate Compilable Example
+// Ultimate compilable example
 // File-name convention: ultimate_example.cpp  Namespace convention: snake_case
 // ============================================================================
 
@@ -1061,7 +1061,7 @@ This example covers:
 - **Pointer markers** — all 8 variants (`p`, `pc`, `pv`, `pcv`, `pe`, `pce`, `pve`, `pcve`); the note that they apply to smart pointers alike is stated in [Pointer markers](#115-pointer-markers).
 - **Reference markers** — all 8 variants (`r`, `rc`, `rv`, `rcv`, `re`, `rce`, `rve`, `rcve`), with the [`cv-qualifier`] marker intentionally omitted.
 - **Scope markers** (`g`, `n`, `a`) and their omission at local/member scope.
-- **Static linkage/storage markers** (`s`, `t`, `st`) at namespace scope and as class members, plus the out-of-line static-member definition pattern (keyword `static` omitted, the name retained unchanged).
+- **Static linkage/storage markers** — `s`, `t` and `st` at namespace scope, and `s` and `st` as class members (a bare `t` has no member form; see [Member variable naming conventions](#8-member-variable-naming-conventions)) — plus the out-of-line static-member definition pattern (keyword `static` omitted, the name retained unchanged).
 - **Static thread_local** namespace (`gst`, `nst` markers) and member (`st`) forms.
 - **Type prefixes** (`C`, `S`, `E`, `U`) and **type-alias prefixes** (`TA`, `TAC`, `TAS`, `TAE`, `TAU`, `TAP`, `TAR`, `TAF`).
 - **Template parameter prefixes** — all 6 kinds (`TTP`, `TTPP`, `NTTP`, `NTTPP`, `TeTP`, `TeTPP`).
