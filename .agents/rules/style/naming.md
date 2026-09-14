@@ -16,7 +16,7 @@ class C_FileError final : public std::exception   // C_ prefix and final: conven
 {
 public:
     const char* what() const noexcept override;   // Deviation: the name is fixed by std::exception
-    int errorCode() const;                        // our own method: imperative verb, no deviation
+    int retrieveErrorCode() const;                // our own method: imperative verb, no deviation
 
 private:
     int priv_errorCode;                           // member: access marker and marker block, no deviation
@@ -25,7 +25,8 @@ private:
 
 - `C_FileError` — the type keeps its `C_` prefix: the deviation applies to `what()` alone.
 - `what()` — the only name in the class that does not follow these conventions; the comment states why.
-- `errorCode()` / `priv`\_`errorCode` — ordinary members of the same class, named by the rules as usual.
+- `retrieveErrorCode()` — a method of the same class: imperative verb, so the rule applies and nothing is deviated (`errorCode()` would be a noun, and nouns belong to variables).
+- `priv`\_`errorCode` — a field of the same class: a noun with the access marker and the marker block, again with no deviation.
 
 ## `1. Identifier markers`
 
