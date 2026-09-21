@@ -13,7 +13,7 @@ A deviation covers only the name that is forced; everything else about the entit
 
 Every code fragment in this document is written to compile as C++17; where a rule's prose names a C++20 form (a `requires`-clause, a concept), that form is an optional refinement of the same rule rather than a requirement of the conventions. This document decides names and the form in which a member is reached (§5, §8); how the code is otherwise formatted and documented lies outside its scope.
 
-Fragments that exist only to show a naming form declare names nothing reads, so a build that enables `-Wunused-variable` (or Clang's `-Wunused-const-variable` / `-Wunused-private-field` / `-Wunused-function`) reports those declarations; no fragment in this document produces a compiler error. The fragments below illustrate names rather than the program itself: their `//` comments annotate the name rather than document the declaration, and the fragments are laid out by hand for reading.
+Fragments that exist only to show a naming form declare names nothing reads, so a build that enables the unused-declaration warnings (`-Wunused-variable` and `-Wunused-function`; Clang adds `-Wunused-const-variable` and `-Wunused-private-field`) reports those declarations; no fragment in this document produces a compiler error. The fragments below illustrate names rather than the program itself: their `//` comments annotate the name rather than document the declaration, and the fragments are laid out by hand for reading.
 
 ***Example***:
 
@@ -42,9 +42,9 @@ The rules are layered, and this is the order they expect to be read in:
 
 - **Marker grammar — §1.** What a marker family is, which markers exist, in what order they concatenate, and what each letter means: `1.1` variables, `1.2` types, `1.3` template parameters. No later section adds a marker to this grammar; the one family defined outside it is the member's leading **access marker** (`pub_`, `prot_` or `priv_`), introduced in [Member variable naming conventions](#8-member-variable-naming-conventions).
 - **One table per entity — §2 to §9.** Each table names an entity and the style-form it has to follow; the style-forms themselves are defined in §1.
-- **One worked example — §10.** A single translation unit that exercises the rules above.
+- **One worked example — §10.** A single translation unit that exercises the rules above; the coverage list at its end names the few it points at instead of demonstrating.
 
-A reader who is here to name things rather than to read the document through needs less: §1.1 with §7 and §8 covers a variable, §1.2.1 with §4 a type, and §5 a function; §1.2.2 is the reference for deciding a type's role, and §10 shows every rule in one file.
+A reader who is here to name things rather than to read the document through needs less: §1.1 with §7 and §8 covers a variable, §1.2.1 with §4 a type (§1.2.3 an alias), and §5 a function; §1.2.2 is the reference for deciding a type's role. Every other entity has its own table — §2 a file, §3 a namespace, §6 a macro or enumerator, §9 a template parameter — and §10 shows the rules in one file.
 
 A variable is the one entity whose rules are spread over the places below — one per scope it can be declared in, plus the style-form table its own section carries; this table says where to look instead of repeating the grammar:
 
@@ -62,7 +62,7 @@ In this document, a name in square brackets is a **marker family** — the posit
 
 ### `1.1. Variable markers`
 
-A variable name is a meaningful noun in `camelCase` — a predicate, for a `bool` (see the Boolean notice below) — followed by a **marker block**: every marker that applies to the variable, written as lowercase letters after a single `_`, in the fixed order below (each marker listed below appears at most once, in the specified order).
+A variable name is a **base name** followed by a **marker block**. The base name is a meaningful noun in `camelCase` — a predicate, for a `bool` (see the Boolean notice below) — and the block is every marker that applies to the variable, written as lowercase letters after a single `_`, in the fixed order below (each marker listed below appears at most once, in the specified order).
 
 - `normal-var` (non-enum and non-pointer and non-reference) variable: `camelCase`\_[`scope`][`storage-class`][`cv-qualifier`]
 - `enum-var` variable: `camelCase`\_[`scope`][`storage-class`][`cv-qualifier`][`enum`]
@@ -71,7 +71,7 @@ A variable name is a meaningful noun in `camelCase` — a predicate, for a `bool
 
 The four forms differ in their **kind marker** — the marker that says what kind the variable is: `[`enum`]`, `[`pointer`]` or `[`reference`]`, with no kind marker at all for `normal-var`. A variable carries at most one of them, because each kind marker already encodes what its type designates (a pointer to an enum object is `pe`, never `ep`; a reference to an enum object is `re`), and it is the last position of the block.
 
-*Placeholders*: the names used in the examples of this document (`someVar`, `var_g`, `ptr_np`, `SomeType`) show the shape of a name, not the name of anything real; a name written in code states what the entity holds.
+*Placeholders*: the names used in the examples of this document (`someVar`, `var_g`, `ptr_np`, `SomeType`, and the type-shaped placeholders `C_X`, `PC_X<C_A>` and `C_Derived`) show the shape of a name, not the name of anything real; a name written in code states what the entity holds. A fragment may also name an entity the ultimate example declares, such as `S_Point` or `intTarget_g`, when the sentence is about the marker rather than about the entity.
 
 **Important notice for Boolean variables**:
 
@@ -127,7 +127,7 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 
 **Important notice for the `s` marker at namespace scope**:
 
-> Every namespace-scope variable has static storage duration, so the `s` marker does not record that. It records the `static` keyword itself: the variable is visible only within its own translation unit (e.g., `someVar`\_`gs` or `someVar`\_`ns`) — a distinction that matters in a project with many source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope markers. The marker records the keyword written in the declaration, not the linkage the variable ends up with: a namespace-scope `const` object that is not `volatile` already has internal linkage without any marker, while a `const volatile` one keeps external linkage. On a class member the same letter reads as class-level shared storage and says nothing about linkage — the member notice in [Member variable naming conventions](#8-member-variable-naming-conventions) explains the difference; the kind of scope the variable sits in always decides which reading applies. `inline` is not a keyword the markers name either: a namespace-scope `inline` variable keeps its plain [`scope`] marker, while an `inline static` member keeps its `s` (see `C_Container`::`pub`\_`sharedCount`\_`s` in §10).
+> Every namespace-scope variable has static storage duration, so the `s` marker does not record that. It records the `static` keyword itself: the variable is visible only within its own translation unit (e.g., `someVar`\_`gs` or `someVar`\_`ns`) — a distinction that matters in a project with many source files. The same reasoning applies to both the `global` (`g`) and the `named` (`n`) scope markers. The marker records the keyword written in the declaration, not the linkage the variable ends up with: a namespace-scope `const` object that is not `volatile` already has internal linkage without any marker, while a `const volatile` one keeps external linkage. On a class member the same letter reads as class-level shared storage and says nothing about linkage — the member notice in [Member variable naming conventions](#8-member-variable-naming-conventions) explains the difference. `inline` is not a keyword the markers name either: a namespace-scope `inline` variable keeps its plain [`scope`] marker, while an `inline static` member keeps its `s` (see `C_Container`::`pub`\_`sharedCount`\_`s` in §10).
 
 **Important notice for the `x` marker**:
 
@@ -161,7 +161,7 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 
 **Rationale for the enum marker**:
 
-> The `e` marker on a variable (e.g., `varName`\_`e`) makes it possible to recognize that the variable is an enumeration. This is especially important when the variable is of a plain `enum` (not `enum class`), because plain enumerators can be assigned directly as `VAL` instead of `E_EnumType::VAL`. If a reader sees `var = VAL`, they might not realize the variable is an enumeration, because in that representation `VAL` may be taken for some constant rather than an enumerator. The `e` marker (`var_e = VAL`) solves that problem. The marker describes the variable's own kind, so a variable whose type merely holds enumerators does not receive it — the cases are listed in the notice in [Reference markers](#116-reference-markers).
+> The `e` marker on a variable (e.g., `varName`\_`e`) makes it possible to recognize that the variable is an enumeration. This is especially important when the variable is of a plain `enum` (not `enum class`), because plain enumerators can be assigned directly as `VAL` instead of `E_EnumType::VAL`. If a reader sees `var = VAL`, they might not realize the variable is an enumeration, because in that representation `VAL` may be taken for some constant rather than an enumerator. The `e` marker (`var_e = VAL`) solves that problem. The marker describes the variable's own kind, so a variable whose type merely holds enumerators — a container of them, a class with an enumerator member — does not receive it and is written as a `normal-var`; the notice in [Reference markers](#116-reference-markers) lists the two kinds of variable that take no kind marker at all.
 
 #### `1.1.5. Pointer markers`
 
@@ -654,7 +654,7 @@ The **base name** of a member variable is the same meaningful noun in `camelCase
 
 **Important notice for the access marker and member scope**:
 
-> Every **data member** — `static` or not — carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. A member *function* carries no access marker: functions are named by the [Function-like Macro and Function/Method naming conventions](#5-function-like-macro-and-functionmethod-naming-conventions), never by this section. What follows the base name is the same trailing marker block as for any other variable: [`access-marker`]\_`camelCase`\_, then the block of the variable's own style-form with the [`scope`] position dropped — [`storage-class`][`cv-qualifier`] and at most one kind marker ([`enum`], [`pointer`] or [`reference`]; a reference leaves the [`cv-qualifier`] position empty, exactly as it does for a non-member variable) — and, exactly as for a non-member variable, a member whose block has nothing to mark is written without the trailing underscore (`pub`\_`operatingMode`):
+> Every **data member** — `static` or not — carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. A member *function* carries no access marker: functions are named by the [Function-like Macro and Function/Method naming conventions](#5-function-like-macro-and-functionmethod-naming-conventions), never by this section. What follows the base name is the same trailing marker block as for any other variable: [`access-marker`]\_`camelCase`\_, then the block of the variable's own style-form with the [`scope`] position dropped — [`storage-class`][`cv-qualifier`] and at most one kind marker ([`enum`], [`pointer`] or [`reference`]; a reference carries no [`cv-qualifier`] marker at all) — and, exactly as for a non-member variable, a member whose block has nothing to mark is written without the trailing underscore (`pub`\_`operatingMode`):
 >
 > - An ordinary (instance) non-static member carries **no storage-class marker** (e.g., `pub`\_`operatingMode`, `prot`\_`operatingMode`\_`pe`).
 > - A `static` class member carries the **`s`** storage-class marker (e.g., `pub`\_`instanceCount`\_`s`) — the *class-level shared storage* reading of the same marker [Storage-class markers](#112-storage-class-markers) defines at namespace scope: the kind of scope the variable sits in decides which reading applies. The `x` (`extern`) marker is **never** used on members: `static` members are defined exactly once and resolved by the linker; a declaration of one is written in the header with the plain `s` marker and defined in one source file with the same `s` marker (the keyword `static` is omitted at the definition).
@@ -739,7 +739,7 @@ private:
 
 ## `10. Ultimate compilable example`
 
-A single, self-contained translation unit (example) that exercises the naming conventions defined in this document. This example is artificial by design. The file-name convention is represented by the hypothetical artifact name `ultimate_example.cpp`, and the namespace-name convention is demonstrated by the `snake_case` namespaces below.
+A single, self-contained translation unit (example) that exercises the naming conventions defined in this document; the coverage list at its end names the few it points at instead of demonstrating. This example is artificial by design. The file-name convention is represented by the hypothetical artifact name `ultimate_example.cpp`, and the namespace-name convention is demonstrated by the `snake_case` namespaces below.
 
 ```C++
 // ============================================================================
