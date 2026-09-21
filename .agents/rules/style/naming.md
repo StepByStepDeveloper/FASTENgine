@@ -169,16 +169,16 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 - `pc`: `pointer` to an object of `const` type (`pc` - `p`ointer `c`onst)
 - `pv`: `pointer` to an object of `volatile` type (`pv` - `p`ointer `v`olatile)
 - `pcv`: `pointer` to an object of `const` `volatile` type (`pcv` - `p`ointer `c`onst `v`olatile)
-- `pe`: `pointer` to object of `enum` (or `enum class`) type (`pe` - `p`ointer `e`num)
-- `pce`: `pointer` to object of `const` `enum` (or `enum class`) type (`pce` - `p`ointer `c`onst `e`num)
-- `pve`: `pointer` to object of `volatile` `enum` (or `enum class`) type (`pve` - `p`ointer `v`olatile `e`num)
-- `pcve`: `pointer` to object of `const` `volatile` `enum` (or `enum class`) type (`pcve` - `p`ointer `c`onst `v`olatile `e`num)
+- `pe`: `pointer` to an object of `enum` (or `enum class`) type (`pe` - `p`ointer `e`num)
+- `pce`: `pointer` to an object of `const` `enum` (or `enum class`) type (`pce` - `p`ointer `c`onst `e`num)
+- `pve`: `pointer` to an object of `volatile` `enum` (or `enum class`) type (`pve` - `p`ointer `v`olatile `e`num)
+- `pcve`: `pointer` to an object of `const` `volatile` `enum` (or `enum class`) type (`pcve` - `p`ointer `c`onst `v`olatile `e`num)
 
 **Important notice for the `pointer` markers**:
 
 > The pointer markers are applicable to smart pointers as well: the marker records that the variable *designates* an object instead of holding it, so a `std::unique_ptr<C_SomeType>` variable is a pointer variable (`someVar_gp`) even though its own type is a class.
 
-***Example***: `someVar`\_`pcve` - `pointer to object of const-volatile-enum type` with name `someVar`
+***Example***: `someVar`\_`pcve` - `pointer to an object of const-volatile-enum type` with name `someVar`
 
 #### `1.1.6. Reference markers`
 
@@ -186,12 +186,12 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 - `rc`: `reference` to an object of `const` type (`rc` - `r`eference `c`onst)
 - `rv`: `reference` to an object of `volatile` type (`rv` - `r`eference `v`olatile)
 - `rcv`: `reference` to an object of `const` `volatile` type (`rcv` - `r`eference `c`onst `v`olatile)
-- `re`: `reference` to object of `enum` (or `enum class`) type (`re` - `r`eference `e`num)
-- `rce`: `reference` to object of `const` `enum` (or `enum class`) type (`rce` - `r`eference `c`onst `e`num)
-- `rve`: `reference` to object of `volatile` `enum` (or `enum class`) type (`rve` - `r`eference `v`olatile `e`num)
-- `rcve`: `reference` to object of `const` `volatile` `enum` (or `enum class`) type (`rcve` - `r`eference `c`onst `v`olatile `e`num)
+- `re`: `reference` to an object of `enum` (or `enum class`) type (`re` - `r`eference `e`num)
+- `rce`: `reference` to an object of `const` `enum` (or `enum class`) type (`rce` - `r`eference `c`onst `e`num)
+- `rve`: `reference` to an object of `volatile` `enum` (or `enum class`) type (`rve` - `r`eference `v`olatile `e`num)
+- `rcve`: `reference` to an object of `const` `volatile` `enum` (or `enum class`) type (`rcve` - `r`eference `c`onst `v`olatile `e`num)
 
-***Example***: `someVar`\_`rcve` - `reference to object of const-volatile-enum type` with name `someVar`
+***Example***: `someVar`\_`rcve` - `reference to an object of const-volatile-enum type` with name `someVar`
 
 **Important notice for the designated type**:
 
@@ -215,7 +215,7 @@ Variable `state`\_`gscvpcve` is `global`-scope, internal-linkage (`static`), `co
 - variable has internal linkage (`static`)
 - variable has `const volatile` qualifiers
 - variable has `pointer` type
-- variable points to object of `const-volatile-enum` type, specifically `E_DeviceState`
+- variable points to an object of `const-volatile-enum` type, specifically `E_DeviceState`
 
 ***Example 2***:
 
@@ -232,7 +232,7 @@ Variable `state`\_`gsrcve` is `global`-scope, internal-linkage (`static`) refere
 - variable has `global` scope
 - variable has internal linkage (`static`)
 - variable has `reference` type
-- variable refers to object of `const-volatile-enum` type, specifically `E_DeviceState`
+- variable refers to an object of `const-volatile-enum` type, specifically `E_DeviceState`
 
 ### `1.2. Types`
 
