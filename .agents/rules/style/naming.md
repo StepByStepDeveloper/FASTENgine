@@ -165,10 +165,10 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 
 #### `1.1.5. Pointer markers`
 
-- `p`: `pointer` to an object or a function of any type (`p` - `p`ointer)
-- `pc`: `pointer` to an object or a function of `const` type (`pc` - `p`ointer `c`onst)
-- `pv`: `pointer` to an object or a function of `volatile` type (`pv` - `p`ointer `v`olatile)
-- `pcv`: `pointer` to an object or a function of `const` `volatile` type (`pcv` - `p`ointer `c`onst `v`olatile)
+- `p`: `pointer` to an object or a function of any type, or to `void` (`p` - `p`ointer)
+- `pc`: `pointer` to an object of `const` type (`pc` - `p`ointer `c`onst)
+- `pv`: `pointer` to an object of `volatile` type (`pv` - `p`ointer `v`olatile)
+- `pcv`: `pointer` to an object of `const` `volatile` type (`pcv` - `p`ointer `c`onst `v`olatile)
 - `pe`: `pointer` to object of `enum` (or `enum class`) type (`pe` - `p`ointer `e`num)
 - `pce`: `pointer` to object of `const` `enum` (or `enum class`) type (`pce` - `p`ointer `c`onst `e`num)
 - `pve`: `pointer` to object of `volatile` `enum` (or `enum class`) type (`pve` - `p`ointer `v`olatile `e`num)
@@ -183,9 +183,9 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 #### `1.1.6. Reference markers`
 
 - `r`: `reference` to an object or a function of any type (`r` - `r`eference)
-- `rc`: `reference` to an object or a function of `const` type (`rc` - `r`eference `c`onst)
-- `rv`: `reference` to an object or a function of `volatile` type (`rv` - `r`eference `v`olatile)
-- `rcv`: `reference` to an object or a function of `const` `volatile` type (`rcv` - `r`eference `c`onst `v`olatile)
+- `rc`: `reference` to an object of `const` type (`rc` - `r`eference `c`onst)
+- `rv`: `reference` to an object of `volatile` type (`rv` - `r`eference `v`olatile)
+- `rcv`: `reference` to an object of `const` `volatile` type (`rcv` - `r`eference `c`onst `v`olatile)
 - `re`: `reference` to object of `enum` (or `enum class`) type (`re` - `r`eference `e`num)
 - `rce`: `reference` to object of `const` `enum` (or `enum class`) type (`rce` - `r`eference `c`onst `e`num)
 - `rve`: `reference` to object of `volatile` `enum` (or `enum class`) type (`rve` - `r`eference `v`olatile `e`num)
@@ -195,7 +195,7 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 
 **Important notice for the designated type**:
 
-> The designated type may itself be a `pointer`, an array or a function: the marker names the outermost kind only, and its letters describe the cv-qualification and the enum-ness of what that outermost kind designates — one level down, never the full shape of the type. A pointer to a pointer (`int**`) is therefore `someVar`\_`gp`, a pointer to a function (`int (*)(int)`) is `someVar`\_`gp`, a pointer to an array (`char (*)[4]`) is `someVar`\_`gp`, and a reference to a pointer (`int*&`) is `someVar`\_`gr`. Qualification deeper than that one level is not encoded: `int* const*` is `someVar`\_`gpc`, because the type it designates (`int* const`) is itself cv-qualified, while `const int**` is `someVar`\_`gp`, because the type it designates (`const int*`) is a pointer rather than a cv-qualified type and the `const` it points to lies one level further down — the letters never describe the pointee of a pointee. The value category is not encoded: an rvalue reference takes the same marker as any other reference (`int&&` is `someVar`\_`gr`, `const int&&` is `someVar`\_`grc`). Two kinds of variable take no kind marker at all and are written as `normal-var`: a raw array (`char buffer`\_`g`\[4\]) — an array is not a `pointer` — and a pointer to a member (`int C_X::* offset`\_`g`), whether it designates a member object or a member function, because it designates a member rather than an object.
+> The designated type may itself be a `pointer`, an array or a function: the marker names the outermost kind only, and its letters describe the cv-qualification and the enum-ness of what that outermost kind designates — one level down, never the full shape of the type. A pointer to a pointer (`int**`) is therefore `someVar`\_`gp`, a pointer to a function (`int (*)(int)`) is `someVar`\_`gp`, a pointer to an array (`char (*)[4]`) is `someVar`\_`gp`, and a reference to a pointer (`int*&`) is `someVar`\_`gr`. Qualification deeper than that one level is not encoded: `int* const*` is `someVar`\_`gpc`, because the type it designates (`int* const`) is itself cv-qualified, while `const int**` is `someVar`\_`gp`, because the type it designates (`const int*`) is a pointer rather than a cv-qualified type and the `const` it points to lies one level further down — the letters never describe the pointee of a pointee. A function type carries no cv-qualifiers — a qualifier written on top of one is ignored — so the `c` and `v` letters never describe a function: a pointer to a function carries them either for itself, before the kind marker (`int (* const someVar`\_`gcp)(int)`), or for a pointer it designates (`int (* const * someVar`\_`gpc)(int)`). The value category is not encoded: an rvalue reference takes the same marker as any other reference (`int&&` is `someVar`\_`gr`, `const int&&` is `someVar`\_`grc`). Two kinds of variable take no kind marker at all and are written as `normal-var`: a raw array (`char buffer`\_`g`\[4\]) — an array is not a `pointer` — and a pointer to a member (`int C_X::* offset`\_`g`), whether it designates a member object or a member function, because it designates a member rather than an object.
 
 #### `1.1.7. Compound marker examples`
 
