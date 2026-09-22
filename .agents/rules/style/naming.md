@@ -24,17 +24,17 @@ class C_FileError final : public std::exception   // C_ prefix: convention
 {
 public:
     const char* what() const noexcept override;   // Deviation: the name is fixed by std::exception
-    int retrieveErrorCode() const;                // our own method: imperative verb, no deviation
+    int retrieveErrorCode() const;                // our own method: imperative verb (§5), no deviation
 
 private:
-    int priv_errorCode;                           // member: access marker only; no block, no deviation
+    int priv_errorCode;                           // member: access marker only (§8); no marker block, no deviation
 };
 ```
 
 - `C_FileError` — the type keeps its `C_` prefix: the deviation applies to `what()` alone.
 - `what()` — the only name in the class that does not follow these conventions; the comment states why.
-- `retrieveErrorCode()` — a method of the same class: imperative verb, so the rule applies and nothing is deviated (`errorCode()` would be a noun, and nouns belong to variables).
-- `priv`\_`errorCode` — a field of the same class: a noun with the access marker and no marker block (an ordinary `int` field has nothing to mark), again with no deviation.
+- `retrieveErrorCode()` — a method of the same class: imperative verb (the name starts with a verb; §5), so the rule applies and nothing is deviated (`errorCode()` would be a noun, and nouns belong to variables; §1.1).
+- `priv`\_`errorCode` — a field of the same class: a noun with the leading access marker (`pub_`, `prot_` or `priv_`; §8) and no marker block (an ordinary `int` field has nothing to mark; §1.1), again with no deviation.
 
 ## `Organization of this document`
 
@@ -109,7 +109,7 @@ The marker block is trailing on purpose: the meaningful part of every name comes
 
 **Important notice for local (function/block) scope**:
 
-> Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the [`scope`] marker** entirely — `g`, `n` and `a` describe namespace scope only, so no name of a local variable ever carries one. The marker block of a local variable therefore starts at the [`storage-class`] position (e.g., a `static` local is `someVar`\_`s`, a `thread_local` local is `someVar`\_`t`, a `const` local is `someVar`\_`c`), and a local that has nothing to mark at all is written with no block and no trailing underscore (e.g., `someVar`). A name introduced by a structured binding (`auto [xCoordinate, yCoordinate] = S_Point{1, 2};`) is a block-scope name as well, but it binds to a subobject instead of declaring a variable of its own, so it carries no marker block and no separating underscore. The minimal forms shown in the [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) table (such as `operatingMode`\_`e`, `dataBuffer`\_`p`) are valid only at local scope.
+> Variables declared inside a function or block scope are *block-scoped*: they have no linkage and are not members of any namespace. They intentionally **omit the [`scope`] marker** entirely — `g`, `n` and `a` describe namespace scope only, so no name of a local variable ever carries one. The marker block of a local variable therefore starts at the [`storage-class`] position (e.g., a `static` local is `someVar`\_`s`, a `thread_local` local is `someVar`\_`t`, a `const` local is `someVar`\_`c`), and a local that has nothing to mark at all is written with no marker block and no trailing underscore (e.g., `someVar`). A name introduced by a structured binding (`auto [xCoordinate, yCoordinate] = S_Point{1, 2};`) is a block-scope name as well, but it binds to a subobject instead of declaring a variable of its own, so it carries no marker block and no separating underscore. The minimal forms shown in the [Non-Member variable naming conventions](#7-non-member-variable-naming-conventions) table (such as `operatingMode`\_`e`, `dataBuffer`\_`p`) are valid only at local scope.
 
 **Important notice for function parameters**:
 
@@ -654,7 +654,7 @@ The **base name** of a member variable is the same meaningful noun in `camelCase
 
 **Important notice for the access marker and member scope**:
 
-> Every **data member** — `static` or not — carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. A member *function* carries no access marker: functions are named by the [Function-like Macro and Function/Method naming conventions](#5-function-like-macro-and-functionmethod-naming-conventions), never by this section. What follows the base name is the same trailing marker block as for any other variable: [`access-marker`]\_`camelCase`\_, then the block of the variable's own style-form with the [`scope`] position dropped — [`storage-class`][`cv-qualifier`] and at most one kind marker ([`enum`], [`pointer`] or [`reference`]; a reference carries no [`cv-qualifier`] marker at all) — and, exactly as for a non-member variable, a member whose block has nothing to mark is written without the trailing underscore (`pub`\_`operatingMode`):
+> Every **member variable** — `static` or not — carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. A member *function* carries no access marker: functions are named by the [Function-like Macro and Function/Method naming conventions](#5-function-like-macro-and-functionmethod-naming-conventions), never by this section. What follows the base name is the same trailing marker block as for any other variable: [`access-marker`]\_`camelCase`\_, then the block of the variable's own style-form with the [`scope`] position dropped — [`storage-class`][`cv-qualifier`] and at most one kind marker ([`enum`], [`pointer`] or [`reference`]; a reference carries no [`cv-qualifier`] marker at all) — and, exactly as for a non-member variable, a member whose block has nothing to mark is written without the trailing underscore (`pub`\_`operatingMode`):
 >
 > - An ordinary (instance) non-static member carries **no storage-class marker** (e.g., `pub`\_`operatingMode`, `prot`\_`operatingMode`\_`pe`).
 > - A `static` class member carries the **`s`** storage-class marker (e.g., `pub`\_`instanceCount`\_`s`) — the *class-level shared storage* reading of the same marker [Storage-class markers](#112-storage-class-markers) defines at namespace scope: the kind of scope the variable sits in decides which reading applies. The `x` (`extern`) marker is **never** used on members: `static` members are defined exactly once and resolved by the linker; a declaration of one is written in the header with the plain `s` marker and defined in one source file with the same `s` marker (the keyword `static` is omitted at the definition).
