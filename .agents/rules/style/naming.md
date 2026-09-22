@@ -259,7 +259,7 @@ A type prefix consists of optional `role markers` followed by a `type letter`.
 - `A`: `abstract` type — a base that is not yet complete: abstract, yet failing at least one `I` clause — typically it carries state or implementation (`A` - `A`bstract)
 - `P`: `protocol` type — a compile-time contract on a statically known derived type: a mixin that states what its host owes (`P` - `P`rotocol)
 
-`Role markers` concatenate in the fixed order (`P` must be before `A`) and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA`. (`PI` and `IA` cannot be written — see the composition rules below.)
+`Role markers` concatenate in the fixed order (`P` must be before `A`) and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA` (`PI` and `IA` cannot be written — see the composition rules below).
 
 Resulting prefixes: `C`, `S`, `E`, `U`, `IC`, `IS`, `AC`, `AS`, `PC`, `PS`, `PAC`, `PAS`.
 
