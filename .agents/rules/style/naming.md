@@ -9,7 +9,7 @@ Every entity created in this project is named by the rules of this document — 
 - the name is fixed by the language or by an existing system / third-party interface — `main`, constructors, destructors, conversion operators, `operator+`, and an override that has to keep the library's name (e.g. `std::exception::what()`);
 - the entity is legacy code, carries established terminology, or has to be named so that it unifies with third-party code it is used together with — there the accepted name may be kept as it stands (a vendor method name kept so that the two hierarchies stay interchangeable, `dot()` / `cross()` kept because that is what the operations are called).
 
-A deviation covers only the name that is forced; everything else about the entity keeps the conventions — the type keeps its prefix, a pointer to it keeps its marker, the file keeps its `snake_case.cpp` name, the namespace keeps its `snake_case` name. When the forced name is not self-evident, the declaration carries a comment that names the reason (`// Deviation: the name is fixed by std::exception`).
+A deviation covers only the name that is forced; everything else about the entity keeps the conventions — the type keeps its prefix (§1.2.1), a pointer to it keeps its marker (§1.1), the file keeps its `snake_case.cpp` name, the namespace keeps its `snake_case` name. When the forced name is not self-evident, the declaration carries a comment that names the reason (`// Deviation: the name is fixed by std::exception`).
 
 Every code fragment in this document is written to compile as C++17; where a rule's prose names a C++20 form (a `requires`-clause, a concept), that form is an optional refinement of the same rule rather than a requirement of the conventions. This document decides names and the form in which a member is reached (§5, §8); how the code is otherwise formatted and documented lies outside its scope.
 
@@ -257,7 +257,7 @@ A type prefix consists of optional `role markers` followed by a `type letter`.
 - *(none)*: concrete type
 - `I`: `interface` type — a complete dynamic contract: pure virtual functions only, no data member, destruction through the base is well-defined or impossible to write (`I` - `I`nterface)
 - `A`: `abstract` type — a base that is not yet complete: abstract, yet failing at least one `I` clause — typically it carries state or implementation (`A` - `A`bstract)
-- `P`: `protocol` type — a compile-time contract on a statically known derived type: a mixin that states what its host owes (`P` - `P`rotocol)
+- `P`: `protocol` type — a compile-time contract on a statically known derived type: a class template that states what the class deriving from it owes (`P` - `P`rotocol)
 
 `Role markers` concatenate in the fixed order (`P` must be before `A`) and admit exactly five combinations: *(none)*, `I`, `A`, `P`, `PA` (`PI` and `IA` cannot be written — see the composition rules below).
 
@@ -316,8 +316,8 @@ Terms used below:
 - **special member function** — default constructor, copy/move constructor, copy/move assignment operator, destructor, in any form (defaulted, deleted, pure).
 - **data member** — a non-static data member; static data members are not fields and carry no per-object state.
 - **handle** — a pointer or a reference through which a user reaches an object.
-- **contract member** — a member declared by the type whose own declaration names its derived-type template parameter `TTP_Derived` (a non-static member function, a static member function or a member function template, e.g. `void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }` — a body and a trailing return type written in the class count as part of that declaration). A separate out-of-line definition does not: a pure virtual member whose definition names `TTP_Derived` is not a contract member.
-- **mixin** — a class template that hands functionality to the class deriving from it, typically through CRTP; a **protocol** is this document's name for the mixin form that obliges its host (see `P` below).
+- **contract member** — a member function (declared by the type) that requires something of the class deriving from the template — the static counterpart of an interface's pure virtual function. It reaches that class through `TTP_Derived`, the fixed name this document requires for the template parameter that stands for it (see [Template parameter naming conventions](#9-template-parameter-naming-conventions)). It is one of three forms — a non-static member function, a static member function or a member function template — for example `void refresh() { static_cast<TTP_Derived&>(*this).refreshState(); }`, which requires the deriving class to provide `refreshState()`. Where the member's text stands does not matter: a declaration, a trailing return type, a body written in the class and a definition written outside it all state the same requirement.
+- **mixin** — a class template that hands functionality to the class deriving from it (its **host**), typically through CRTP; the member a contract member calls on that host is the mixin's **hook**; a **protocol** is this document's name for the mixin form that obliges its host (see `P` below).
 - **abstract** — standard C++ sense: at least one pure virtual function in the member set has no final overrider in the type (`std::is_abstract_v<T>`); otherwise the type is **concrete**.
 
 `Role markers`:
@@ -357,7 +357,7 @@ Composition rules:
 
 Mechanical classification algorithm:
 
-1. Does the type declare a contract member (a member that names `TTP_Derived`)? If any exist, remember marker `P`.
+1. Does the type declare a contract member (a member function whose declaration or definition names `TTP_Derived`)? If any exist, remember marker `P`.
 2. Is the type abstract in the standard C++ sense — at least one pure virtual function (declared by the type or inherited) has no final overrider in it?
    - No → the type is concrete: `PC_`/`PS_` if marker `P` was remembered, otherwise `C_`/`S_`. Implementing every inherited pure virtual function makes a type concrete even though it keeps a vtable (e.g. `C_Button final : public AC_WidgetBase`).
    - Yes → `PAC_`/`PAS_` if marker `P` was remembered (a contract member already breaks clause `I4`, and the remembered `P` settles the role, so there is nothing left to ask); otherwise continue.
@@ -654,7 +654,7 @@ The **base name** of a member variable is the same meaningful noun in `camelCase
 
 **Important notice for the access marker and member scope**:
 
-> Every **member variable** — `static` or not — carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a field. A member *function* carries no access marker: functions are named by the [Function-like Macro and Function/Method naming conventions](#5-function-like-macro-and-functionmethod-naming-conventions), never by this section. What follows the base name is the same trailing marker block as for any other variable: [`access-marker`]\_`camelCase`\_, then the block of the variable's own style-form with the [`scope`] position dropped — [`storage-class`][`cv-qualifier`] and at most one kind marker ([`enum`], [`pointer`] or [`reference`]; a reference carries no [`cv-qualifier`] marker at all) — and, exactly as for a non-member variable, a member whose block has nothing to mark is written without the trailing underscore (`pub`\_`operatingMode`):
+> Every **member variable** — `static` or not — carries a mandatory **access marker** as its leading prefix — `pub_`, `prot_` or `priv_` — and omits the [`scope`] marker entirely: a member is *class-scoped*, never namespace-scoped, so `g` / `n` / `a` never apply to a member variable. A member *function* carries no access marker: functions are named by the [Function-like Macro and Function/Method naming conventions](#5-function-like-macro-and-functionmethod-naming-conventions), never by this section. What follows the base name is the same trailing marker block as for any other variable: [`access-marker`]\_`camelCase`\_, then the block of the variable's own style-form with the [`scope`] position dropped — [`storage-class`][`cv-qualifier`] and at most one kind marker ([`enum`], [`pointer`] or [`reference`]; a reference carries no [`cv-qualifier`] marker at all) — and, exactly as for a non-member variable, a member whose block has nothing to mark is written without the trailing underscore (`pub`\_`operatingMode`):
 >
 > - An ordinary (instance) non-static member carries **no storage-class marker** (e.g., `pub`\_`operatingMode`, `prot`\_`operatingMode`\_`pe`).
 > - A `static` class member carries the **`s`** storage-class marker (e.g., `pub`\_`instanceCount`\_`s`) — the *class-level shared storage* reading of the same marker [Storage-class markers](#112-storage-class-markers) defines at namespace scope: the kind of scope the variable sits in decides which reading applies. The `x` (`extern`) marker is **never** used on members: `static` members are defined exactly once and resolved by the linker; a declaration of one is written in the header with the plain `s` marker and defined in one source file with the same `s` marker (the keyword `static` is omitted at the definition).
