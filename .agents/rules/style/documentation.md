@@ -11,7 +11,7 @@ This document defines *what* must be documented, *which* commands to use, and *w
 - **Single-line form** — `/// @brief ...` on its own line above the declaration, or the trailing form `///< @brief ...` on the same line after a member/enumerator, is allowed only for entities whose whole contract is one short clause.
 - **Language**: English only (see the `Language` core rule in `AGENTS.md`).
 - **Formatting**: comment text obeys the `Formatting` rules — 4-space indentation, max 100-120 characters, no tabs. Continuation lines of a block align with the block's first `*`.
-- **Where the documentation lives**: the full contract block is written on the **declaration** (header). The matching definition in a `.cpp` file carries no Doxygen block — only ordinary `//` implementation comments — so that the same entity is not documented twice. Entities with no declaration in a header (internal helpers, anonymous-namespace functions, `static` file-local utilities) are documented at their definition.
+- **Where the documentation lives**: the full contract block is written on the **declaration** (header). The matching definition in a `.cpp` file carries no Doxygen block — only ordinary `//` implementation comments — so that the same entity is not documented twice. Entities with no declaration in a header (internal helpers, anonymous-namespace functions, `static` file-local variables) are documented at their definition.
 
 ## Fixed command order
 
@@ -73,13 +73,16 @@ Every header and source file opens with a file block:
 A type block answers: what does an instance *mean*, what invariants must hold, who owns the resource, and how does it relate to other types. For every template parameter, `@tparam` must state the requirement imposed on the argument — not merely repeat its name:
 
 ```C++
+#include <cstddef>
+
 /**
  * @brief Owns the vertex storage of one mesh and provides read access to it.
  * @details The mesh never copies vertex data: the constructor stores the caller's pointer and every
  *          accessor hands it back. Objects are movable; duplication is an explicit operation.
  * @tparam TTP_Vertex Vertex component type (in practice @c float or @c double) used for both position and normal data.
- * @invariant priv_vertices_p is non-null and priv_vertexCount is greater than zero.
- * @warning The object holds a view over the storage passed to the constructor; destroying that storage first leaves the mesh dangling.
+ * @invariant @c priv_vertices_p is non-null and @c priv_vertexCount is greater than zero.
+ * @warning The object holds a view over the storage passed to the constructor; destroying that
+ *          storage first leaves the mesh dangling.
  * @see C_MeshLoader
  */
 template <typename TTP_Vertex>
@@ -88,9 +91,10 @@ class C_Mesh
 public:
     /**
      * @brief Creates a mesh over a caller-provided vertex array.
-     * @param[in,out] vertices_p Vertex array of at least @p vertexCount elements; ownership stays with the caller and the storage must outlive this object.
+     * @param[in,out] vertices_p Vertex array of at least @p vertexCount elements;
+     *                           ownership stays with the caller and the storage must outlive this object.
      * @param[in] vertexCount Number of vertices in @p vertices_p; must be greater than zero.
-     * @pre vertices_p != nullptr
+     * @pre @p vertices_p != nullptr
      */
     C_Mesh(TTP_Vertex* vertices_p, std::size_t vertexCount)
         : priv_vertices_p(vertices_p), priv_vertexCount(vertexCount)
@@ -101,18 +105,18 @@ public:
      * @brief Returns the number of vertices covered by this mesh.
      * @return Vertex count; never zero for a validly constructed mesh.
      */
-    std::size_t vertexCount() const { return priv_vertexCount; }
+    std::size_t retrieveVertexCount() const { return priv_vertexCount; }
 
 private:
     /// @brief Vertex array owned by the caller; must outlive this object.
     TTP_Vertex* priv_vertices_p;
 
-    /// @brief Number of vertices in priv_vertices_p; strictly greater than zero.
+    /// @brief Number of vertices in @c priv_vertices_p; strictly greater than zero.
     std::size_t priv_vertexCount;
 };
 ```
 
-Role-marked types (see `style/naming.md`) document their contract accordingly: an `IC_`/`IS_` interface documents the obligations on implementations, an `AC_`/`AS_` abstract type documents its partial implementation, and a `PC_`/`PS_`/`PAC_`/`PAS_` protocol documents exactly what the derived type must provide, naming the forwarding member that requires it.
+Role-marked types (see `style/naming.md`) document their contract accordingly: an `IC_`/`IS_` interface documents the obligations on implementations, an `AC_`/`AS_` abstract type documents its partial implementation, and a `PC_`/`PS_`/`PAC_`/`PAS_` protocol documents exactly what the derived type must provide, naming the contract member that requires it.
 
 ### Enumerators
 
@@ -152,23 +156,31 @@ Error reporting is documented through the return channel, because the project fo
 Documented meaning, not a translation of the name: units, valid range, ownership (for pointers/references — who owns the pointee, how long it must outlive the object, whether ownership is transferred), lifetime, aliasing, thread-safety for `static`, `thread_local` and `mutable` members, and the relation to other fields:
 
 ```C++
+#include <cstddef>
+#include <cstdint>
+
 class C_Logger
 {
 public:
-    /// @brief Number of live C_Logger instances; incremented by the constructor and decremented by the destructor.
-    /// @note Class-level storage shared by every instance; not thread-safe by itself.
+    /**
+     * @brief Number of live @c C_Logger instances; incremented by the constructor and decremented by the destructor.
+     * @note Class-level storage shared by every instance; not thread-safe by itself.
+     */
     static std::uint32_t pub_instanceCount_s;
 
     /// @brief Returns the age of the oldest entry that has not been flushed yet.
     /// @return Age in milliseconds, saturated at the configured flush timeout; never decreasing.
-    std::uint32_t lastFlushAge() const { return prot_lastFlushAge; }
+    std::uint32_t retrieveLastFlushAge() const { return prot_lastFlushAge; }
 
 protected:
     /// @brief Milliseconds since the last successful flush; saturated at the configured timeout.
     std::uint32_t prot_lastFlushAge;
 
 private:
-    /// @brief One past the last written entry of the caller-provided sink; the sink must not be reallocated while the logger is alive.
+    /**
+     * @brief One past the last written entry of the caller-provided sink; the sink must not be
+     *        reallocated while the logger is alive.
+     */
     std::byte* priv_sinkEnd_p;
 };
 ```
@@ -191,10 +203,10 @@ Every macro carries a block. Function-like macros document each parameter, state
 The following entities are **not** required to carry Doxygen comments:
 
 - **Trivial locals** — loop indices, single-use temporaries, clearly named intermediate results. They are explained inline with `//` only when they are non-obvious (magic values, units, invariants, ownership of a raw pointer, an intentional lifetime extension).
-- **Trivial accessors** — one-line getters/setters whose name fully expresses the semantics (e.g. `vehicleCount()`, `setVehicleCount()`). A restating comment on them is forbidden rather than encouraged.
+- **Trivial accessors** — one-line getters/setters whose name fully expresses the semantics (e.g. `retrieveVehicleCount()`, `setVehicleCount()`). A restating comment on them is forbidden rather than encouraged.
 - **Self-evident lambdas and local functors** passed directly to an algorithm.
 - **Third-party, vendored and generated code** (e.g. `vcpkg_installed/`, generated bindings) — never documented and never reformatted; its comments are left exactly as upstream wrote them.
-- **Illustrative code fragments inside `.agents/rules/**`** that exist to demonstrate a *different* convention (e.g. the `Ultimate Compilable Example` in `style/naming.md`) may omit Doxygen comments, provided the fragment states the omission. Fragments that illustrate this document are documented, follow every rule in this folder and are kept compilable — together they form a single translation unit that builds without warnings.
+- **Illustrative code fragments inside `.agents/rules/**`** that exist to demonstrate a *different* convention (e.g. the `Ultimate Compilable Example` in `style/naming.md`) may omit Doxygen comments, provided the fragment states the omission. Fragments that illustrate this document are documented and follow every rule in this folder; they are kept compilable, and together they form a single translation unit that produces no compiler error. Such a fragment declares entities nothing reads, so a warning-enabled build reports them: Clang flags the unread private member of the members example above (`-Wunused-private-field`), while GCC stays silent on the same code.
 
 Nothing else is exempt. Materially non-trivial code is always documented, regardless of visibility: `private` members and internal helpers are read by maintainers at least as often as public API is read by callers.
 
