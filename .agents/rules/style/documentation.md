@@ -208,6 +208,8 @@ The following entities are **not** required to carry Doxygen comments:
 - **Third-party, vendored and generated code** (e.g. `vcpkg_installed/`, generated bindings) — never documented and never reformatted; its comments are left exactly as upstream wrote them.
 - **Illustrative code fragments inside `.agents/rules/**`** that exist to demonstrate a *different* convention (e.g. the `Ultimate Compilable Example` in `style/naming.md`) may omit Doxygen comments, provided the fragment states the omission. Fragments that illustrate this document are documented and follow every rule in this folder; they are kept compilable, and together they form a single translation unit that produces no compiler error. Such a fragment declares entities nothing reads, so a warning-enabled build reports them: Clang flags the unread private member of the members example above (`-Wunused-private-field`), while GCC stays silent on the same code.
 
+- **Skill tooling scripts** (`.agents/skills/**/scripts/`) — helper scripts a skill invokes. They are written in Python and carry a module docstring stating their interface, usage and exit codes, plus function docstrings where the behaviour is not obvious, in place of Doxygen blocks: nothing generates Doxygen output from that folder, and the interpreter and `--help` are what read them.
+
 Nothing else is exempt. Materially non-trivial code is always documented, regardless of visibility: `private` members and internal helpers are read by maintainers at least as often as public API is read by callers.
 
 ## Prohibited
