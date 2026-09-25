@@ -1,0 +1,34 @@
+# Paths an agent should neither read nor quote, and which adapters copy into a
+# harness-specific ignore file (.cursorignore / .aiexclude / .claudeignore) where one is read.
+# Syntax: one glob per line, .gitignore-like. See .agents/adapters/README.md.
+
+# Build and cache output
+build/
+build-*/
+.cache/
+Testing/
+CMakeFiles/
+compile_commands.json
+vcpkg_installed/
+
+# Compiled artifacts
+*.o
+*.obj
+*.a
+*.so
+*.out
+*.d
+*.gch
+*.pch
+
+# Version-control and editor internals
+.git/
+.kilo/
+.obsidian/
+
+# Secrets and local environment
+.env
+.env.*
+*.pem
+*.key
+*.p12
