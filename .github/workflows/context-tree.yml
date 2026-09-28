@@ -1,0 +1,34 @@
+name: Context tree
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gate:
+    name: Context tree gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Snippets compile, links and anchors resolve, layout holds
+        run: |
+          python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py .agents --group block --compiler clang++ --std c++17
+          python3 .agents/skills/verify-rules/scripts/check_heading_numbering.py .agents/rules/style/naming.md -r .agents/rules
+          python3 .agents/skills/verify-rules/scripts/check_context_layout.py --root .agents --repo .
+
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Bazelisk
+        run: |
+          curl -sSL -o /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-amd64
+          chmod +x /usr/local/bin/bazel
+      - name: Install doit
+        run: python3 -m pip install --user doit
+      - name: Build
+        run: doit build
+      - name: Test
+        run: doit test

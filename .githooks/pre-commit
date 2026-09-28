@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Advisory pre-commit gate for the context tree.
+#
+# Specification: .agents/hooks/verify-rules-on-edit.md — the same gate CI runs,
+# fired for the owner's commits as well as an agent's. It prints a problem and
+# lets the commit through; flip the last line to `exit "$status"` once the tree
+# has been green for a round.
+#
+# Enable once per clone: git config core.hooksPath .githooks
+
+set -uo pipefail
+
+cd "$(git rev-parse --show-toplevel)" || exit 0
+
+if ! git diff --cached --name-only | grep -qE '^(AGENTS\.md|\.agents/)'; then
+    exit 0
+fi
+
+status=0
+python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py \
+    .agents --group block --compiler clang++ --std c++17 || status=1
+python3 .agents/skills/verify-rules/scripts/check_heading_numbering.py \
+    .agents/rules/style/naming.md -r .agents/rules || status=1
+python3 .agents/skills/verify-rules/scripts/check_context_layout.py \
+    --root .agents --repo . || status=1
+
+if [ "$status" -ne 0 ]; then
+    echo "pre-commit: the context tree gate reported a problem (advisory — the commit continues)."
+fi
+exit 0
