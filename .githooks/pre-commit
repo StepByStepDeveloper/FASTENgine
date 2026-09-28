@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
-# Advisory pre-commit gate for the context tree.
+# Pre-commit gate: an advisory context-tree check, and a blocking secret scan.
 #
-# Specification: .agents/hooks/verify-rules-on-edit.md — the same gate CI runs,
-# fired for the owner's commits as well as an agent's. It prints a problem and
-# lets the commit through; flip the last line to `exit "$status"` once the tree
-# has been green for a round.
+# Specifications: .agents/hooks/verify-rules-on-edit.md (the context tree —
+# the same gate CI runs; it prints a problem and lets the commit through, so
+# flip its closing `exit 0` to `exit "$status"` once the tree has been green
+# for a round) and .agents/hooks/secret-scan-on-commit.md (the secret scan —
+# a finding blocks the commit).
 #
 # Enable once per clone: git config core.hooksPath .githooks
 
 set -uo pipefail
 
 cd "$(git rev-parse --show-toplevel)" || exit 0
+
+# Secret scan — any staged change, in any path; blocking.
+if ! python3 .githooks/check_secrets.py; then
+    echo "pre-commit: the secret scan reported a problem — the commit is blocked."
+    exit 1
+fi
 
 if ! git diff --cached --name-only | grep -qE '^(AGENTS\.md|\.agents/)'; then
     exit 0
