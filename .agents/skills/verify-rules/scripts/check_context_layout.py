@@ -17,7 +17,7 @@ Checks, per the layout's own sections:
   mcp.json    an mcpServers object
   hooks/      on / match / action / mode from the reference vocabulary
   agents/     name + description, Role & Mindset / Checklist / Output Format
-  evals/      Scenario / Expected behaviour / Pass criteria
+  evals/      Scenario / Expected behavior / Pass criteria
   adapters/   the harness -> expects -> source -> method table
 
 Usage:
@@ -228,10 +228,10 @@ def check_evals(ag: str) -> None:
     detail, passed = [], bool(files)
     for name in files:
         text = open(os.path.join(root, name), encoding="utf-8").read()
-        good = all(h in text for h in ["## Scenario", "## Expected behaviour", "## Pass criteria"])
+        good = all(h in text for h in ["## Scenario", "## Expected behavior", "## Pass criteria"])
         passed &= good
         detail.append(f"{name}: {'ok' if good else 'section missing'}")
-    check("evals", "Scenario -> Expected behaviour -> Pass criteria", passed, "; ".join(detail))
+    check("evals", "Scenario -> Expected behavior -> Pass criteria", passed, "; ".join(detail))
 
 
 def check_adapters(ag: str) -> None:

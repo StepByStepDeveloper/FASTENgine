@@ -56,6 +56,8 @@ Links across the whole context tree, not only the rules subtree:
 python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py .agents --group block
 ```
 
+The three runs above are wrapped as `doit verify` (`dodo.py`) — the entry point `.githooks/pre-commit` and `.github/workflows/context-tree.yml` call.
+
 Layout conformance of the tree itself — run it after adding, renaming or removing a layer:
 
 ```bash

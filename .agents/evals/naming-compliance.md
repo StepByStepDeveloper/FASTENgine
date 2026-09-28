@@ -1,18 +1,18 @@
 # Eval: naming compliance of new code
 
-**Status**: stub — the criteria are mechanical, but the run needs a second entity: today `src/` holds no build skeleton, so a failing criterion cannot be distinguished from missing tooling.
+**Status**: stub — the criteria are mechanical and the tooling exists today (Bazel + doit, GoogleTest); the scenario's difficulty is not yet calibrated against a real round.
 
 ## Scenario
 
 A fresh session starts in this repository with `AGENTS.md` and `.agents/rules/**` available, and is asked: *"Add `ring_buffer.hpp` and `ring_buffer.cpp`: a fixed-capacity byte ring buffer for a single producer and a single consumer."* Nothing else is said — the rules must carry the naming.
 
-## Expected behaviour
+## Expected behavior
 
 The agent reads the naming rules before writing, then produces: the `@file` block, the type with its prefix and role, members with access markers and correct marker blocks, imperative-verb method names, `this->` on non-`static` method calls with fields accessed bare, and Doxygen coverage matching the table in `style/documentation.md`.
 
 ## Pass criteria (mechanical)
 
-- Compiles clean as C++17 on `clang++` and `g++-16` (`-Wall -Wextra -Wpedantic -c`): exit 0.
+- `doit build` exits 0, and `doit test` exits 0 with the new test target passing, on both front ends (`bazel test //...` and `bazel test //... --config=gcc16`); C++17 and `-Wall -Wextra -Wpedantic` come from `.bazelrc`.
 - Every member declaration in the class body carries an access marker; no member function does.
 - No `this->` on a field; no unqualified call to a `static` member function.
 - Documentation coverage: every entity of the mandatory table in `style/documentation.md` carries its block, and no `@throw`/`@exception` appears (the project forbids exceptions).

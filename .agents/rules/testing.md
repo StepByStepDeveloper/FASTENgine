@@ -6,8 +6,8 @@ Ensuring stability and correctness through automated testing in FASTENgine.
 
 ## Frameworks
 
-- **Primary Framework**: [Specify: e.g., GoogleTest or Catch2]
-- **Mocking**: [Specify: e.g., GoogleMock]
+- **Primary Framework**: GoogleTest — every test is a Bazel `cc_test` target next to the code it covers.
+- **Mocking**: GoogleMock. Both arrive through the `googletest` Bazel module (one target family since 1.18.0: `@googletest//:gtest` carries the test and mock libraries, `@googletest//:gtest_main` provides `main()`).
 
 ## Testing Principles
 
@@ -24,4 +24,9 @@ Ensuring stability and correctness through automated testing in FASTENgine.
 
 ## Running Tests
 
-[Command to run tests, e.g., `ctest` or `./build/tests`]
+```bash
+doit test                                  # bazel test //... — every target
+bazel test //src/types:ring_buffer_test    # one target
+```
+
+A test source is code like any other: it follows the naming rules, and its `@brief` names the behavior under test and the expected outcome (see [Documentation](style/documentation.md)).

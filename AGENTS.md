@@ -13,10 +13,10 @@ High-performance C++ Engine. The repository currently carries the specification 
 
 ## Commands
 
-- **Verify the context tree**: `python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py .agents/rules --group block --compiler clang++ --std c++17`
-- **Build**: `[Insert Build Command, e.g., cmake --build build]` — pending, no build system yet (see [Toolchain](.agents/docs/toolchain.md))
-- **Test**: `[Insert Test Command, e.g., ctest --test-dir build]` — pending
-- **Lint**: `[Insert Lint Command, e.g., clang-format -i src/*.cpp]` — pending, no `.clang-format` yet
+- **Verify the context tree**: `doit verify` — the three gates; the compile run alone is `python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py .agents --group block --compiler clang++ --std c++17`
+- **Build**: `doit build` — Bazel 9 through Bazelisk (`.bazelversion`, `MODULE.bazel`); the second front end is `bazel build //... --config=gcc16`
+- **Test**: `doit test` — GoogleTest / GoogleMock targets
+- **Lint**: `doit format` (writes) and `doit format_check` (checks) — `clang-format` with the repository's `.clang-format`
 
 ## Context Architecture (`.agents/`)
 
@@ -24,7 +24,7 @@ This table is the router: nothing attaches a rule to a path automatically, so an
 
 | Path | Holds |
 |:--|:--|
-| [`rules/`](.agents/rules/style.md) | Binding conventions — style, testing, git |
+| [`rules/`](.agents/rules/style.md) | Binding conventions — [style](.agents/rules/style.md), [testing](.agents/rules/testing.md), [git](.agents/rules/git.md) |
 | [`policies/`](.agents/policies/guardrails.md) + [`ignore`](.agents/ignore) | Prohibitions, and the paths never to read |
 | [`skills/`](.agents/skills/verify-rules/SKILL.md) | On-demand procedures — `verify-rules` |
 | [`docs/`](.agents/docs/toolchain.md) | Dense system facts — `toolchain.md` |

@@ -30,22 +30,22 @@ Within one block, commands appear in this order, so that every block in the code
 
 ## Mandatory coverage
 
-| Entity                                    | Required                                                                                    |
-|:----------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `.hpp` / `.cpp` file                      | `@file` block with `@brief` (+ `@details` for non-obvious responsibilities)                  |
-| Namespace (named and anonymous)           | `@brief`                                                                                     |
-| `class` / `struct` / `union` type         | Block: `@brief`, `@details`; `@tparam` per template parameter; `@invariant` where applicable |
-| `enum` / `enum class` type                | Block: `@brief`, plus one `///<` or block per enumerator (meaning of every value)             |
-| Function / method (free, member, static)  | Block: `@brief`, `@details` (non-trivial), `@param` per parameter, `@return` unless `void`    |
-| Constructor / destructor                  | Block: `@brief`, `@param` per parameter, stated invariants established / released             |
-| Type alias (`using` / `typedef`)          | `/// @brief` stating what the alias resolves to and why it exists                             |
-| Function-like macro                       | Block: `@brief`, `@param` per macro parameter, `@note` on evaluation/parenthesization hazards |
-| Object-like macro                         | `@brief` (units, valid range, how the value is derived)                                       |
-| Variable: global / namespace-scope        | `///< @brief` or block — meaning, units, valid range, ownership, thread-safety                 |
-| Variable: class data member (any access)  | Same as namespace-scope variables; required for `static`, `thread_local`, `mutable` members   |
-| Variable: local (block scope)             | Not required — see `Exceptions`; required when it carries non-obvious semantics               |
-| Template parameter (all six kinds)        | `@tparam` describing the contract imposed on the argument                                     |
-| Test case (see `.agents/rules/testing.md`) | `@brief` naming the behaviour under test and the expected outcome                              |
+| Entity                                     | Required                                                                                       |
+|:------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `.hpp` / `.cpp` file                       | `@file` block with `@brief` (+ `@details` for non-obvious responsibilities)                    |
+| Namespace (named and anonymous)            | `@brief`                                                                                       |
+| `class` / `struct` / `union` type          | Block: `@brief`, `@details`; `@tparam` per template parameter; `@invariant` where applicable   |
+| `enum` / `enum class` type                 | Block: `@brief`, plus one `///<` or block per enumerator (meaning of every value)              |
+| Function / method (free, member, static)   | Block: `@brief`, `@details` (non-trivial), `@param` per parameter, `@return` unless `void`     |
+| Constructor / destructor                   | Block: `@brief`, `@param` per parameter, stated invariants established / released              |
+| Type alias (`using` / `typedef`)           | `/// @brief` stating what the alias resolves to and why it exists                              |
+| Function-like macro                        | Block: `@brief`, `@param` per macro parameter, `@note` on evaluation/parenthesization hazards  |
+| Object-like macro                          | `@brief` (units, valid range, how the value is derived)                                        |
+| Variable: global / namespace-scope         | `///< @brief` or block — meaning, units, valid range, ownership, thread-safety                 |
+| Variable: class data member (any access)   | Same as namespace-scope variables; required for `static`, `thread_local`, `mutable` members    |
+| Variable: local (block scope)              | Not required — see `Exceptions`; required when it carries non-obvious semantics                |
+| Template parameter (all six kinds)         | `@tparam` describing the contract imposed on the argument                                      |
+| Test case (see `.agents/rules/testing.md`) | `@brief` naming the behavior under test and the expected outcome                               |
 
 ## Required content by entity kind
 
@@ -147,7 +147,7 @@ A function block must let a caller use the function **without reading its body**
 - `@retval` — required when distinct returned values carry distinct meanings; use one `@retval` per meaningful value instead of a vague `@return`.
 - `@pre` / `@post` — required for every precondition the callee does not enforce itself (non-null pointers, index ranges, locked mutexes, initialized subsystems) and for every postcondition a caller may rely on.
 - `@note` — thread-safety, reentrancy, complexity, ownership transfer, units, and rationale for surprising choices.
-- `@warning` — anything that can cause undefined behaviour, data loss, or a dangling resource when used as described.
+- `@warning` — anything that can cause undefined behavior, data loss, or a dangling resource when used as described.
 
 Error reporting is documented through the return channel, because the project forbids exceptions (see `style/patterns.md`): for a `std::optional`, `std::expected`, error-code out-parameter or sentinel result, state the success payload *and* every failure condition with its cause and the caller's recovery options. `@throw`, `@exception` and `@throws` must never appear.
 
@@ -206,9 +206,10 @@ The following entities are **not** required to carry Doxygen comments:
 - **Trivial accessors** — one-line getters/setters whose name fully expresses the semantics (e.g. `retrieveVehicleCount()`, `setVehicleCount()`). A restating comment on them is forbidden rather than encouraged.
 - **Self-evident lambdas and local functors** passed directly to an algorithm.
 - **Third-party, vendored and generated code** (e.g. `vcpkg_installed/`, generated bindings) — never documented and never reformatted; its comments are left exactly as upstream wrote them.
-- **Illustrative code fragments inside `.agents/rules/**`** that exist to demonstrate a *different* convention (e.g. the `Ultimate Compilable Example` in `style/naming.md`) may omit Doxygen comments, provided the fragment states the omission. Fragments that illustrate this document are documented and follow every rule in this folder; they are kept compilable, and together they form a single translation unit that produces no compiler error. Such a fragment declares entities nothing reads, so a warning-enabled build reports them: Clang flags the unread private member of the members example above (`-Wunused-private-field`), while GCC stays silent on the same code.
+- **Illustrative code fragments inside `.agents/rules/**`** that exist to demonstrate a *different* convention (e.g. the `Ultimate compilable example` in `style/naming.md`) may omit Doxygen comments, provided the fragment states the omission. Fragments that illustrate this document are documented and follow every rule in this folder; they are kept compilable, and together they form a single translation unit that produces no compiler error. Such a fragment declares entities nothing reads, so a warning-enabled build reports them: Clang flags the unread private member of the members example above (`-Wunused-private-field`), while GCC stays silent on the same code.
 
-- **Skill tooling scripts** (`.agents/skills/**/scripts/`) — helper scripts a skill invokes. They are written in Python and carry a module docstring stating their interface, usage and exit codes, plus function docstrings where the behaviour is not obvious, in place of Doxygen blocks: nothing generates Doxygen output from that folder, and the interpreter and `--help` are what read them.
+- **Skill tooling scripts** (`.agents/skills/**/scripts/`) — helper scripts a skill invokes. They are written in Python and carry a module docstring stating their interface, usage and exit codes, plus function docstrings where the behavior is not obvious, in place of Doxygen blocks: nothing generates Doxygen output from that folder, and the interpreter and `--help` are what read them.
+- **Repository tooling scripts** (`dodo.py`, `.githooks/*`, `tools/**`) — the task runner, the git hooks and any helper the repository keeps for itself. They carry the same kind of self-description in place of Doxygen blocks: a module docstring for Python stating what it does, how it is invoked and what it returns, and a header comment for a shell script stating the same. Nothing generates Doxygen output from them either; their reader is whoever runs them.
 
 Nothing else is exempt. Materially non-trivial code is always documented, regardless of visibility: `private` members and internal helpers are read by maintainers at least as often as public API is read by callers.
 
@@ -216,8 +217,8 @@ Nothing else is exempt. Materially non-trivial code is always documented, regard
 
 - **Missing documentation** — an undocumented entity is a blocker, not a follow-up. Never leave `// TODO: document` or an empty `/** */` block behind as a placeholder.
 - **Restating the code** — `@brief Flushes the buffer.` on `flushBuffer()`, `@param value The value.`, `@return The result.` These add no information and hide the absence of real documentation.
-- **Wrong or stale documentation** — a comment that contradicts the code is worse than no comment. Documentation is updated **in the same commit** as the behaviour it describes; code changes are incomplete until their docs change with them.
-- **Copied documentation** — a comment pasted from a neighbouring entity without adjusting it. `@copydoc` is allowed only when the inherited semantics are genuinely identical; an override that deviates documents its own behaviour.
+- **Wrong or stale documentation** — a comment that contradicts the code is worse than no comment. Documentation is updated **in the same commit** as the behavior it describes; code changes are incomplete until their docs change with them.
+- **Copied documentation** — a comment pasted from a neighbouring entity without adjusting it. `@copydoc` is allowed only when the inherited semantics are genuinely identical; an override that deviates documents its own behavior.
 - **Metadata noise** — `@author`, `@date` and `@version` must not be used: authorship and change history are authoritative in git and must not be duplicated in comments.
 - **Non-standard commands** — only the standard command set listed above may be used (no `@threadsafety`-style or project-invented commands) until an alias is formally defined by the project's Doxygen configuration.
 - **Commented-out code** — dead code is deleted, not annotated.

@@ -6,7 +6,7 @@
 
 *"Add a rule about `<topic>` to `.agents/rules`"* — a convention that belongs to an existing document rather than opening a new one.
 
-## Expected behaviour
+## Expected behavior
 
 The convention lands in the document that owns it, in every home it needs; the report names what passed, what stays open, and which home was deliberately omitted and why; the diff is left uncommitted.
 

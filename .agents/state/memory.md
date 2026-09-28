@@ -16,11 +16,12 @@ Knowledge about *this repository* that a fresh session cannot re-derive cheaply.
 ## Environment Quirks
 
 - `g++` on PATH is a shim to GCC 12 (`/usr/bin/x86_64-linux-gnu-g++-12`), while the newest GCC is `g++-16` and Clang is 23. A verification report must name the compiler and its version — see [`../docs/toolchain.md`](../docs/toolchain.md).
-- `doxygen` and `clang-format` are installed, but the repository has neither a `Doxyfile` nor a `.clang-format`: the documentation rules and the formatting rules are not enforced by any tool yet.
-- No build system exists (no `CMakeLists.txt`, no `Makefile`; `cmake` and `ninja` are not installed), so `testing.md` and the build half of the pre-commit gate wait for a decision.
+- `doxygen` and `clang-format` are installed, and both have their configuration in the repository root (`.clang-format`, `Doxyfile`): the formatting and documentation rules have mechanical halves (`doit format_check`, `doxygen Doxyfile`) that wait only for the first sources.
+- The build stack is **Bazel 9** (through Bazelisk, the version pinned in `.bazelversion`) with **doit** as the task runner (`dodo.py`) and GoogleTest / GoogleMock as the test framework; `cmake`, `ninja` and `vcpkg` are not used. `src/` carries no Bazel targets yet — `doit build` reports that state instead of failing, and the first `BUILD.bazel` ends it.
+- The distro `/usr/bin/gcc` has **no C++ front end** (`cc1plus` is missing for gcc-13), so nothing may auto-detect the system compiler: `.bazelrc` names one explicitly (`--config=clang`, the default, or `--config=gcc16`).
 
 ## Team Conventions
 
 - Rules are edited in batches and committed only on an explicit request; a review of the batch (spelling, consistency, a gate run) comes first.
 - Deviations, exemptions and placeholders are **findings** to report, never gaps to fill by assumption — see [`../policies/guardrails.md`](../policies/guardrails.md).
-- A verification claim is quoted with the compiler, the version and the flag set actually used; an unverified claim is labelled as such instead of being softened.
+- A verification claim is quoted with the compiler, the version and the flag set actually used; an unverified claim is labeled as such instead of being softened.

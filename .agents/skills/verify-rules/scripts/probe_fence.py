@@ -7,6 +7,8 @@ Usage:
 Default picks the LARGEST block of the requested language, which is what a doc's
 self-contained "ultimate example" is. --index N selects the N-th block (0-based,
 document order) when you need one of the small examples instead.
+
+Exit 0 on success; a missing block or an out-of-range --index exits 1 with a message.
 """
 
 import argparse

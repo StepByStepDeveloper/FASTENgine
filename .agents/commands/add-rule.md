@@ -3,6 +3,8 @@ description: "Add or change a rule in .agents/rules without breaking the tree"
 argument-hint: "<topic>"
 ---
 
+**Status**: active — the prompt is usable today; the discipline it applies lives in the existing documents.
+
 Add the rule about `<topic>` to the rules tree, following the discipline the existing documents already follow:
 
 1. **One home for the grammar.** A rule is stated once, in the section that owns it; a later section points at it with an anchor instead of restating it.
