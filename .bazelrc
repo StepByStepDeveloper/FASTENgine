@@ -1,0 +1,18 @@
+# C++17 is the minimum the rules promise (style/patterns.md, .agents/docs/toolchain.md);
+# the warning set is the one the context-tree gate compiles with.
+build --cxxopt=-std=c++17
+build --copt=-Wall
+build --copt=-Wextra
+build --copt=-Wpedantic
+
+test --test_output=errors
+
+# The distro `gcc` on this machine has no C++ front end (`cc1plus` is missing for
+# gcc-13), so a compiler is named explicitly instead of being auto-detected.
+# clang is the default; `--config=gcc16` switches to the second front end the
+# warning claims of the rules were measured on.
+build --config=clang
+build:clang --repo_env=CC=clang
+build:clang --repo_env=CXX=clang++
+build:gcc16 --repo_env=CC=gcc-16
+build:gcc16 --repo_env=CXX=g++-16

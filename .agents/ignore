@@ -5,6 +5,7 @@
 # Build and cache output
 build/
 build-*/
+bazel-*/
 .cache/
 Testing/
 CMakeFiles/

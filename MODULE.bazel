@@ -1,0 +1,12 @@
+module(
+    name = "fastengine",
+    version = "0.1.0",
+)
+
+# C++ rules moved out of Bazel's native set in Bazel 9: every BUILD file
+# loads cc_library / cc_test from rules_cc.
+bazel_dep(name = "rules_cc", version = "0.2.25")
+
+# GoogleTest and GoogleMock — one module since 1.18.0: the `gtest` target
+# carries both libraries, `gtest_main` provides main().
+bazel_dep(name = "googletest", version = "1.18.0")
