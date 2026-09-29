@@ -1,7 +1,8 @@
 """doit task definitions for FASTENgine.
 
 The repository's task runner: `doit` drives the context-tree gates, the Bazel
-build and the test suite, so a developer and CI run the same commands.
+build, the test suite and the documentation build, so a developer and CI run
+the same commands.
 
 Usage:
     doit                 # verify + build + test (the CI set)
@@ -11,11 +12,15 @@ Usage:
     doit test            # bazel test //...
     doit format          # clang-format -i over the engine sources
     doit format_check    # clang-format --dry-run --Werror (writes nothing)
+    doit docs            # build the documentation (arc42 + ADRs + API reference)
+    doit docs_check      # check the documentation tree (see .agents/rules/docs.md)
+    doit diagrams        # render docs/arc42/diagrams/*.puml into docs/arc42/images/
 
 Exit codes: doit exits 0 when every requested task succeeds, 1 otherwise.
 """
 
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -26,6 +31,7 @@ DOIT_CONFIG = {
 
 GATE_DIR = Path(".agents/skills/verify-rules/scripts")
 SOURCE_SUFFIXES = (".hpp", ".cpp")
+DOCS_BUILD_DIR = Path("build/docs")
 
 
 def _engine_sources():
@@ -109,3 +115,53 @@ def task_format_check():
         return subprocess.call(["clang-format", "--dry-run", "--Werror", *sources]) == 0
 
     return {"actions": [run_check]}
+
+
+def task_docs_check():
+    """Check the documentation tree: ADR set, generated regions, includes, links."""
+    return {"actions": [["python3", "tools/check_docs.py"]]}
+
+
+def task_diagrams():
+    """Render the PlantUML diagram sources into docs/arc42/images/ (SVG)."""
+    return {"actions": [["python3", "tools/render_diagrams.py"]]}
+
+
+def task_docs():
+    """Build the documentation: arc42 + ADRs to HTML, then the API reference."""
+    def build_docs():
+        for tool in ("asciidoctor", "doxygen"):
+            if shutil.which(tool) is None:
+                print(f"no '{tool}' on PATH — see .agents/docs/toolchain.md")
+                return False
+
+        arc42_dir = DOCS_BUILD_DIR / "arc42"
+        adr_dir = arc42_dir / "adr"
+        adr_dir.mkdir(parents=True, exist_ok=True)
+        (DOCS_BUILD_DIR / "api").mkdir(parents=True, exist_ok=True)
+
+        if subprocess.call(["python3", "tools/render_diagrams.py"]) != 0:
+            return False
+        if subprocess.call(["python3", "tools/check_docs.py"]) != 0:
+            return False
+
+        if subprocess.call(["asciidoctor", "-b", "html5",
+                            "-o", str(arc42_dir / "arc42.html"),
+                            "docs/arc42/arc42.adoc"]) != 0:
+            return False
+
+        adrs = sorted(str(path) for path in Path("docs/arc42/adr").glob("[0-9]*.adoc"))
+        if adrs and subprocess.call(["asciidoctor", "-b", "html5", "-D", str(adr_dir), *adrs]) != 0:
+            return False
+
+        images = Path("docs/arc42/images")
+        if images.is_dir():
+            shutil.copytree(images, arc42_dir / "images", dirs_exist_ok=True)
+
+        if subprocess.call(["doxygen", "docs/api/Doxyfile"]) != 0:
+            return False
+
+        print(f"documentation built into {DOCS_BUILD_DIR}/")
+        return True
+
+    return {"actions": [build_docs]}

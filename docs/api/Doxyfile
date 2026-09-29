@@ -1,0 +1,37 @@
+# Doxygen configuration for the FASTENgine API reference.
+#
+# The comment rules it makes machine-checkable live in
+# .agents/rules/style/documentation.md; the layout and build conventions in
+# .agents/rules/docs.md.
+#
+# Run it from the repository root — measured with doxygen 1.18.0, relative
+# paths below resolve against the working directory doxygen is started from:
+#     doxygen docs/api/Doxyfile      (or: doit docs)
+# Output: build/docs/api/html/ — created by `doit docs`; when running doxygen
+# directly, run `mkdir -p build/docs/api` first (doxygen does not create
+# nested output directories).
+#
+# EXTRACT_ALL stays NO: with YES, doxygen disables the warnings about
+# undocumented members, which is exactly the check this file exists for.
+# WARN_AS_ERROR stays NO while `src/` is empty; flip it to FAIL_ON_WARNINGS
+# together with the first stable sources (tracked in .agents/rules/docs.md).
+
+PROJECT_NAME           = "FASTENgine"
+OUTPUT_DIRECTORY       = build/docs/api
+INPUT                  = src docs/api/mainpage.md docs/api/groups.dox
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp *.cpp
+EXCLUDE_PATTERNS       = */bazel-*
+USE_MDFILE_AS_MAINPAGE = docs/api/mainpage.md
+
+EXTRACT_ALL            = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_AS_ERROR          = NO
+
+QUIET                  = YES
+JAVADOC_AUTOBRIEF      = NO
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+HAVE_DOT               = NO

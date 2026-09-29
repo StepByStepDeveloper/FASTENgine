@@ -1,0 +1,43 @@
+// ADR template — instantiate with `python3 tools/new_adr.py "Title"`, never by hand.
+// Conventions: .agents/rules/docs.md.  The procedure: .agents/skills/write-adr/.
+// The generator replaces these literal placeholders: NNNN, <Title>, <status>,
+// <YYYY-MM-DD>.
+
+[[adr-NNNN]]
+= ADR-NNNN: <Title>
+
+Status: <status> (<YYYY-MM-DD>).
+
+== Context and Problem Statement
+
+<What is the problem? Which forces are at play? Two to three sentences or a
+short narrative; link whatever the reader needs to judge the decision.>
+
+== Decision Drivers
+
+* <driver 1 — the criterion that will decide between the options>
+* <driver 2>
+
+== Considered Options
+
+* <option 1>
+* <option 2>
+
+== Decision Outcome
+
+Chosen option: "<option>", because <the reason that carried it>.
+
+=== Consequences
+
+* Good, because <positive effect>
+* Bad, because <negative effect or accepted cost>
+* Neutral, because <observation that follows either way>
+
+== Confirmation
+
+<How the implementation of the decision is verified: a build, a check, a test,
+a review — something a reader can run or see.>
+
+== More Information
+
+<Links, related decisions, affected building blocks and files.>

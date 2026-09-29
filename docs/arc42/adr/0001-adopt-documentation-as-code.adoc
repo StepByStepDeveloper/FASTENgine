@@ -1,0 +1,73 @@
+[[adr-0001]]
+= ADR-0001: Adopt documentation as code (arc42, AsciiDoc, ADR, Doxygen)
+
+Status: accepted (2026-09-30).
+
+== Context and Problem Statement
+
+The repository carries the specification layer of FASTENgine: the agent context
+in `.agents/`, an empty `src/`, and no documentation of the evolving
+architecture. Documentation written outside the repository (wikis, office
+documents) drifts out of review: it is not versioned with the code it
+describes, and no gate checks it.
+
+How should the project's documentation be kept reviewable, versioned and
+mechanically checkable while the engine itself is still beginning?
+
+== Decision Drivers
+
+* Documentation as code: sources live in the repository, change in the same
+  commits as the artifacts they describe, and pass review like code.
+* One text toolchain for prose and diagrams; diagrams are source files, not
+  images drawn in a GUI.
+* A structure that survives years and readers: arc42 for the architecture,
+  ADRs for decisions, Doxygen for the API surface.
+* Every statement lives in exactly one artifact — cross-link, never copy.
+* The toolchain must run on the development machine without administrative
+  privileges.
+
+== Considered Options
+
+* **arc42 + AsciiDoc + ADR (in AsciiDoc) + Doxygen** — one text toolchain, one
+  structure, decisions recorded next to the architecture document.
+* **Markdown + MADR (canonical Markdown ADRs)** — the ADR community's default
+  format, but a second rendering toolchain next to AsciiDoc and weaker
+  cross-referencing between the architecture document and the ADRs.
+* **A wiki or office documents** — not versioned with the code, not reviewed in
+  the same flow, no mechanical checks.
+
+== Decision Outcome
+
+Chosen option: "arc42 + AsciiDoc + ADR + Doxygen", because it keeps the
+architecture, the decisions and the API reference in one reviewable text
+toolchain that the existing gates can check.
+
+=== Consequences
+
+* Good, because the architecture document is assembled from one file per
+  section (`docs/arc42/sections/`) — changes stay small and reviewable.
+* Good, because decisions are immutable records (`docs/arc42/adr/`) with an
+  index generated into Section 9 — the history of *why* is never rewritten.
+* Good, because diagrams are PlantUML sources (`docs/arc42/diagrams/`) rendered
+  into `docs/arc42/images/` by `doit diagrams`.
+* Bad, because the toolchain is Asciidoctor.js without the Ruby extensions:
+  PDF output and inline `asciidoctor-diagram` rendering are deferred until the
+  toolchain decision is revisited (tracked in `.agents/rules/docs.md`).
+* Neutral, because the arc42 help texts stay in the sections until the content
+  replaces them (`:arc42help:` in `docs/arc42/config.adoc`).
+
+== Confirmation
+
+* `doit docs` builds the document and `doit docs_check` verifies the tree
+  (ADR set, generated regions, includes, links); the CI job *Documentation*
+  runs the same pair.
+* The conventions are binding in `.agents/rules/docs.md`; the procedures are
+  the skills `write-arc42-docs`, `write-adr` and `build-api-docs`.
+
+== More Information
+
+* https://arc42.org — the template's home.
+* https://adr.github.io and https://adr.github.io/madr — ADR background; this
+  template adapts MADR's section structure to AsciiDoc.
+* https://docs.asciidoctor.org — the AsciiDoc syntax reference.
+* The agent context: `.agents/rules/docs.md`.

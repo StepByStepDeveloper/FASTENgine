@@ -1,0 +1,71 @@
+// FASTENgine architecture documentation — the arc42 template, adapted.
+//
+// arc42 (https://arc42.org) by Dr. Peter Hruschka, Dr. Gernot Starke and
+// contributors, licensed CC BY-SA 4.0. This master file is the adaptation:
+// one include per section, a generated decision index (Section 9).
+//
+// Build:  doit docs   -> build/docs/arc42/arc42.html
+// Rules:  .agents/rules/docs.md    Procedure: .agents/skills/write-arc42-docs/
+
+include::config.adoc[]
+
+= FASTENgine — Architecture Documentation
+:revnumber: 0.1
+:revdate: 2026-09-30
+:revremark: template — sections are not filled yet
+
+include::about-arc42.adoc[]
+
+***
+
+ifdef::arc42help[]
+[role="arc42help"]
+****
+[NOTE]
+====
+This document is still a *template*: every section carries arc42's own help
+text. A section's help may stay while the section is being filled; when the
+document stops being a template, drop `:arc42help:` from `config.adoc` and
+update `:revremark:`.
+====
+****
+endif::arc42help[]
+
+// numbering from here on
+:numbered:
+
+<<<<
+include::sections/01_introduction_and_goals.adoc[]
+
+<<<<
+include::sections/02_architecture_constraints.adoc[]
+
+<<<<
+include::sections/03_context_and_scope.adoc[]
+
+<<<<
+include::sections/04_solution_strategy.adoc[]
+
+<<<<
+include::sections/05_building_block_view.adoc[]
+
+<<<<
+include::sections/06_runtime_view.adoc[]
+
+<<<<
+include::sections/07_deployment_view.adoc[]
+
+<<<<
+include::sections/08_concepts.adoc[]
+
+<<<<
+include::sections/09_architecture_decisions.adoc[]
+
+<<<<
+include::sections/10_quality_requirements.adoc[]
+
+<<<<
+include::sections/11_technical_risks.adoc[]
+
+<<<<
+include::sections/12_glossary.adoc[]

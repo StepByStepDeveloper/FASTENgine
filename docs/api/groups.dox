@@ -1,0 +1,32 @@
+/**
+ * @defgroup engine Engine
+ * @brief The whole of FASTENgine — the root group every module group belongs to.
+ * @details The group tree mirrors the building-block view of the architecture
+ *          documentation (Section 5 of docs/arc42). One group per level-1 or
+ *          level-2 building block; this file is the only place the module tree
+ *          is listed. Conventions: .agents/rules/docs.md.
+ */
+
+/**
+ * @defgroup engine_algorithms Algorithms
+ * @ingroup engine
+ * @brief Algorithm implementations (src/algorithms).
+ * @details Self-contained algorithms over the core types; no I/O, no global
+ *          state. Filled in together with the first sources under src/algorithms.
+ */
+
+/**
+ * @defgroup engine_patterns Patterns
+ * @ingroup engine
+ * @brief Static-polymorphism machinery (src/patterns), per style/patterns.md.
+ * @details The project's patterns forbid exceptions and virtual functions;
+ *          this group carries their static replacements.
+ */
+
+/**
+ * @defgroup engine_types Core types
+ * @ingroup engine
+ * @brief Fundamental value types and vocabulary of the engine (src/types).
+ * @details Types every other module speaks in; the naming rules of
+ *          style/naming.md bind here first.
+ */

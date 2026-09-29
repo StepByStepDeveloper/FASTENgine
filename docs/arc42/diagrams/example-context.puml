@@ -1,0 +1,12 @@
+@startuml example-context
+' Example only — replace with the real context of the engine.
+' Edit this source and run `doit diagrams`; the render lands in docs/arc42/images/.
+' Conventions: .agents/rules/docs.md.
+skinparam shadowing false
+left to right direction
+
+[Embedding application] as app
+[FASTENgine] as engine
+
+app --> engine
+@enduml
