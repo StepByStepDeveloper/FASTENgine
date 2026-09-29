@@ -39,10 +39,11 @@
 *.out
 *.app
 
-# Build directories
-build/
-Build/
-build-*/
+# Build directories (root-level — anchored so the patterns cannot swallow
+# nested paths such as .agents/skills/build-api-docs/)
+/build/
+/Build/
+/build-*/
 
 # CMake generated files
 CMakeFiles/
@@ -78,6 +79,9 @@ bazel-*
 .doit.db*
 __pycache__/
 *.pyc
+
+# Documentation renders (generated from docs/arc42/diagrams/*.puml by doit diagrams)
+docs/arc42/images/*.svg
 
 # Obsidian vault
 .obsidian/
