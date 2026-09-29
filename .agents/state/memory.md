@@ -12,13 +12,15 @@ Knowledge about *this repository* that a fresh session cannot re-derive cheaply.
 - `style/naming.md` does **not** compile as one translation unit, by design: it re-declares its own sample entities (`E_DeviceState`, `var_g`, `IS_Drawable`) across fences, and the aggregate mode reports those as duplicate definitions. The green mode is one translation unit per fence.
 - The ultimate example (§10 of `style/naming.md`) is the only fragment that must link and run, not merely compile: it carries `main`. `style/documentation.md` makes the opposite claim for its own fragments — they form a single translation unit — and that claim is verified by compiling them together.
 - `style/naming.md` carries no frontmatter and no per-file scope metadata: nothing auto-attaches the rule documents to a path. The index in `AGENTS.md` is the only router, so a new artifact that is not linked there is invisible.
+- Documentation is docs-as-code per [`../rules/docs.md`](../rules/docs.md): arc42 in `docs/arc42/` (a master plus one file per section), ADRs in `docs/arc42/adr/` (created only through `tools/new_adr.py`, which owns the generated Section 9 regions), the Doxygen input in `docs/api/`. `doit docs` builds `build/docs/`, `doit docs_check` verifies the tree, and the SVG renders in `docs/arc42/images/` are generated — never committed.
 
 ## Environment Quirks
 
 - `g++` on PATH is a shim to GCC 12 (`/usr/bin/x86_64-linux-gnu-g++-12`), while the newest GCC is `g++-16` and Clang is 23. A verification report must name the compiler and its version — see [`../docs/toolchain.md`](../docs/toolchain.md).
-- `doxygen` and `clang-format` are installed, and both have their configuration in the repository root (`.clang-format`, `Doxyfile`): the formatting and documentation rules have mechanical halves (`doit format_check`, `doxygen Doxyfile`) that wait only for the first sources.
+- `doxygen` and `clang-format` are installed; `.clang-format` sits in the repository root and the Doxygen configuration in `docs/api/Doxyfile` — `doxygen docs/api/Doxyfile` runs from the repository root (doxygen resolves the Doxyfile's relative paths against the working directory). The formatting and comment-coverage rules have mechanical halves (`doit format_check`, `doxygen docs/api/Doxyfile`) that wait only for the first sources.
 - The build stack is **Bazel 9** (through Bazelisk, the version pinned in `.bazelversion`) with **doit** as the task runner (`dodo.py`) and GoogleTest / GoogleMock as the test framework; `cmake`, `ninja` and `vcpkg` are not used. `src/` carries no Bazel targets yet — `doit build` reports that state instead of failing, and the first `BUILD.bazel` ends it.
 - The distro `/usr/bin/gcc` has **no C++ front end** (`cc1plus` is missing for gcc-13), so nothing may auto-detect the system compiler: `.bazelrc` names one explicitly (`--config=clang`, the default, or `--config=gcc16`).
+- The documentation toolchain is Asciidoctor.js (npm `@asciidoctor/cli`, pinned at 3.5.0 — 4.0.0 is broken on Node 22) and a user-local PlantUML 1.2026.8: `~/.local/bin/plantuml` runs `~/.local/share/plantuml/plantuml.jar` on Temurin 21 (`~/.local/opt/temurin-21-jre`), because the system `java` is 8 — too old for current PlantUML. PDF and `asciidoctor-diagram` are deferred; diagrams pre-render through `doit diagrams`.
 
 ## Team Conventions
 

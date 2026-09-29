@@ -2,16 +2,17 @@
 
 Automation **specification** — intent, not a harness config.
 
-**Status**: active — every step has its tooling today. `.githooks/pre-commit` runs the first step on its own; the other three run on request through `doit`. The order below is the contract: a later step never runs on an artifact an earlier step already rejects.
+**Status**: active — every step has its tooling today. `.githooks/pre-commit` runs the first step and the documentation check on its own; the rest run on request through `doit`. The order below is the contract: a later step never runs on an artifact an earlier step already rejects.
 
 ```
 on:     pre-commit
-match:  any change under AGENTS.md, .agents/ or src/
+match:  any change under AGENTS.md, .agents/, docs/ or src/
 action: the gate below, in order
 mode:   blocking
 ```
 
 1. **Context tree** — `doit verify` exits 0 (rules compile, links, anchors and layout resolve). *Runs in `.githooks/pre-commit` and in CI.*
-2. **Formatting** — `doit format_check` (`clang-format --dry-run --Werror` over the changed sources, per `.clang-format`). *Available today; nothing to check until `src/` carries sources.*
-3. **Build** — `doit build` (Bazel, see [`../docs/toolchain.md`](../docs/toolchain.md)). *Available today; no targets until the first `BUILD.bazel`.*
-4. **Tests** — `doit test` (GoogleTest / GoogleMock, see [`../rules/testing.md`](../rules/testing.md)). *Available today; no targets yet.*
+2. **Documentation** — `doit docs_check` exits 0 and `doit docs` builds (arc42, ADRs, API reference — see [`../rules/docs.md`](../rules/docs.md)). *CI runs both in the Documentation job; `.githooks/pre-commit` runs the check for staged `docs/` or `tools/` changes (advisory).*
+3. **Formatting** — `doit format_check` (`clang-format --dry-run --Werror` over the changed sources, per `.clang-format`). *Available today; nothing to check until `src/` carries sources.*
+4. **Build** — `doit build` (Bazel, see [`../docs/toolchain.md`](../docs/toolchain.md)). *Available today; no targets until the first `BUILD.bazel`.*
+5. **Tests** — `doit test` (GoogleTest / GoogleMock, see [`../rules/testing.md`](../rules/testing.md)). *Available today; no targets yet.*

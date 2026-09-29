@@ -2,7 +2,7 @@
 
 Every piece of code created in FASTENgine **must** be accompanied by detailed Doxygen comments. Documentation is a first-class deliverable: an undocumented (or misdocumented) entity is a review blocker, exactly like a missing test or a violated naming rule.
 
-This document defines *what* must be documented, *which* commands to use, and *what counts as detailed*. The tooling (Doxyfile, generation target, CI gate) is intentionally not covered here.
+This document defines *what* must be documented, *which* commands to use, and *what counts as detailed*. The tooling (Doxyfile, generation target, CI gate) is intentionally not covered here — it lives in [Documentation System](../docs.md).
 
 ## Comment form
 

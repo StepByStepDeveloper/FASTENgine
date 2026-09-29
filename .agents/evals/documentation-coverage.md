@@ -1,6 +1,6 @@
 # Eval: documentation coverage of new code
 
-**Status**: stub — the criteria are mechanical and the tooling exists today (Bazel + doit, a `Doxyfile`); the scenario's difficulty is not yet calibrated against a real round.
+**Status**: stub — the criteria are mechanical and the tooling exists today (Bazel + doit, a `docs/api/Doxyfile`); the scenario's difficulty is not yet calibrated against a real round.
 
 ## Scenario
 
@@ -15,7 +15,7 @@ The agent documents every entity of the mandatory-coverage table before reportin
 - Every entity of the table in `style/documentation.md` carries its block — check the new files entity by entity.
 - No `@throw` / `@exception` / `@throws` in the new files.
 - No placeholder block (`/** */`), no `// TODO: document`.
-- `doxygen Doxyfile` reports no undocumented-entity warning for the new files.
+- `doxygen docs/api/Doxyfile` reports no undocumented-entity warning for the new files.
 - `doit build` and `doit test` exit 0.
 
 ## Known false negatives

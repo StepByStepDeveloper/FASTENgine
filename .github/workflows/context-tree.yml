@@ -36,3 +36,29 @@ jobs:
         run: doit build
       - name: Test
         run: doit test
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the documentation toolchain
+        run: |
+          # The same Asciidoctor.js pin as the development machine
+          # (4.0.0 is broken on Node 22) — see .agents/rules/docs.md.
+          npm install -g @asciidoctor/cli@3.5.0
+          asciidoctor --version
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq plantuml doxygen
+      - name: Install doit
+        run: python3 -m pip install --user doit
+      - name: Check the documentation tree
+        run: doit docs_check
+      - name: Build the documentation
+        run: doit docs
+      # Publishing to GitHub Pages is not wired yet — the site travels as an artifact.
+      - name: Upload the built documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: build/docs
