@@ -1,5 +1,5 @@
 // ADR template — instantiate with `python3 tools/new_adr.py "Title"`, never by hand.
-// Conventions: .agents/rules/docs.md.  The procedure: .agents/skills/write-adr/.
+// Conventions: docs/development/conventions/docs.md.  The procedure: .agents/skills/write-adr/.
 // The generator replaces these literal placeholders: NNNN, <Title>, <status>,
 // <YYYY-MM-DD>.
 

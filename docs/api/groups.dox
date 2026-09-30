@@ -4,7 +4,7 @@
  * @details The group tree mirrors the building-block view of the architecture
  *          documentation (Section 5 of docs/arc42). One group per level-1 or
  *          level-2 building block; this file is the only place the module tree
- *          is listed. Conventions: .agents/rules/docs.md.
+ *          is listed. Conventions: docs/development/conventions/docs.md.
  */
 
 /**

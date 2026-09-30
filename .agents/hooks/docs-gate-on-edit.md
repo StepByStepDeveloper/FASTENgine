@@ -6,7 +6,7 @@ Automation **specification** — intent, not a harness config; an adapter turns 
 
 ```
 on:     file-edit
-match:  docs/**, tools/check_docs.py, tools/render_diagrams.py, tools/new_adr.py
+match:  docs/**, tools/check_docs.py, tools/render_diagrams.py, tools/new_adr.py, tools/render_arc42_pages.py
 action: python3 tools/check_docs.py && doit docs
 mode:   advisory
 ```

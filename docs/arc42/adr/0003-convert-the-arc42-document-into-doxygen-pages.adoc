@@ -1,0 +1,69 @@
+[[adr-0003]]
+= ADR-0003: Convert the arc42 document into Doxygen pages
+
+Status: accepted (2026-09-30).
+
+== Context and Problem Statement
+
+The Doxygen site is meant to be publishable on its own as the reference of
+the product — but it carried only the API surface, while the architecture
+document stayed in the HTML build of the AsciiDoc sources. A reader landing on
+the site had no path to the architecture.
+
+How can the standalone site carry the architecture document without turning
+the AsciiDoc sources into a second, hand-maintained copy?
+
+== Decision Drivers
+
+* One source of truth: the arc42 AsciiDoc sources stay the contract.
+* No administrative privileges: the conversion toolchain must run user-local,
+  like the rest of the documentation toolchain (ADR-0001).
+* The converted pages are build artifacts; the repository never commits them.
+
+== Considered Options
+
+* **Convert mechanically at build time**: Asciidoctor -> pandoc -> Markdown
+  pages under `build/docs/api-pages/`, listed in the Doxyfile INPUT.
+* **A DocBook-based pipeline** — unavailable: Asciidoctor.js ships no
+  docbook5 converter (measured; the backend aborts).
+* **A hand-maintained Markdown copy of the architecture** — a second source
+  that drifts from the AsciiDoc contract.
+* **Leave the site API-only** — the requirement to publish the architecture
+  with the API remains unmet.
+
+== Decision Outcome
+
+Chosen option: "convert mechanically at build time", because it keeps the
+sources canonical and the site self-contained.
+
+`tools/render_arc42_pages.py` (run inside `doit docs`) converts every section
+with Asciidoctor (HTML5 embedded, `-a arc42help!`, `-a toc!`) and pandoc
+(GFM, with a Lua filter unwrapping the structural `<div>` wrappers; same-page
+anchors degrade to plain text), copies the rendered diagrams, and writes
+`build/docs/api-pages/`. The Doxyfile joins that directory to INPUT; the site
+lands in `build/docs/api/html/`. CI installs pandoc through apt.
+
+=== Consequences
+
+* Good, because the published site carries the API reference and the
+  architecture pages from the same sources the AsciiDoc build renders.
+* Bad, because the conversion is best-effort: tables and lists survive, exact
+  in-page anchors and some cross-references render plainer than in
+  `build/docs/arc42/arc42.html`.
+* Bad, because the documentation toolchain gains a dependency (pandoc) and the
+  document tree gains a tool to maintain.
+* Neutral, because the arc42 sources remain the contract; the converted pages
+  are regenerated on every `doit docs`.
+
+== Confirmation
+
+`doit docs` builds the site with the pages (exit 0, no Doxygen warnings from
+the pages); `build/docs/api/html/` carries the twelve section pages and the
+overview page under *Related Pages*.
+
+== More Information
+
+* The pipeline: `tools/render_arc42_pages.py`; the guide:
+  `docs/development/documentation/api.md`.
+* The toolchain facts: `docs/development/toolchain.md` (pandoc; why DocBook
+  is not an option).

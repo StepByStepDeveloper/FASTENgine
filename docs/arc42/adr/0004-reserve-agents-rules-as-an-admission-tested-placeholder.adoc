@@ -1,0 +1,78 @@
+[[adr-0004]]
+= ADR-0004: Reserve .agents/rules as an admission-tested placeholder
+
+Status: accepted (2026-09-30).
+
+== Context and Problem Statement
+
+ADR-0002 moved the repository-facing conventions out of the agent context; the
+layout gate that realized the move went further and refused a `rules/` layer
+in `.agents/` outright. The agent-agnostic context-architecture model behind
+this tree, however, keeps `rules/` as its second progressive-disclosure level:
+standing rules that bind the agent and have no human reader.
+
+That category is empty today — every candidate norm already has a home
+(conventions, guardrails, skills, gates, memory). It will not stay empty:
+`AGENTS.md` lives on a per-request instruction budget and must stay a small
+router, so the first agent-only standing norm that fits no other layer would
+otherwise inflate the entry point or land somewhere it does not belong.
+
+== Decision Drivers
+
+* One home per fact; a rule that duplicates another layer's home is a defect.
+* Progressive disclosure with a small `AGENTS.md` — a frontier model follows
+  roughly 150-200 instructions reliably, and every line is paid per request.
+* The tree's own grammar of declared placeholders — `mcp.json`, the hook
+  specs, the eval stubs — each states its status and what it waits for.
+* A gate over prose: what a check can refuse must not rely on a sentence.
+
+== Considered Options
+
+* **No `rules/` layer** — the first agent-only norm has no designated home:
+  it either inflates `AGENTS.md` or invents an ad-hoc location.
+* **Open the layer with content now** — nothing passes the admission test
+  today; speculative rules would duplicate the conventions or add
+  non-universal instructions that measurably degrade adherence.
+* **Reserve the layer as a documented placeholder** — a README states the
+  admission test; the layout check admits the placeholder and fails on any
+  other member; opening the layer is a conscious change.
+
+== Decision Outcome
+
+Chosen option: "reserve the layer as a documented placeholder", because it
+gives the residual category a designated, self-limiting home without
+committing any rule the tree cannot justify today.
+
+`.agents/rules/README.md` carries the *admission test*: a file may live there
+only if it is (1) standing — it binds every unit of work, not one task;
+(2) agent-only — a norm with a developer audience lives in the development
+manual; (3) not a prohibition — those are guardrails; (4) not mechanically
+enforceable — a gate, hook or formatter outranks prose; (5) earned — written
+after the agent repeated a real mistake, never from a hypothetical
+preference. The router table of `AGENTS.md` gains the matching row; the
+layout check admits `README.md` alone and fails on any other member, so
+opening the layer means updating the check and the router in the same change
+as the first real rule.
+
+=== Consequences
+
+* Good, because the residual category has a home that cannot silently fill
+  up: the gate fails until someone consciously opens the layer.
+* Good, because `AGENTS.md` stays a router within its budget; growth
+  pressure goes to the layer whose admission test is written down.
+* Bad, because the tree gains one more entry to maintain, and the gate now
+  carries a placeholder exception next to the `docs/` prohibition.
+* Neutral, because repository-facing rules stay in the development manual;
+  only agent-only norms may ever populate this layer.
+
+== Confirmation
+
+`check_context_layout.py` reports `rules/` as placeholder-only (README with a
+status and the admission test, nothing else), `doit verify` stays green, and
+the placeholder README is reachable from the `AGENTS.md` router table.
+
+== More Information
+
+* The split this one refines: ADR-0002 (documentation by audience).
+* The placeholder and its admission test: `.agents/rules/README.md`.
+* Where new rules are routed: `.agents/commands/add-rule.md`.

@@ -1,12 +1,24 @@
 # Documentation System (arc42, ADR, AsciiDoc, Doxygen)
 
-FASTENgine documents its architecture, its decisions and its API reference as code: plain-text sources live in `docs/`, change in the same commits as the artifacts they describe, and pass mechanical checks. This rule binds the documentation system as a whole — the layout, the formats, the decision records, the diagram pipeline and the Doxygen wiring. The comment-level rules for C++ entities are a separate document: [Documentation (Doxygen)](style/documentation.md).
+FASTENgine documents its architecture, its decisions and its API reference as code: plain-text sources live in `docs/` and `README.md`, change in the same commits as the artifacts they describe, and pass mechanical checks. This rule binds the documentation system as a whole — the classes of documentation, the layout, the formats, the decision records, the diagram pipeline and the Doxygen wiring. The comment-level rules for C++ entities are a separate document: [Documentation (Doxygen)](style/documentation.md).
 
 **Status**: active — the layout, the tools and the checks exist; the twelve arc42 sections are handed to their authors in template state (arc42's own help texts on).
 
+## Documentation classes
+
+Every document belongs to exactly one class; the classes cite each other, they never restate each other:
+
+| Class | Home | Carries | Reader |
+|:--|:--|:--|:--|
+| Agent context | `AGENTS.md`, `.agents/` | only artifacts an agent reads: skills, policies, hooks, evals, state, the adapters map — and pointers, not copies, for everything repository-facing | the agent |
+| Development manual | `README.md`, `docs/development/` | how to work in this repository: workflows, toolchain facts, the conventions, the documentation guides, the arc42 template manual | any developer joining the repository |
+| Product documentation | `docs/arc42/`, `docs/api/` (built into `build/docs/`) | the product itself: architecture, decisions, API reference, the converted architecture pages | readers of the product |
+
+The split is binding: the agent context does not carry developer prose it can link (it points into `docs/development/`), and the product documentation does not describe the repository's own process.
+
 ## Documentation as code
 
-- **Single sources, not copies.** Every statement lives in exactly one artifact: the architecture narrative in the arc42 document, a decision's rationale in its ADR, the API contract in Doxygen comments, the conventions in the rule documents. Cross-link between them; never restate.
+- **Single sources, not copies.** Every statement lives in exactly one artifact: the architecture narrative in the arc42 document, a decision's rationale in its ADR, the API contract in Doxygen comments, the conventions in this document set. Cross-link between them; never restate.
 - **Same commit.** A change is incomplete until the documentation it invalidates is updated in the same commit — see *Definition of done* below.
 - **Language**: English (the `Language` core rule of `AGENTS.md`).
 - **Generated artifacts are never committed.** `build/docs/**` is produced by `doit docs`; the renders in `docs/arc42/images/*.svg` are produced by `doit diagrams`. Both are ignored by git: edit the source, rebuild, never touch the artifact.
@@ -24,13 +36,14 @@ FASTENgine documents its architecture, its decisions and its API reference as co
 | `docs/arc42/diagrams/*.puml` | PlantUML diagram sources — the only editable form of a diagram | scaffold |
 | `docs/arc42/images/` | Diagram renders (`*.svg`, generated) and committed static images | active |
 | `docs/api/Doxyfile`, `docs/api/mainpage.md`, `docs/api/groups.dox` | Doxygen configuration, main page and the module group map | active |
-| `tools/new_adr.py`, `tools/check_docs.py`, `tools/render_diagrams.py` | The documentation tooling the commands below call | active |
-| `build/docs/` | Built HTML (arc42, ADRs, API reference) — generated, never committed | generated |
+| `docs/development/` | The development manual: workflows, toolchain facts, documentation guides, the conventions and the arc42 template copy — indexed from the repository `README.md` | active |
+| `tools/new_adr.py`, `tools/check_docs.py`, `tools/render_diagrams.py`, `tools/render_arc42_pages.py` | The documentation tooling the commands below call | active |
+| `build/docs/` | Built HTML (arc42, ADRs, API reference) and the converted Doxygen pages (`build/docs/api-pages/`) — generated, never committed | generated |
 
 ## Formats
 
 - **AsciiDoc everywhere under `docs/`; no Markdown in `docs/arc42/`.** One text toolchain keeps includes, cross-references and tables uniform. The single exception is `docs/api/mainpage.md`, which Doxygen consumes directly.
-- **Sections are edited, not composed ad hoc.** The master includes them in order; an include line is never duplicated, and a section file is never built standalone by hand.
+- **Sections are edited, not composed ad hoc.** The master includes them in order; an include line is never duplicated; a section file is only built as part of the master, except in the mechanical Doxygen-page conversion (`tools/render_arc42_pages.py`).
 - **Diagrams are sources first.** No image enters a section without a `.puml` (or an entry in `images/` that no tool regenerates) behind it — see *Diagrams*.
 
 ## The arc42 document
@@ -64,16 +77,18 @@ FASTENgine documents its architecture, its decisions and its API reference as co
 - The configuration is `docs/api/Doxyfile`; the build runs **from the repository root** — paths inside resolve against the current directory.
 - `docs/api/groups.dox` is the only place the module tree is listed. Every level-1 or level-2 building block named in Section 5 exists as a group there, and its members join the group from their own documentation blocks; a block is added to both lists in the same change.
 - Coverage policy: `EXTRACT_ALL = NO` with `WARN_IF_UNDOCUMENTED = YES` — a warning is the coverage check working, not noise. `WARN_AS_ERROR` flips to `FAIL_ON_WARNINGS` together with the first stable engine sources (open item below).
+- The standalone site also carries the architecture document as Doxygen pages: `tools/render_arc42_pages.py` converts the arc42 sections to Markdown under `build/docs/api-pages/` (Asciidoctor HTML5 -> pandoc; the conversion is deliberately best-effort — tables survive, exact anchors do not), and the Doxyfile lists that directory as INPUT. The AsciiDoc sources stay the contract; the converted pages are build artifacts.
 - What must be documented, and how: [Documentation (Doxygen)](style/documentation.md).
 
 ## Commands
 
 | Command | What it does |
 |:--|:--|
-| `doit docs` | Builds everything into `build/docs/`: renders diagrams, checks the tree, builds arc42 and the ADRs, builds the API reference |
+| `doit docs` | Builds everything into `build/docs/`: renders diagrams, checks the tree, builds arc42 and the ADRs, converts the architecture pages, builds the API site |
 | `doit docs_check` | Checks the tree alone: the ADR set and numbering, the generated regions, includes, image and link targets |
 | `doit diagrams` | Renders `diagrams/*.puml` to `images/*.svg`; skips up-to-date renders, `--force` re-renders |
 | `python3 tools/new_adr.py "Title"` | Creates an ADR and regenerates the Section 9 regions; `--regenerate` rewrites the regions alone |
+| `python3 tools/render_arc42_pages.py` | Converts `docs/arc42/sections/` into the Doxygen pages under `build/docs/api-pages/` (run by `doit docs`) |
 | `doxygen docs/api/Doxyfile` | The API reference alone, from the repository root (`mkdir -p build/docs/api` first) |
 
 CI runs `doit docs_check` and `doit docs` in the workflow job *Documentation*; the pre-commit hook adds the tree check for staged `docs/` or `tools/` changes (advisory).
@@ -87,13 +102,14 @@ CI runs `doit docs_check` and `doit docs` in the workflow job *Documentation*; t
 | New or changed public entity | Doxygen comment block per [Documentation (Doxygen)](style/documentation.md) |
 | A diagram changes | Edit the `.puml` source; `doit diagrams`; commit the source only |
 | The architecture narrative changes | The owning section file; update the ADR references it carries |
-| A convention changes | The rule document; the artifact that stated it before changes in the same commit |
+| A convention changes | The document under `docs/development/conventions/` that owns it; the artifact that stated it before changes in the same commit |
 
 ## Toolchain state
 
-The toolchain is Asciidoctor.js (npm `@asciidoctor/cli`) plus a user-local PlantUML on Temurin 21 — versions and paths measured in [`../docs/toolchain.md`](../docs/toolchain.md).
+The toolchain is Asciidoctor.js (npm `@asciidoctor/cli`), pandoc and a user-local PlantUML on Temurin 21 — versions and paths measured in [`../toolchain.md`](../toolchain.md).
 
 - The CLI is pinned to `@asciidoctor/cli@3.5.0`: 4.0.0 is broken on Node 22. CI installs the same pin — local and CI builds must not drift.
+- The Doxygen-page conversion runs Asciidoctor with the HTML5 backend, not DocBook: Asciidoctor.js ships no docbook5 converter (measured), so the pipeline is HTML5 -> pandoc and the conversion is explicitly best-effort.
 - PDF output and inline `asciidoctor-diagram` rendering are **deferred** with the Ruby toolchain: diagrams are pre-rendered by `doit diagrams`, and PDF returns when a build target for it exists.
 - Doxygen's `WARN_AS_ERROR` is the same kind of open item — see *API reference*.
 
@@ -109,5 +125,5 @@ The toolchain is Asciidoctor.js (npm `@asciidoctor/cli`) plus a user-local Plant
 
 ## Maintenance and verification
 
-- The mechanical half of this rule is `tools/check_docs.py` — run it (or `doit docs_check`) after any change under `docs/` and quote its output in reports.
-- The context tree that carries this rule is verified separately by `doit verify`; a report names both gates when both are relevant.
+- The mechanical half of this rule is `tools/check_docs.py` — run it (or `doit docs_check`) after any change under `docs/` and quote its output in reports. The vendored arc42 template copy under `docs/development/documentation/arc42-template/` is excluded from its include/image/link scans by design (frozen third-party material, reported as a note).
+- The snippets and links of this document set are verified by `doit verify`, together with the context tree it is linked from; a report names both gates when both are relevant.

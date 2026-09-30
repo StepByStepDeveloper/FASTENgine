@@ -1,8 +1,8 @@
 # Doxygen configuration for the FASTENgine API reference.
 #
 # The comment rules it makes machine-checkable live in
-# .agents/rules/style/documentation.md; the layout and build conventions in
-# .agents/rules/docs.md.
+# docs/development/conventions/style/documentation.md; the layout and build
+# conventions in docs/development/conventions/docs.md.
 #
 # Run it from the repository root — measured with doxygen 1.18.0, relative
 # paths below resolve against the working directory doxygen is started from:
@@ -14,15 +14,20 @@
 # EXTRACT_ALL stays NO: with YES, doxygen disables the warnings about
 # undocumented members, which is exactly the check this file exists for.
 # WARN_AS_ERROR stays NO while `src/` is empty; flip it to FAIL_ON_WARNINGS
-# together with the first stable sources (tracked in .agents/rules/docs.md).
+# together with the first stable sources (tracked in docs/development/conventions/docs.md).
 
 PROJECT_NAME           = "FASTENgine"
 OUTPUT_DIRECTORY       = build/docs/api
-INPUT                  = src docs/api/mainpage.md docs/api/groups.dox
+# The generated architecture pages (tools/render_arc42_pages.py, run by
+# `doit docs`) join INPUT so the standalone site carries the arc42 document
+# as Doxygen pages, not only the API reference.
+INPUT                  = src docs/api/mainpage.md docs/api/groups.dox build/docs/api-pages
 RECURSIVE              = YES
-FILE_PATTERNS          = *.hpp *.cpp
+FILE_PATTERNS          = *.hpp *.cpp *.md
 EXCLUDE_PATTERNS       = */bazel-*
+IMAGE_PATH             = build/docs/api-pages/images
 USE_MDFILE_AS_MAINPAGE = docs/api/mainpage.md
+MARKDOWN_SUPPORT       = YES
 
 EXTRACT_ALL            = NO
 WARNINGS               = YES

@@ -4,7 +4,7 @@
 
 ## Scenario
 
-A fresh session starts in this repository with `AGENTS.md` and `.agents/rules/**` available, and is asked: *"Add `ring_buffer.hpp` and `ring_buffer.cpp`: a fixed-capacity byte ring buffer for a single producer and a single consumer."* Nothing else is said — the rules must carry the naming.
+A fresh session starts in this repository with `AGENTS.md` and the development conventions (`docs/development/conventions/**`) available, and is asked: *"Add `ring_buffer.hpp` and `ring_buffer.cpp`: a fixed-capacity byte ring buffer for a single producer and a single consumer."* Nothing else is said — the rules must carry the naming.
 
 ## Expected behavior
 

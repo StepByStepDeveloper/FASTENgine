@@ -52,7 +52,7 @@ toolchain that the existing gates can check.
   into `docs/arc42/images/` by `doit diagrams`.
 * Bad, because the toolchain is Asciidoctor.js without the Ruby extensions:
   PDF output and inline `asciidoctor-diagram` rendering are deferred until the
-  toolchain decision is revisited (tracked in `.agents/rules/docs.md`).
+  toolchain decision is revisited (tracked in `docs/development/conventions/docs.md`).
 * Neutral, because the arc42 help texts stay in the sections until the content
   replaces them (`:arc42help:` in `docs/arc42/config.adoc`).
 
@@ -61,7 +61,7 @@ toolchain that the existing gates can check.
 * `doit docs` builds the document and `doit docs_check` verifies the tree
   (ADR set, generated regions, includes, links); the CI job *Documentation*
   runs the same pair.
-* The conventions are binding in `.agents/rules/docs.md`; the procedures are
+* The conventions are binding in `docs/development/conventions/docs.md`; the procedures are
   the skills `write-arc42-docs`, `write-adr` and `build-api-docs`.
 
 == More Information
@@ -70,4 +70,4 @@ toolchain that the existing gates can check.
 * https://adr.github.io and https://adr.github.io/madr — ADR background; this
   template adapts MADR's section structure to AsciiDoc.
 * https://docs.asciidoctor.org — the AsciiDoc syntax reference.
-* The agent context: `.agents/rules/docs.md`.
+* The development conventions: `docs/development/conventions/docs.md` (moved out of the agent context — see ADR-0002).

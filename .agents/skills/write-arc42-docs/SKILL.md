@@ -5,7 +5,7 @@ description: "Write and maintain the arc42 architecture document — sections, d
 
 # Write the arc42 Documentation
 
-How to edit FASTENgine's architecture document: which file owns what, how sections, diagrams and references stay consistent, and how to prove the result. The binding conventions live in [docs.md](../../rules/docs.md); this skill is the procedure.
+How to edit FASTENgine's architecture document: which file owns what, how sections, diagrams and references stay consistent, and how to prove the result. The binding conventions live in [docs.md](../../../docs/development/conventions/docs.md); this skill is the procedure.
 
 **Status**: active — the document is in template state; the procedure holds for both filling and maintaining it.
 
@@ -39,7 +39,8 @@ doit docs          # full build into build/docs/
 - Markdown is not allowed under `docs/arc42/` — the AsciiDoc sources are the contract.
 - `docs/arc42/images/*.svg` are generated: never commit or hand-edit them. `check_docs` accepts an image reference backed by a `.puml` source even before the first render.
 - `:arc42help:` in `config.adoc` gates the help chrome for the whole document; removing it while placeholders remain is a rule violation.
+- The Doxygen architecture pages (`build/docs/api-pages/`) are converted from these sections by `tools/render_arc42_pages.py` inside `doit docs`: edit the sources, never the converted pages.
 
 ## Verification
 
-`doit docs_check` reports PASS, `doit docs` builds without asciidoctor warnings, and the edited section appears with its expected number in `build/docs/arc42/arc42.html`.
+`doit docs_check` reports PASS, `doit docs` builds without asciidoctor warnings, and the edited section appears with its expected number in `build/docs/arc42/arc42.html` and, converted, among the Doxygen pages of `build/docs/api/html/`.

@@ -1,6 +1,6 @@
 ---
 name: naming-auditor
-description: Delegate here to audit C++ names and member access against .agents/rules/style/naming.md.
+description: Delegate here to audit C++ names and member access against docs/development/conventions/style/naming.md.
 ---
 
 # Naming Auditor
@@ -9,7 +9,7 @@ description: Delegate here to audit C++ names and member access against .agents/
 
 ## Role & Mindset
 
-Read [`.agents/rules/style/naming.md`](../rules/style/naming.md) before judging anything, and decide by its clauses rather than by taste: a finding is a name a clause forbids, or a form the document cannot produce — not a name you would have written differently.
+Read [`docs/development/conventions/style/naming.md`](../../docs/development/conventions/style/naming.md) before judging anything, and decide by its clauses rather than by taste: a finding is a name a clause forbids, or a form the document cannot produce — not a name you would have written differently.
 
 ## Checklist
 

@@ -1,23 +1,30 @@
 #!/usr/bin/env python3
 """Check the .agents tree against the reference context-architecture layout.
 
-The repository's agent-facing context follows one reference layout (eleven layers
-plus a root AGENTS.md entry point). This script verifies that the tree still
-matches it and that each artifact carries the structure its layer prescribes.
+The repository's agent-facing context follows one reference layout (eleven
+entries plus a root AGENTS.md entry point). This script verifies that the tree
+still matches it and that each artifact carries the structure its layer
+prescribes. The binding conventions themselves live outside the tree, in the
+development manual (`docs/development/conventions`); this script checks that
+they are there, that the toolchain facts moved with them, and that AGENTS.md
+links them.
 
 Checks, per the layout's own sections:
   tree        the reference entries exist, and nothing outside them does
-  AGENTS.md   overview + commands + constraints + index, and no copied content
-  rules/      (reported only) every rule document carries no layer frontmatter
+  AGENTS.md   overview + commands + constraints + index, no copied content,
+              and the rules placeholder routed from the table
+  development the conventions live under docs/development/conventions, and
+              AGENTS.md links the manual; no docs/ layer returns to .agents/
   policies/   a prohibition list, plus a one-glob-per-line ignore file
+  rules/      the declared placeholder: README.md only, carrying a status and
+              an admission test; opening the layer is a conscious change
   skills/     <kebab-name>/SKILL.md with a name and a description that says what and when
   commands/   one file per command, described in frontmatter and in the body's first line
-  docs/       linked from AGENTS.md, table/fact shaped
   state/      the scratchpad's four blocks; the memory's three topic sections
   mcp.json    an mcpServers object
   hooks/      on / match / action / mode from the reference vocabulary
   agents/     name + description, Role & Mindset / Checklist / Output Format
-  evals/      Scenario / Expected behavior / Pass criteria
+  evals/      Scenario -> Expected behavior -> Pass criteria
   adapters/   the harness -> expects -> source -> method table
 
 Usage:
@@ -38,7 +45,7 @@ import re
 import sys
 
 REFERENCE_ENTRIES = {
-    "rules", "policies", "skills", "commands", "docs", "state",
+    "policies", "rules", "skills", "commands", "state",
     "hooks", "agents", "evals", "adapters", "ignore", "mcp.json",
 }
 LAYER_DIRS = REFERENCE_ENTRIES - {"ignore", "mcp.json"}
@@ -110,18 +117,28 @@ def check_agents_md(repo: str) -> None:
           f"headings={heads}")
     check("AGENTS.md", "links rather than copies .agents content",
           "```" not in text, f"{text.count('```')} fenced block(s)")
+    check("AGENTS.md", "rules placeholder linked from AGENTS.md",
+          ".agents/rules/README.md" in text)
     check("AGENTS.md", "stays a single entry point (measurable size)",
           len(text) < 4000, f"{len(text)} chars ~ {len(text) // 4} tokens")
 
 
-def check_rules(ag: str) -> None:
-    docs = [os.path.join(dirpath, name)
-            for dirpath, _, names in os.walk(os.path.join(ag, "rules"))
-            for name in names if name.endswith(".md")]
-    without = [d for d in docs if frontmatter(d)[0] is None]
-    check("rules", "layer frontmatter present (adapter metadata)",
-          not without, f"{len(without)}/{len(docs)} without frontmatter — deliberate, "
-                       "see .agents/state/memory.md", strict=False)
+def check_development_docs(repo: str) -> None:
+    """The conventions live outside .agents now: under the development manual."""
+    conventions = os.path.join(repo, "docs", "development", "conventions")
+    key_files = ["README.md", "style.md", "style/naming.md", "style/documentation.md",
+                 "git.md", "testing.md", "docs.md"]
+    missing = [name for name in key_files
+               if not os.path.isfile(os.path.join(conventions, name))]
+    check("development", "conventions under docs/development/conventions",
+          not missing, f"missing={missing or 'none'}")
+    check("development", "toolchain facts under docs/development",
+          os.path.isfile(os.path.join(repo, "docs", "development", "toolchain.md")))
+    agents_md = open(os.path.join(repo, "AGENTS.md"), encoding="utf-8").read()
+    check("development", "development manual linked from AGENTS.md",
+          "docs/development" in agents_md)
+    check("development", "no docs/ layer back in .agents",
+          not os.path.exists(os.path.join(repo, ".agents", "docs")))
 
 
 def check_policies(ag: str) -> None:
@@ -135,6 +152,19 @@ def check_policies(ag: str) -> None:
                 if l.strip() and not l.startswith("#")]
     check("ignore", "one glob per line", all(not re.search(r"\s{2,}", l) for l in patterns),
           f"{len(patterns)} pattern(s)")
+
+
+def check_rules(ag: str) -> None:
+    """``rules/`` is a declared placeholder: README.md only, until a rule passes its admission test."""
+    root = os.path.join(ag, "rules")
+    files = sorted(os.listdir(root)) if os.path.isdir(root) else []
+    check("rules", "placeholder only (README.md) until the layer opens",
+          files == ["README.md"],
+          f"files={files or 'none'} — opening the layer updates this check and the router")
+    readme = os.path.join(root, "README.md")
+    text = open(readme, encoding="utf-8").read() if os.path.isfile(readme) else ""
+    check("rules", "the placeholder declares its status and admission test",
+          bool(re.search(r"\*\*Status\*\*:\s*placeholder", text)) and "## Admission test" in text)
 
 
 def check_skills(ag: str) -> None:
@@ -167,16 +197,6 @@ def check_commands(ag: str) -> None:
         detail.append(f"{name}: description={described} body_opens_described={opens}")
     check("commands", "one file per command, described in frontmatter and body", passed,
           "; ".join(detail))
-
-
-def check_docs(ag: str, repo: str) -> None:
-    root = os.path.join(ag, "docs")
-    files = [n for n in sorted(os.listdir(root)) if n.endswith(".md")]
-    agents_md = open(os.path.join(repo, "AGENTS.md"), encoding="utf-8").read()
-    linked = all(f".agents/docs/{n}" in agents_md for n in files)
-    table_shaped = all("|" in open(os.path.join(root, n), encoding="utf-8").read() for n in files)
-    check("docs", "linked from AGENTS.md and fact/table shaped", bool(files) and linked and table_shaped,
-          f"{files}")
 
 
 def check_state(ag: str) -> None:
@@ -254,11 +274,11 @@ def main() -> int:
 
     check_tree(args.root)
     check_agents_md(args.repo)
-    check_rules(args.root)
+    check_development_docs(args.repo)
     check_policies(args.root)
+    check_rules(args.root)
     check_skills(args.root)
     check_commands(args.root)
-    check_docs(args.root, args.repo)
     check_state(args.root)
     check_mcp(args.root)
     check_hooks(args.root)

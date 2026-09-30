@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Snippets compile, links and anchors resolve, layout holds
         run: |
-          python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py .agents --group block --compiler clang++ --std c++17
-          python3 .agents/skills/verify-rules/scripts/check_heading_numbering.py .agents/rules/style/naming.md -r .agents/rules
+          python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py .agents docs/development --group block --compiler clang++ --std c++17
+          python3 .agents/skills/verify-rules/scripts/check_heading_numbering.py docs/development/conventions/style/naming.md -r docs/development/conventions
           python3 .agents/skills/verify-rules/scripts/check_context_layout.py --root .agents --repo .
 
   build-and-test:
@@ -45,11 +45,12 @@ jobs:
       - name: Install the documentation toolchain
         run: |
           # The same Asciidoctor.js pin as the development machine
-          # (4.0.0 is broken on Node 22) — see .agents/rules/docs.md.
+          # (4.0.0 is broken on Node 22) — see docs/development/conventions/docs.md.
           npm install -g @asciidoctor/cli@3.5.0
           asciidoctor --version
           sudo apt-get update -qq
-          sudo apt-get install -y -qq plantuml doxygen
+          # pandoc converts the arc42 sources into Doxygen pages (doit docs).
+          sudo apt-get install -y -qq plantuml doxygen pandoc
       - name: Install doit
         run: python3 -m pip install --user doit
       - name: Check the documentation tree

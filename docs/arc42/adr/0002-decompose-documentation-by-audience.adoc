@@ -1,0 +1,76 @@
+[[adr-0002]]
+= ADR-0002: Decompose documentation by audience
+
+Status: accepted (2026-09-30).
+
+== Context and Problem Statement
+
+The documentation had grown in three directions at once: the agent context
+(`.agents/`) had become the de-facto home of repository knowledge — the
+binding conventions, the toolchain facts — while a developer had no guided
+entry into the repository at all, and the product documentation (arc42, ADRs,
+Doxygen) lived next to both without a stated boundary.
+
+Who is each document for, and where does it live so that every audience finds
+it and no fact is stated twice?
+
+== Decision Drivers
+
+* Every document has exactly one audience and one home; the other audiences
+  reach it by link.
+* A developer joins through the repository `README.md` and can follow links to
+  full understanding — structure, processes, conventions, tools.
+* The agent context carries only artifacts an agent reads; repository-facing
+  prose it needs lives in the development manual.
+* The conventions keep their mechanical verification (snippets compile, links
+  resolve, anchors hold).
+
+== Considered Options
+
+* **Three documentation classes**: agent context (`.agents/`), development
+  manual (`README.md` + `docs/development/`), product documentation
+  (`docs/arc42/`, `docs/api/`).
+* **Keep everything in `.agents/`** — the context tree stays one home; a
+  developer gains no entry point and the conventions remain invisible to them.
+* **Duplicate the conventions into the development manual** — both audiences
+  read their own copy; the copies drift apart, and the repository already
+  forbids stating one fact twice.
+
+== Decision Outcome
+
+Chosen option: "three documentation classes", because it gives each audience a
+single door and keeps every fact in one place.
+
+The conventions moved out of the agent context into the development manual —
+`docs/development/conventions/` — together with the toolchain facts
+(`docs/development/toolchain.md`); `.agents/` keeps only agent artifacts and
+links out. The repository `README.md` became the entry point, and the
+verification (the compile/link/layout gate) now scans `.agents` and
+`docs/development` together. The upstream arc42 template joined the manual as
+a vendored reference copy (`docs/development/documentation/arc42-template/`);
+stale path references in ADR-0001 were corrected mechanically, its decisions
+untouched.
+
+=== Consequences
+
+* Good, because a developer reads `README.md` -> development manual ->
+  conventions and fully understands the repository without entering `.agents/`.
+* Good, because the agent context shrank to agent-only artifacts; the router
+  table in `AGENTS.md` links the manual instead of restating it.
+* Bad, because the move retargeted every reference in the gates, hooks, CI,
+  skills, commands and evals — a one-time, mechanical churn.
+* Neutral, because the conventions remain binding for every author; only their
+  home changed.
+
+== Confirmation
+
+`doit verify` scans `.agents` and `docs/development` (snippets, links,
+anchors, layout) and checks that the conventions live under
+`docs/development/conventions/`; the pre-commit hook and CI run the same gate.
+
+== More Information
+
+* The decision this one builds on: ADR-0001 (documentation as code).
+* The manual: `docs/development/README.md`; the conventions index:
+  `docs/development/conventions/README.md`.
+* The classes table: `docs/development/conventions/docs.md`.

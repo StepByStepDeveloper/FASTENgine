@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Check the documentation tree under docs/ against its conventions.
 
-The conventions are binding in .agents/rules/docs.md; this script is their
-mechanical half for the document tree itself. Checks:
+The conventions are binding in docs/development/conventions/docs.md; this
+script is their mechanical half for the document tree itself. Checks:
 
   sections   the twelve section files exist, and the master includes each
              exactly once, in order
@@ -13,6 +13,11 @@ mechanical half for the document tree itself. Checks:
   images     every ``image::`` reference resolves to a file, or to a diagram
              source that ``doit diagrams`` renders into it
   links      every relative ``xref:`` / ``link:`` target resolves
+
+The vendored arc42 template copy under
+``docs/development/documentation/arc42-template/`` is excluded from the
+include/image/link scans by design: it is frozen third-party reference
+material, not this repository's own tree. The exclusion is reported as a note.
 
 Usage:
     python3 tools/check_docs.py [--root docs]
@@ -58,6 +63,9 @@ IMAGE_RE = re.compile(r"^image::([^\s\[]+)\[", re.M)
 LINK_RE = re.compile(r"(?:xref|link):([^\s\[]+)\[")
 STATUS_WORDS = ("proposed", "accepted", "rejected", "deprecated", "superseded")
 
+# Vendored reference material, excluded from the include/image/link scans below.
+THIRD_PARTY_PREFIX = "development/documentation/arc42-template"
+
 problems: list[str] = []
 notes: list[str] = []
 
@@ -84,6 +92,11 @@ def adoc_files(root: Path) -> list[Path]:
     return sorted(root.rglob("*.adoc"))
 
 
+def is_third_party(root: Path, path: Path) -> bool:
+    """True for the vendored arc42 template copy, held outside the tree checks."""
+    return path.relative_to(root).as_posix().startswith(THIRD_PARTY_PREFIX)
+
+
 def check_sections(root: Path) -> None:
     """The twelve section files exist and the master includes them, in order."""
     arc42 = root / "arc42"
@@ -106,6 +119,8 @@ def check_sections(root: Path) -> None:
 def check_includes(root: Path) -> None:
     """Every include:: target under docs/ resolves relative to its includer."""
     for path in adoc_files(root):
+        if is_third_party(root, path):
+            continue
         for target in INCLUDE_RE.findall(path.read_text(encoding="utf-8")):
             if target.startswith(("http://", "https://", "/")):
                 continue
@@ -173,6 +188,8 @@ def check_images(root: Path) -> None:
     """Every image:: reference resolves to a file or to a diagram source."""
     arc42 = root / "arc42"
     for path in adoc_files(root):
+        if is_third_party(root, path):
+            continue
         for target in IMAGE_RE.findall(path.read_text(encoding="utf-8")):
             if target.startswith(("http://", "https://", "/")):
                 continue
@@ -190,6 +207,8 @@ def check_images(root: Path) -> None:
 def check_links(root: Path) -> None:
     """Every relative xref:/link: target resolves (the file part, at least)."""
     for path in adoc_files(root):
+        if is_third_party(root, path):
+            continue
         for target in LINK_RE.findall(path.read_text(encoding="utf-8")):
             if target.startswith(("http://", "https://", "#", "mailto:")):
                 continue
@@ -218,6 +237,11 @@ def main() -> int:
     check_regions(root, adrs)
     check_images(root)
     check_links(root)
+
+    vendored = [p for p in adoc_files(root) if is_third_party(root, p)]
+    if vendored:
+        note(f"vendored arc42 template copy: {len(vendored)} file(s) outside "
+             "the include/image/link checks by design")
 
     for message in notes:
         print(f"check_docs: note: {message}")

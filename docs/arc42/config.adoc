@@ -1,12 +1,12 @@
 // AsciiDoc settings shared by the arc42 document (docs/arc42).
-// The conventions this file takes part in: .agents/rules/docs.md
+// The conventions this file takes part in: docs/development/conventions/docs.md
 // The build: `doit docs` — see docs/arc42/arc42.adoc.
 
 :toc-title: Table of Contents
 :toc:
 
 // Where images live, relative to the built master document. Diagram renders
-// land there through `doit diagrams`; see .agents/rules/docs.md.
+// land there through `doit diagrams`; see docs/development/conventions/docs.md.
 :imagesdir: images
 
 // The arc42 help texts: defined = shown. Comment this line out once every

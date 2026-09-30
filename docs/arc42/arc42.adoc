@@ -5,7 +5,7 @@
 // one include per section, a generated decision index (Section 9).
 //
 // Build:  doit docs   -> build/docs/arc42/arc42.html
-// Rules:  .agents/rules/docs.md    Procedure: .agents/skills/write-arc42-docs/
+// Rules:  docs/development/conventions/docs.md   Procedure: .agents/skills/write-arc42-docs/
 
 include::config.adoc[]
 

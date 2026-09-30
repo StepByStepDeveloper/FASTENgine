@@ -7,13 +7,13 @@ the same commands.
 Usage:
     doit                 # verify + build + test (the CI set)
     doit list            # every task, one line each
-    doit verify          # context-tree gates only
+    doit verify          # the specification gates only (context tree + conventions)
     doit build           # bazel build //...
     doit test            # bazel test //...
     doit format          # clang-format -i over the engine sources
     doit format_check    # clang-format --dry-run --Werror (writes nothing)
-    doit docs            # build the documentation (arc42 + ADRs + API reference)
-    doit docs_check      # check the documentation tree (see .agents/rules/docs.md)
+    doit docs            # build the documentation (arc42 + ADRs + API reference + architecture pages)
+    doit docs_check      # check the documentation tree (see docs/development/conventions/docs.md)
     doit diagrams        # render docs/arc42/diagrams/*.puml into docs/arc42/images/
 
 Exit codes: doit exits 0 when every requested task succeeds, 1 otherwise.
@@ -60,10 +60,11 @@ def task_verify():
     """Run the context-tree gates: snippets compile, links, anchors and layout resolve."""
     return {
         "actions": [
-            ["python3", str(GATE_DIR / "verify_rule_docs.py"), ".agents",
+            ["python3", str(GATE_DIR / "verify_rule_docs.py"), ".agents", "docs/development",
              "--group", "block", "--compiler", "clang++", "--std", "c++17"],
             ["python3", str(GATE_DIR / "check_heading_numbering.py"),
-             ".agents/rules/style/naming.md", "-r", ".agents/rules"],
+             "docs/development/conventions/style/naming.md",
+             "-r", "docs/development/conventions"],
             ["python3", str(GATE_DIR / "check_context_layout.py"),
              "--root", ".agents", "--repo", "."],
         ],
@@ -128,11 +129,11 @@ def task_diagrams():
 
 
 def task_docs():
-    """Build the documentation: arc42 + ADRs to HTML, then the API reference."""
+    """Build the documentation: arc42 + ADRs to HTML, the architecture pages, and the API site."""
     def build_docs():
-        for tool in ("asciidoctor", "doxygen"):
+        for tool in ("asciidoctor", "pandoc", "doxygen"):
             if shutil.which(tool) is None:
-                print(f"no '{tool}' on PATH — see .agents/docs/toolchain.md")
+                print(f"no '{tool}' on PATH — see docs/development/toolchain.md")
                 return False
 
         arc42_dir = DOCS_BUILD_DIR / "arc42"
@@ -145,18 +146,32 @@ def task_docs():
         if subprocess.call(["python3", "tools/check_docs.py"]) != 0:
             return False
 
-        if subprocess.call(["asciidoctor", "-b", "html5",
-                            "-o", str(arc42_dir / "arc42.html"),
-                            "docs/arc42/arc42.adoc"]) != 0:
+        # asciidoctor recovers from some parse errors with exit 0 — an
+        # `asciidoctor: ERROR` line still fails the build here.
+        proc = subprocess.run(["asciidoctor", "-b", "html5",
+                               "-o", str(arc42_dir / "arc42.html"),
+                               "docs/arc42/arc42.adoc"],
+                              capture_output=True, text=True)
+        if proc.stderr.strip():
+            print(proc.stderr.strip())
+        if proc.returncode != 0 or "asciidoctor: ERROR" in proc.stderr:
             return False
 
         adrs = sorted(str(path) for path in Path("docs/arc42/adr").glob("[0-9]*.adoc"))
-        if adrs and subprocess.call(["asciidoctor", "-b", "html5", "-D", str(adr_dir), *adrs]) != 0:
-            return False
+        if adrs:
+            proc = subprocess.run(["asciidoctor", "-b", "html5", "-D", str(adr_dir), *adrs],
+                                  capture_output=True, text=True)
+            if proc.stderr.strip():
+                print(proc.stderr.strip())
+            if proc.returncode != 0 or "asciidoctor: ERROR" in proc.stderr:
+                return False
 
         images = Path("docs/arc42/images")
         if images.is_dir():
             shutil.copytree(images, arc42_dir / "images", dirs_exist_ok=True)
+
+        if subprocess.call(["python3", "tools/render_arc42_pages.py"]) != 0:
+            return False
 
         if subprocess.call(["doxygen", "docs/api/Doxyfile"]) != 0:
             return False

@@ -2,12 +2,13 @@
 # Pre-commit gate: advisory context-tree and documentation-tree checks, and a
 # blocking secret scan.
 #
-# Specifications: .agents/hooks/verify-rules-on-edit.md (the context tree —
-# the same gate CI runs; it prints a problem and lets the commit through, so
-# flip its closing `exit 0` to `exit "$status"` once the tree has been green
-# for a round), .agents/hooks/docs-gate-on-edit.md (the documentation tree —
-# advisory in the same way) and .agents/hooks/secret-scan-on-commit.md (the
-# secret scan — a finding blocks the commit).
+# Specifications: .agents/hooks/verify-rules-on-edit.md (the context tree and
+# the development conventions — the same gate CI runs; it prints a problem and
+# lets the commit through, so flip its closing `exit 0` to `exit "$status"`
+# once the tree has been green for a round), .agents/hooks/docs-gate-on-edit.md
+# (the documentation tree — advisory in the same way) and
+# .agents/hooks/secret-scan-on-commit.md (the secret scan — a finding blocks
+# the commit).
 #
 # Enable once per clone: git config core.hooksPath .githooks
 
@@ -23,11 +24,11 @@ fi
 
 status=0
 
-if git diff --cached --name-only | grep -qE '^(AGENTS\.md|\.agents/)'; then
+if git diff --cached --name-only | grep -qE '^(AGENTS\.md|\.agents/|docs/development/)'; then
     python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py \
-        .agents --group block --compiler clang++ --std c++17 || status=1
+        .agents docs/development --group block --compiler clang++ --std c++17 || status=1
     python3 .agents/skills/verify-rules/scripts/check_heading_numbering.py \
-        .agents/rules/style/naming.md -r .agents/rules || status=1
+        docs/development/conventions/style/naming.md -r docs/development/conventions || status=1
     python3 .agents/skills/verify-rules/scripts/check_context_layout.py \
         --root .agents --repo . || status=1
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Verify a repository's rules documentation tree.
+"""Verify the repository's specification trees: the agent context and the
+development manual.
 
 Two checks, both of which catch defects a human review misses:
 
@@ -17,9 +18,12 @@ that is the only mode in which such a document can be green.
 resolve to a file that exists.
 
 Usage:
-    python3 verify_rule_docs.py <rules-dir> [--group file|tree|block] [--compiler g++]
-                                   [--std c++20]
+    python3 verify_rule_docs.py <dir> [<dir> ...] [--group file|tree|block]
+                                   [--compiler g++] [--std c++20]
                                    [--prelude '#include <cstddef>']
+
+Typical invocation scans the context tree and the development conventions:
+`.agents docs/development`.
 
 Exit code 0 only when every check passes. Stdlib only.
 """
@@ -188,7 +192,8 @@ def check_links(root: str) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("rules_dir", help="root of the rules tree, e.g. <repo>/.agents/rules")
+    parser.add_argument("rules_dirs", nargs="+",
+                        help="one or more roots to scan, e.g. .agents docs/development")
     parser.add_argument(
         "--group",
         choices=("file", "tree", "block"),
@@ -205,16 +210,20 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    if not os.path.isdir(args.rules_dir):
-        print(f"rules dir not found: {args.rules_dir}")
+    missing = [root for root in args.rules_dirs if not os.path.isdir(root)]
+    for root in missing:
+        print(f"dir not found: {root}")
+    if missing:
         return 2
 
-    snippets_ok = check_snippets(
-        args.rules_dir, args.compiler, args.std, args.prelude, args.group
-    )
-    links_ok = check_links(args.rules_dir)
-    print("result:", "PASS" if (snippets_ok and links_ok) else "FAIL")
-    return 0 if (snippets_ok and links_ok) else 1
+    ok = True
+    for root in args.rules_dirs:
+        print(f"--- {root} ---")
+        snippets_ok = check_snippets(root, args.compiler, args.std, args.prelude, args.group)
+        links_ok = check_links(root)
+        ok = ok and snippets_ok and links_ok
+    print("result:", "PASS" if ok else "FAIL")
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

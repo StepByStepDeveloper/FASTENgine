@@ -5,7 +5,7 @@ description: "Record an architecture decision as an ADR — create, fill, supers
 
 # Record an ADR
 
-How a FASTENgine decision becomes an immutable record in `docs/arc42/adr/` and a row in Section 9's index. Conventions: [docs.md](../../rules/docs.md); the shipped example is ADR-0001.
+How a FASTENgine decision becomes an immutable record in `docs/arc42/adr/` and a row in Section 9's index. Conventions: [docs.md](../../../docs/development/conventions/docs.md); the shipped examples are ADR-0001 through ADR-0003.
 
 **Status**: active — the generator, the template and the checks exist.
 

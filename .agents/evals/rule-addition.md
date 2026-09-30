@@ -4,7 +4,7 @@
 
 ## Scenario
 
-*"Add a rule about `<topic>` to `.agents/rules`"* — a convention that belongs to an existing document rather than opening a new one.
+*"Add a rule about `<topic>` to the development conventions (`docs/development/conventions`)"* — a convention that belongs to an existing document rather than opening a new one.
 
 ## Expected behavior
 

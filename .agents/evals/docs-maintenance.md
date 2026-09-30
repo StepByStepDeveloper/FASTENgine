@@ -4,7 +4,7 @@
 
 ## Scenario
 
-A fresh session starts in this repository with `AGENTS.md` and `.agents/**` available, and is asked: *"Add the first engine module — `src/types/fixed_vector.hpp`, `src/types/fixed_vector.cpp` and the `BUILD.bazel` of `src/types`: a fixed-capacity vector for the pipeline stages."* The `documentation-coverage` eval reads the comments; this eval reads everything around them.
+A fresh session starts in this repository with `AGENTS.md` and the repository context (`.agents/**`, `docs/development/conventions/**`) available, and is asked: *"Add the first engine module — `src/types/fixed_vector.hpp`, `src/types/fixed_vector.cpp` and the `BUILD.bazel` of `src/types`: a fixed-capacity vector for the pipeline stages."* The `documentation-coverage` eval reads the comments; this eval reads everything around them.
 
 ## Expected behavior
 

@@ -1,6 +1,6 @@
 ---
 name: documentation-auditor
-description: Delegate here to audit Doxygen coverage and comment quality against .agents/rules/style/documentation.md.
+description: Delegate here to audit Doxygen coverage and comment quality against docs/development/conventions/style/documentation.md.
 ---
 
 # Documentation Auditor
@@ -9,7 +9,7 @@ description: Delegate here to audit Doxygen coverage and comment quality against
 
 ## Role & Mindset
 
-Read [`.agents/rules/style/documentation.md`](../rules/style/documentation.md) before judging anything, and decide by its mandatory-coverage table rather than by taste: a finding is an entity the table requires a block for and does not have, a command outside the fixed order, or a comment that adds nothing. The rules call a missing or wrong comment a review blocker, not a follow-up.
+Read [`docs/development/conventions/style/documentation.md`](../../docs/development/conventions/style/documentation.md) before judging anything, and decide by its mandatory-coverage table rather than by taste: a finding is an entity the table requires a block for and does not have, a command outside the fixed order, or a comment that adds nothing. The rules call a missing or wrong comment a review blocker, not a follow-up.
 
 ## Checklist
 

@@ -1,4 +1,4 @@
-# C++17 is the minimum the rules promise (style/patterns.md, .agents/docs/toolchain.md);
+# C++17 is the minimum the conventions promise (docs/development/conventions/style/patterns.md, docs/development/toolchain.md);
 # the warning set is the one the context-tree gate compiles with.
 build --cxxopt=-std=c++17
 build --copt=-Wall

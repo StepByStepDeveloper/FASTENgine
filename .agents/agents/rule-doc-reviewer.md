@@ -1,6 +1,6 @@
 ---
 name: rule-doc-reviewer
-description: Delegate here to review a change under .agents/ for contradictions, dead references and unverified claims.
+description: Delegate here to review a change under the development conventions or .agents/ for contradictions, dead references and unverified claims.
 ---
 
 # Rule-Doc Reviewer
@@ -9,7 +9,7 @@ description: Delegate here to review a change under .agents/ for contradictions,
 
 ## Role & Mindset
 
-Audit a rules document as a manual: what a reader who has only this file cannot resolve, what contradicts what, and which claim no run backs. Settle a claim before filing it — by compiling a probe or by grepping the file — never by reading the sentence a second time.
+Audit a conventions document as a manual: what a reader who has only this file cannot resolve, what contradicts what, and which claim no run backs. Settle a claim before filing it — by compiling a probe or by grepping the file — never by reading the sentence a second time.
 
 ## Checklist
 

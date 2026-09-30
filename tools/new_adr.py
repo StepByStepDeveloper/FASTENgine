@@ -11,8 +11,8 @@ Usage:
     python3 tools/new_adr.py --regenerate
     python3 tools/new_adr.py --help
 
-``--status`` picks the opening status word (see .agents/rules/docs.md for the
-vocabulary). ``--regenerate`` rewrites the two regions from the ADR files on
+``--status`` picks the opening status word (see
+docs/development/conventions/docs.md for the vocabulary). ``--regenerate`` rewrites the two regions from the ADR files on
 disk without creating anything — run it after hand-editing an ADR's title or
 status line.
 
@@ -102,8 +102,14 @@ def index_block(adrs: list[dict]) -> str:
 
 
 def include_block(adrs: list[dict]) -> str:
-    """The include list — the content of the include region."""
-    return "\n".join(f"include::../adr/{adr['file']}[]" for adr in adrs)
+    """The include list — the content of the include region.
+
+    One blank line between the includes: an included ADR file ends without a
+    trailing blank line, and Asciidoctor would otherwise glue the next ADR's
+    title line into the previous paragraph — the title then never becomes a
+    section (measured while converting the pages for Doxygen).
+    """
+    return "\n\n".join(f"include::../adr/{adr['file']}[]" for adr in adrs)
 
 
 def replace_region(path: Path, start: str, end: str, content: str) -> None:

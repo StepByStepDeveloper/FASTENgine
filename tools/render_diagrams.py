@@ -2,9 +2,9 @@
 """Render the PlantUML diagram sources of the architecture documentation.
 
 Every ``docs/arc42/diagrams/*.puml`` becomes ``docs/arc42/images/<name>.svg``
-through the PlantUML renderer (see .agents/docs/toolchain.md). Renders are
+through the PlantUML renderer (see docs/development/toolchain.md). Renders are
 build artifacts: they are not committed, and the documents reference the SVG
-name, never the .puml (see .agents/rules/docs.md).
+name, never the .puml (see docs/development/conventions/docs.md).
 
 Usage:
     python3 tools/render_diagrams.py [--force] [--root docs]
@@ -43,7 +43,7 @@ def main() -> int:
 
     renderer = shutil.which("plantuml")
     if renderer is None:
-        print("render_diagrams: no 'plantuml' on PATH — see .agents/docs/toolchain.md "
+        print("render_diagrams: no 'plantuml' on PATH — see docs/development/toolchain.md "
               "for the renderer this repository expects")
         return 2
 

@@ -2,7 +2,7 @@
 description: "Commit the staged work as one focused change, the way this repository commits"
 ---
 
-**Status**: active — the prompt is usable today; the commit conventions it applies live in [Git & PR Workflow](../rules/git.md).
+**Status**: active — the prompt is usable today; the commit conventions it applies live in [Git & PR Workflow](../../docs/development/conventions/git.md).
 
 Commit the current work following the repository's own conventions:
 
