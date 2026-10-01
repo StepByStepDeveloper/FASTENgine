@@ -3,12 +3,12 @@
 # blocking secret scan.
 #
 # Specifications: .agents/hooks/verify-rules-on-edit.md (the context tree and
-# the development conventions — the same gate CI runs; it prints a problem and
-# lets the commit through, so flip its closing `exit 0` to `exit "$status"`
-# once the tree has been green for a round), .agents/hooks/docs-gate-on-edit.md
-# (the documentation tree — advisory in the same way) and
-# .agents/hooks/secret-scan-on-commit.md (the secret scan — a finding blocks
-# the commit).
+# the development conventions), .agents/hooks/spec-gate-on-edit.md (the
+# specifications) and .agents/hooks/docs-gate-on-edit.md (the documentation
+# tree) — all advisory in the same way: a problem is printed and the commit
+# continues, so flip the closing `exit 0` to `exit "$status"` once the trees
+# have been green for a round. .agents/hooks/secret-scan-on-commit.md is the
+# secret scan — a finding blocks the commit.
 #
 # Enable once per clone: git config core.hooksPath .githooks
 
@@ -31,10 +31,15 @@ if git diff --cached --name-only | grep -qE '^(AGENTS\.md|\.agents/|docs/develop
         docs/development/conventions/style/naming.md -r docs/development/conventions || status=1
     python3 .agents/skills/verify-rules/scripts/check_context_layout.py \
         --root .agents --repo . || status=1
+fi
 
-    if [ "$status" -ne 0 ]; then
-        echo "pre-commit: the context tree gate reported a problem (advisory — the commit continues)."
-    fi
+# Specifications — staged docs/specs/ changes; advisory in the same way.
+if git diff --cached --name-only | grep -qE '^docs/specs/'; then
+    python3 tools/spec_check.py docs/specs || status=1
+fi
+
+if [ "$status" -ne 0 ]; then
+    echo "pre-commit: a gate reported a problem (advisory — the commit continues)."
 fi
 
 # Documentation tree — staged docs/ or tools/ changes; advisory for now.

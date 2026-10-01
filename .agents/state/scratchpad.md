@@ -2,28 +2,29 @@
 
 Operational memory of **one** task: the agent writes and rereads it while working, and clears it when the task ends. This is a working note, not a report — keep it short.
 
-**Status**: complete — the `rules/` placeholder is in place, routed, and gated; every gate is green, awaiting the owner's review (committing is a separate request).
+**Status**: complete — the SDD + ADR + TDD process artifacts are adopted and the development manual is rebuilt as a sequential walkthrough; awaiting the owner's review of the batch (nothing committed).
 
 ## Objective
 
-Give the residual category of agent-only rules a declared home: a documented `rules/` placeholder with an admission test, a layout gate that admits it, and the routing updated — without reopening the decomposition's decisions.
+Adopt the process artifacts of the SDD + ADR + TDD method (spec tree, process conventions, gates, skills/commands, an ADR recording the decision) and restructure the development manual into a sequential walkthrough with progressive disclosure and a glossary.
 
 ## Status
 
-- [x] `.agents/rules/README.md` — placeholder + admission test + neighbour table
-- [x] layout check: placeholder-only admission for `rules/` (fails on any other member) and the router route required
-- [x] `add-rule` routes a norm by type first; memory + verify-rules skill note updated
-- [x] ADR-0004 created, filled, index regenerated; `doit docs` / `docs_check` green
-- [x] skill `agent-rules-docs`: admission-test criterion + `verify_rule_docs.py` upstreamed (multi-root; four vendored copies byte-identical again)
-- [x] `AGENTS.md` router row for `rules/` — added with the owner's approval; the row is now checked mechanically
-- [x] gates: layout green, `doit verify` PASS, `doit docs_check` PASS, `doit docs` rc=0
+- [x] tools/spec_check.py + tools/trace.py; `doit spec_check` inside `verify`, new `doit trace`
+- [x] docs/specs/: README + `_templates/` (spec / plan / tasks)
+- [x] conventions: `process.md` (new), `testing.md` (+TDD), `docs.md` (+specs), `style/documentation.md` (+`@covers`/`@implements`)
+- [x] manual: README reading path, `process.md`, `getting-started.md`, `glossary.md`, `documentation/specs.md`
+- [x] .agents: skills `write-spec` / `tdd-cycle`; commands `new-spec` / `implement-task`; persona `test-reviewer`; eval `spec-first-discipline`; guardrails + hook `spec-gate-on-edit`
+- [x] ADR-0005 (through the generator) + Doxyfile aliases (verified with doxygen)
+- [x] AGENTS.md (<4000 chars), pre-commit, CI, PR template, root README, hooks, verify-rules skill
+- [x] gates: `doit verify` / `spec_check` / `docs_check` / `trace` — green; `docs` / `build` / `test` re-run before hand-off
 
 ## Discovered Issues
 
-- The vendored `verify_rule_docs.py` had drifted from the skill copy (the repo carried the newer multi-root version) — upstreamed into the skill; byte-identity restored and checked with `diff -rq`.
-- `AGENTS.md` is gate-protected: a write needs the owner's approval — expect a confirmation prompt when editing it.
-- A placeholder that exists but is not routed is invisible — the layout check now fails when the `AGENTS.md` row is missing.
+- `AGENTS.md` is gate-protected (measured size < 4000 chars); headroom after this task: ~50 characters.
+- `plan-feature` was folded into `write-spec` (one skill for spec -> plan -> tasks) instead of a separate skill.
+- The pilot feature (spec 001) remains a separate, human-involving step — not part of this change.
 
 ## Next action
 
-None — the owner reviews the diff; committing happens on an explicit request.
+Owner review of the batch; then the pilot feature becomes the first run of the loop (spec 001 through `docs/specs/`).

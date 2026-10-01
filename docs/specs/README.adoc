@@ -1,0 +1,44 @@
+= Specifications
+
+This directory carries the specifications — the artifacts that say *what* is being
+built and *how the build will be verified*, before any code exists. The method
+is SDD + ADR + TDD; the binding rules are in
+link:../development/conventions/process.md[the process conventions], and the
+writing guide is link:../development/documentation/specs.md[the specification
+guide].
+
+== Layout
+
+[source,text]
+----
+docs/specs/
+  README.adoc            this file
+  _templates/            the templates a new specification starts from
+  NNN-<slug>/            one directory per specification, numbered from 001
+    spec.adoc            what and why: requirements, acceptance criteria
+    plan.adoc            how: approach, contracts, test strategy (after approval)
+    tasks.adoc           the work breakdown: one behavior per task
+----
+
+A specification's directory and its identifiers (FR / NFR / AC / T) are
+numbered and *never reused*: identifiers are the stable addresses that tests
+and code point at. A replaced specification is marked `Superseded`, not
+deleted.
+
+== Adding a specification
+
+1. Copy `_templates/` into a new `NNN-<slug>/` directory — the next free number.
+2. Fill `spec.adoc`; keep every open point spelled as `NEEDS CLARIFICATION`.
+3. Walk the statuses — Draft -> Approved -> Implementing -> Implemented; the
+   process link above tells who approves and when.
+4. Once Approved, write `plan.adoc`; then slice `tasks.adoc` and implement
+   task by task under the TDD cycle.
+
+== Gates
+
+* `doit spec_check` — structure, identifiers, status and links of the specifications
+  (part of `doit verify`).
+* `doit trace` — the traceability report: acceptance criteria against tests.
+
+The directory is valid while empty: the first specification arrives with the pilot
+feature, and ADR-0005 records the decision that put this process in place.

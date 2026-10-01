@@ -1,0 +1,17 @@
+= Tasks NNN: <Title>
+
+// One row — one behavior — one test. Status vocabulary: todo | doing | done |
+// withdrawn. "Covers" names the acceptance criterion the task verifies; the
+// Bazel target is where that test lives. Work through the list with the TDD
+// cycle (docs/development/conventions/process.md).
+
+:spec: spec.adoc
+:plan: plan.adoc
+
+[cols="1,4,2,2,2"]
+|===
+| ID | Description | Covers | Bazel target | Status
+
+| T-NNN-01 | <one behavior, one test> | AC-NNN-01 | //src/<module>:<name>_test | todo
+
+|===

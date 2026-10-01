@@ -2,7 +2,7 @@
 
 Automation **specification** — intent, not a harness config; an adapter turns it into the form of the harness in use.
 
-**Status**: active — the trigger is realized as a git hook: `.githooks/pre-commit` runs the whole gate (snippets compile, links resolve, anchors and layout hold) for any commit touching `AGENTS.md`, `.agents/` or `docs/development/`, the owner's commits included. Enable it once per clone with `git config core.hooksPath .githooks`; CI runs the same gate (`.github/workflows/context-tree.yml`).
+**Status**: active — the trigger is realized as a git hook: `.githooks/pre-commit` runs the whole gate (snippets compile, links resolve, anchors and layout hold) for any commit touching `AGENTS.md`, `.agents/` or `docs/development/`, the owner's commits included. Enable it once per clone with `git config core.hooksPath .githooks`; CI runs the same gate (`.github/workflows/context-tree.yml`). Specification changes (`docs/specs/`) are covered by [spec-gate-on-edit.md](spec-gate-on-edit.md).
 
 ```
 on:     file-edit

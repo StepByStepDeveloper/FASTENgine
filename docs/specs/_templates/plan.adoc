@@ -1,0 +1,53 @@
+= Plan NNN: <Title>
+
+// The implementation plan — written after the specification, reviewed together
+// with its ADRs; the tasks live in `tasks.adoc`. Keep it honest: the sections
+// "Decisions requiring an ADR" and "Risks" are where a plan earns trust.
+// Implementation starts once the specification is Approved
+// (docs/development/conventions/process.md).
+
+:spec: spec.adoc
+:status: Draft
+
+// plan status: Draft | Approved
+
+== Approach
+
+<The chosen technical approach and why, in a few paragraphs. Alternatives the
+specification did not settle belong in an ADR, not here.>
+
+== Affected building blocks
+
+<The arc42 section 5 building blocks and Doxygen groups the feature touches.>
+
+== Public API sketch
+
+[source,cpp]
+----
+// signatures only — the contract the plan commits to before implementation
+----
+
+== Data and concurrency model
+
+<Ownership, lifetimes, the thread model, memory ordering.>
+
+== Performance considerations
+
+<The budgets from the specification; how they will be measured.>
+
+== Decisions requiring an ADR
+
+* <decision> -> ADR-NNNN (status)
+
+== Test strategy
+
+<Levels, test doubles, benchmarks, sanitizers; the mapping AC -> tests.>
+
+== Risks
+
+<What could go wrong and the mitigation.>
+
+== Links
+
+* Specification: `spec.adoc`
+* Tasks: `tasks.adoc`

@@ -16,6 +16,10 @@ jobs:
           python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py .agents docs/development --group block --compiler clang++ --std c++17
           python3 .agents/skills/verify-rules/scripts/check_heading_numbering.py docs/development/conventions/style/naming.md -r docs/development/conventions
           python3 .agents/skills/verify-rules/scripts/check_context_layout.py --root .agents --repo .
+      - name: Specifications validate; traceability is clean
+        run: |
+          python3 tools/spec_check.py docs/specs
+          python3 tools/trace.py
 
   build-and-test:
     name: Build and test

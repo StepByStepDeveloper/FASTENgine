@@ -1,0 +1,61 @@
+= Spec NNN: <Title>
+
+// The specification template: copy this directory (`docs/specs/_templates/`)
+// into a new `NNN-<slug>/` and fill every placeholder. One feature per
+// specification, one to three pages. The binding rules live in
+// docs/development/conventions/process.md; the writing guide — in
+// docs/development/documentation/specs.md.
+
+:status: Draft
+:feature-id: NNN
+:owner: <name>
+:adr: <ADR-NNNN, ...>
+:arc42: <sections, e.g. 5.2, 8>
+
+// status vocabulary: Draft | Approved | Implementing | Implemented | Superseded
+
+== Goal
+
+<Why this feature exists, for whom, in three to five sentences.>
+
+== Context
+
+<Relevant background: the building blocks it touches, links to arc42 sections
+and ADRs. No duplication — link, do not copy.>
+
+== Non-goals
+
+* <Explicitly out of scope — what a reader could reasonably expect but will not get.>
+
+== Requirements
+
+=== Functional
+
+// EARS patterns: When <trigger>, ... | While <state>, ... | Where <feature>, ...
+// If <condition>, ... | The <system> shall <response>.
+// Identifiers are never reused; a removed requirement is marked (withdrawn).
+* FR-NNN-01: <EARS statement>
+
+=== Non-functional
+
+* NFR-NNN-01: <measurable statement with conditions and the reference configuration>
+
+== Acceptance Criteria
+
+// One criterion per line, checkable by a test, naming its requirement in
+// parentheses; state the observable result, not an implementation detail.
+// When a question below is resolved, rewrite it as the answer.
+* AC-NNN-01 (FR-NNN-01): Given <state>, when <action>, then <observable result>.
+  Verification: automated | manual (<why>)
+
+== Constraints
+
+<Standards, platforms, dependencies, performance budget, links to ADRs.>
+
+== Open Questions
+
+* NEEDS CLARIFICATION: <question> (owner, due)
+
+== Links
+
+<Plan, tasks, ADRs, Doxygen group, test targets.>

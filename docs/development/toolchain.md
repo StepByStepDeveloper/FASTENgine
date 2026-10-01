@@ -48,9 +48,9 @@ Commands and their pitfalls live in the [`verify-rules` skill](../../.agents/ski
 | `src/algorithms/` | Algorithm implementations | empty (`.gitkeep`) |
 | `src/patterns/` | Static-polymorphism implementations, per `style/patterns.md` | empty (`.gitkeep`) |
 | `src/types/` | Core types | empty (`.gitkeep`) |
-| `docs/` | arc42 AsciiDoc sources, ADRs, diagram sources, the Doxygen input and the development manual under `docs/development/` — the system is [Documentation system](conventions/docs.md) | active |
+| `docs/` | arc42 AsciiDoc sources, ADRs, diagram sources, the Doxygen input, the specifications under `docs/specs/` and the development manual under `docs/development/` — the system is [Documentation system](conventions/docs.md) | active |
 | `MODULE.bazel`, `.bazelversion`, `.bazelrc` | Bazel workspace: module dependencies, the pinned version, the compiler and warning flags | active |
 | `dodo.py` | doit tasks — the commands a developer and CI run | active |
-| `tools/` | Documentation tooling: the ADR generator, the tree checker, the diagram renderer | active |
+| `tools/` | Tooling: the ADR generator, the documentation tree checker, the specification validator (`spec_check.py`), the traceability reporter (`trace.py`), the diagram renderer | active |
 | `.clang-format`, `docs/api/Doxyfile` | The configuration the formatting and documentation rules are checked with | active |
 | `.agents/` | Agent context architecture — agent-only artifacts, linking into the development manual; the entry point is the repository `AGENTS.md` | active |

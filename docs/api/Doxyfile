@@ -40,3 +40,10 @@ JAVADOC_AUTOBRIEF      = NO
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
 HAVE_DOT               = NO
+
+# Specification anchors (docs/development/conventions/process.md): the two
+# commands that tie tests and implementations back to the specifications.
+# Defined as cross-reference lists, so every anchor is rendered and listed
+# in the API site instead of being an unknown command.
+ALIASES += covers{1}="\xrefitem covers \"Covers\" \"Specification coverage\" \1"
+ALIASES += implements{1}="\xrefitem implements \"Implements\" \"Specification realization\" \1"

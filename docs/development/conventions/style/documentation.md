@@ -26,7 +26,8 @@ Within one block, commands appear in this order, so that every block in the code
 7. `@note` / `@warning`
 8. `@see` / `@ref` / `@deprecated`
 9. `@code{.cpp}` … `@endcode` — usage example
-10. `@todo` — only for work already tracked in the repository's issue tracker
+10. `@covers{...}` / `@implements{...}` — specification anchors (see *Cross-entity requirements*)
+11. `@todo` — only for work already tracked in the repository's issue tracker
 
 ## Mandatory coverage
 
@@ -45,7 +46,7 @@ Within one block, commands appear in this order, so that every block in the code
 | Variable: class data member (any access)   | Same as namespace-scope variables; required for `static`, `thread_local`, `mutable` members    |
 | Variable: local (block scope)              | Not required — see `Exceptions`; required when it carries non-obvious semantics                |
 | Template parameter (all six kinds)         | `@tparam` describing the contract imposed on the argument                                      |
-| Test case (see `docs/development/conventions/testing.md`) | `@brief` naming the behavior under test and the expected outcome                               |
+| Test case (see `docs/development/conventions/testing.md`) | `@brief` naming the behavior under test and the expected outcome; `@covers{AC-NNN-ii}` when the test verifies a specification criterion |
 
 ## Required content by entity kind
 
@@ -195,6 +196,7 @@ Every macro carries a block. Function-like macros document each parameter, state
 
 - **Code words in prose**: a parameter is referenced as `@p name` (so that Doxygen links it), any other identifier, keyword or literal as `@c word`. Neither form is ever left as bare text.
 - **Related entities** are linked with `@ref` / `@see` / `@sa` when a reader needs them to use the documented entity correctly.
+- **Specification anchors**: a test that verifies a specification criterion states it as `@covers{AC-NNN-ii}`; an implementation entity that realizes a requirement states it as `@implements{FR-NNN-ii}` when the link is not obvious from its Doxygen group. The anchors are the machine-readable half of [Process](../process.md); `doit trace` reports every anchor that matches nothing.
 - **Non-trivial public APIs** ship a short `@code{.cpp} … @endcode` usage example in the type or function block (compilable code, following every rule in `style/naming.md`).
 - **Deprecations** are never silent: `@deprecated` plus the replacement entity and the reason.
 
@@ -220,7 +222,7 @@ Nothing else is exempt. Materially non-trivial code is always documented, regard
 - **Wrong or stale documentation** — a comment that contradicts the code is worse than no comment. Documentation is updated **in the same commit** as the behavior it describes; code changes are incomplete until their docs change with them.
 - **Copied documentation** — a comment pasted from a neighbouring entity without adjusting it. `@copydoc` is allowed only when the inherited semantics are genuinely identical; an override that deviates documents its own behavior.
 - **Metadata noise** — `@author`, `@date` and `@version` must not be used: authorship and change history are authoritative in git and must not be duplicated in comments.
-- **Non-standard commands** — only the standard command set listed above may be used (no `@threadsafety`-style or project-invented commands) until an alias is formally defined by the project's Doxygen configuration.
+- **Non-standard commands** — only the standard command set listed above plus the two specification anchors (`@covers`, `@implements`, defined as aliases in `docs/api/Doxyfile`) may be used; no `@threadsafety`-style or project-invented commands.
 - **Commented-out code** — dead code is deleted, not annotated.
 
 ## Maintenance and verification

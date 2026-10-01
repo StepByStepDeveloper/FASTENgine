@@ -13,6 +13,7 @@ Mechanical gate for the specification tree — the agent context and the develop
 
 - Before committing any change under `.agents/` or `docs/development/` (conventions, manual, policies, skills, commands).
 - After editing a fenced example, a heading, an anchor or a cross-reference anywhere in the two trees.
+- For a change under `docs/specs/`: `doit spec_check` (one of the `doit verify` gates) and, for traceability, `doit trace`.
 - When the owner asks whether the specification tree is still green.
 
 ## Scripts

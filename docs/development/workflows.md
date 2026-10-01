@@ -9,11 +9,13 @@ Everything runs through [doit](https://pydoit.org) (`dodo.py`); a developer and 
 | Command | What it does |
 |:--|:--|
 | `doit` | The CI set: `verify` + `build` + `test` |
-| `doit verify` | The specification gates: snippets compile, links resolve, anchors and layout hold |
+| `doit verify` | The specification gates: snippets compile, links resolve, anchors and layout hold; the specifications (`docs/specs/`) validate |
+| `doit spec_check` | The specifications alone: structure, identifiers, statuses, links |
 | `doit build` / `doit test` | Bazel build / test of `//...` — currently a state report, until the first `BUILD.bazel` |
 | `doit format` / `doit format_check` | `clang-format` over `src/` — writes / checks without writing |
 | `doit docs` | Builds all documentation into `build/docs/` |
 | `doit docs_check` | Checks the documentation tree alone |
+| `doit trace` | The traceability report — acceptance criteria against tests, into `build/trace/` |
 | `doit diagrams` | Renders `docs/arc42/diagrams/*.puml` into `docs/arc42/images/*.svg` |
 
 ## Editing and the gates
@@ -21,15 +23,16 @@ Everything runs through [doit](https://pydoit.org) (`dodo.py`); a developer and 
 - **Code**: match the [conventions](conventions/README.md) — naming, formatting, Doxygen comments; run `doit format` and then `doit verify` before reporting.
 - **Documentation**: after editing under `docs/`, run `doit docs_check` and `doit docs` — see the [documentation guides](documentation/README.md).
 - **Specification text** (`.agents/`, `docs/development/`): run `doit verify`; fenced blocks of compilable languages are compiled with `clang++`, and links across both trees are resolved.
+- **Specifications** (`docs/specs/`): run `doit spec_check` after every edit; statuses move only per the [process conventions](conventions/process.md), and the criteria-against-tests side is `doit trace`.
 
 The gates also run automatically:
 
 | Where | What runs | Blocking? |
 |:--|:--|:--|
 | `.githooks/pre-commit` | secret scan, any staged change | yes — a finding blocks the commit |
-| `.githooks/pre-commit` | specification gate (for `.agents/`, `docs/development/` or `AGENTS.md` changes) | advisory today |
+| `.githooks/pre-commit` | specification gate (for `.agents/`, `docs/development/`, `docs/specs/` or `AGENTS.md` changes) | advisory today |
 | `.githooks/pre-commit` | documentation tree check (for `docs/` or `tools/` changes) | advisory today |
-| CI *Context tree* job | the same specification gate | yes |
+| CI *Context tree* job | the same specification gate, plus `doit trace` | yes |
 | CI *Build and test* job | `doit build`, `doit test` | yes |
 | CI *Documentation* job | `doit docs_check`, `doit docs` | yes |
 

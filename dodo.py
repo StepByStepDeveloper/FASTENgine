@@ -7,7 +7,7 @@ the same commands.
 Usage:
     doit                 # verify + build + test (the CI set)
     doit list            # every task, one line each
-    doit verify          # the specification gates only (context tree + conventions)
+    doit verify          # the specification gates only (context tree + conventions + specs)
     doit build           # bazel build //...
     doit test            # bazel test //...
     doit format          # clang-format -i over the engine sources
@@ -15,6 +15,8 @@ Usage:
     doit docs            # build the documentation (arc42 + ADRs + API reference + architecture pages)
     doit docs_check      # check the documentation tree (see docs/development/conventions/docs.md)
     doit diagrams        # render docs/arc42/diagrams/*.puml into docs/arc42/images/
+    doit spec_check      # validate the specifications (docs/specs)
+    doit trace           # traceability report (acceptance criteria ↔ tests) into build/trace/
 
 Exit codes: doit exits 0 when every requested task succeeds, 1 otherwise.
 """
@@ -57,7 +59,7 @@ def _has_bazel_targets():
 
 
 def task_verify():
-    """Run the context-tree gates: snippets compile, links, anchors and layout resolve."""
+    """Run the specification gates: snippets compile, links, anchors and layout resolve; the specifications validate."""
     return {
         "actions": [
             ["python3", str(GATE_DIR / "verify_rule_docs.py"), ".agents", "docs/development",
@@ -67,8 +69,14 @@ def task_verify():
              "-r", "docs/development/conventions"],
             ["python3", str(GATE_DIR / "check_context_layout.py"),
              "--root", ".agents", "--repo", "."],
+            ["python3", "tools/spec_check.py", "docs/specs"],
         ],
     }
+
+
+def task_spec_check():
+    """Validate the specifications (`docs/specs`): structure, identifiers, status, links."""
+    return {"actions": [["python3", "tools/spec_check.py", "docs/specs"]]}
 
 
 def task_build():
@@ -121,6 +129,11 @@ def task_format_check():
 def task_docs_check():
     """Check the documentation tree: ADR set, generated regions, includes, links."""
     return {"actions": [["python3", "tools/check_docs.py"]]}
+
+
+def task_trace():
+    """Write the traceability report (acceptance criteria ↔ tests) into build/trace/."""
+    return {"actions": [["python3", "tools/trace.py"]]}
 
 
 def task_diagrams():

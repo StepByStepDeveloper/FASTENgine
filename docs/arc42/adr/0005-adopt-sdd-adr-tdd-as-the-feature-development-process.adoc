@@ -1,0 +1,69 @@
+[[adr-0005]]
+= ADR-0005: Adopt SDD + ADR + TDD as the feature development process
+
+Status: accepted (2026-10-02).
+
+== Context and Problem Statement
+
+The repository carries the specification layer — the conventions, the arc42
+document, the gates — but no process for feature work: a feature could start
+before its intent was written down, tests could follow the code instead of
+leading it, and a choice between real alternatives could live only in a
+conversation. The placeholder for the process artifacts (`docs/specs/`) exists
+but is empty, and nothing states how it is meant to be used.
+
+== Decision Drivers
+
+* The intent of a feature must be reviewable — and mechanically checkable —
+  before implementation starts.
+* Agents working in the repository need a written contract to implement
+  against; unwritten gaps get filled with invention.
+* The process must stay small enough to be lived: a few documents and one
+  loop, not a methodology that needs its own maintenance.
+* Statements of intent should be verified by running code wherever possible,
+  like the conventions they complement.
+
+== Considered Options
+
+* Ad-hoc work: describe features in issues or conversations, implement, test
+  afterwards.
+* Full executable BDD/Gherkin specifications driving the test suite.
+* SDD + ADR + TDD: a specification, a decision record and a task list per
+  feature, implemented in the red-green-refactor loop.
+
+== Decision Outcome
+
+Chosen option: "SDD + ADR + TDD", because it makes the intent reviewable and
+traceable at the smallest viable cost: three plain-AsciiDoc artifacts per
+feature under `docs/specs/NNN-<slug>/`, mechanical gates (`doit spec_check`
+inside `doit verify`, and `doit trace`), and TDD as the implementation loop.
+The binding rules live in `docs/development/conventions/process.md`; the
+walkthrough is `docs/development/process.md`.
+
+=== Consequences
+
+* Good, because intent is versioned and reviewable before code, and every
+  acceptance criterion is expected to be covered by a test.
+* Good, because agents get a contract: the specification, the plan and the
+  tasks carry the requirements, not a chat message.
+* Bad, because every feature carries an extra written artifact; for small
+  fixes a full specification is overkill, and the process must not be
+  demanded where it does not apply.
+* Neutral, because identifiers (FR / NFR / AC / T) become permanent addresses
+  and are never recycled — a constraint on authoring, recorded in the
+  specification templates.
+
+== Confirmation
+
+`doit spec_check` validates the specifications (structure, identifiers,
+statuses, links) and is part of `doit verify`; `doit trace` reports coverage
+of acceptance criteria by tests and lands in `build/trace/report.md`. The
+pre-commit hook and CI run both, and the first pilot feature exercises the
+loop end to end.
+
+== More Information
+
+* The rules: `docs/development/conventions/process.md`; the walkthrough:
+  `docs/development/process.md`; the tree: `docs/specs/README.adoc`.
+* Related decisions: ADR-0001 (documentation as code), ADR-0002 (classes of
+  documentation).

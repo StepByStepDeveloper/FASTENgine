@@ -1,8 +1,8 @@
 # Documentation System (arc42, ADR, AsciiDoc, Doxygen)
 
-FASTENgine documents its architecture, its decisions and its API reference as code: plain-text sources live in `docs/` and `README.md`, change in the same commits as the artifacts they describe, and pass mechanical checks. This rule binds the documentation system as a whole — the classes of documentation, the layout, the formats, the decision records, the diagram pipeline and the Doxygen wiring. The comment-level rules for C++ entities are a separate document: [Documentation (Doxygen)](style/documentation.md).
+FASTENgine documents its architecture, its decisions and its API reference as code: plain-text sources live in `docs/` and `README.md`, change in the same commits as the artifacts they describe, and pass mechanical checks. This rule binds the documentation system as a whole — the classes of documentation, the layout, the formats, the specifications, the decision records, the diagram pipeline and the Doxygen wiring. The comment-level rules for C++ entities are a separate document: [Documentation (Doxygen)](style/documentation.md).
 
-**Status**: active — the layout, the tools and the checks exist; the twelve arc42 sections are handed to their authors in template state (arc42's own help texts on).
+**Status**: active — the layout, the tools and the checks exist; the twelve arc42 sections are handed to their authors in template state (arc42's own help texts on); the specifications (`docs/specs/`) carry the process artifacts (empty until the pilot).
 
 ## Documentation classes
 
@@ -13,8 +13,9 @@ Every document belongs to exactly one class; the classes cite each other, they n
 | Agent context | `AGENTS.md`, `.agents/` | only artifacts an agent reads: skills, policies, hooks, evals, state, the adapters map — and pointers, not copies, for everything repository-facing | the agent |
 | Development manual | `README.md`, `docs/development/` | how to work in this repository: workflows, toolchain facts, the conventions, the documentation guides, the arc42 template manual | any developer joining the repository |
 | Product documentation | `docs/arc42/`, `docs/api/` (built into `build/docs/`) | the product itself: architecture, decisions, API reference, the converted architecture pages | readers of the product |
+| Specifications | `docs/specs/` | what is being built and how it will be verified, before it exists: requirements, acceptance criteria, the plan, the task list | the author and the reviewer of a feature |
 
-The split is binding: the agent context does not carry developer prose it can link (it points into `docs/development/`), and the product documentation does not describe the repository's own process.
+The split is binding: the agent context does not carry developer prose it can link (it points into `docs/development/`), and the product documentation does not describe the repository's own process. Specifications state intent, arc42 states the architecture as built — they cross-reference, they never restate each other.
 
 ## Documentation as code
 
@@ -36,8 +37,9 @@ The split is binding: the agent context does not carry developer prose it can li
 | `docs/arc42/diagrams/*.puml` | PlantUML diagram sources — the only editable form of a diagram | scaffold |
 | `docs/arc42/images/` | Diagram renders (`*.svg`, generated) and committed static images | active |
 | `docs/api/Doxyfile`, `docs/api/mainpage.md`, `docs/api/groups.dox` | Doxygen configuration, main page and the module group map | active |
+| `docs/specs/` | The specifications: one directory per feature (`NNN-<slug>/` with `spec.adoc`, `plan.adoc`, `tasks.adoc`), the `_templates/` they start from, and the directory README | active (empty until the pilot) |
 | `docs/development/` | The development manual: workflows, toolchain facts, documentation guides, the conventions and the arc42 template copy — indexed from the repository `README.md` | active |
-| `tools/new_adr.py`, `tools/check_docs.py`, `tools/render_diagrams.py`, `tools/render_arc42_pages.py` | The documentation tooling the commands below call | active |
+| `tools/new_adr.py`, `tools/check_docs.py`, `tools/spec_check.py`, `tools/trace.py`, `tools/render_diagrams.py`, `tools/render_arc42_pages.py` | The documentation and specification tooling the commands below call | active |
 | `build/docs/` | Built HTML (arc42, ADRs, API reference) and the converted Doxygen pages (`build/docs/api-pages/`) — generated, never committed | generated |
 
 ## Formats
@@ -86,6 +88,8 @@ The split is binding: the agent context does not carry developer prose it can li
 |:--|:--|
 | `doit docs` | Builds everything into `build/docs/`: renders diagrams, checks the tree, builds arc42 and the ADRs, converts the architecture pages, builds the API site |
 | `doit docs_check` | Checks the tree alone: the ADR set and numbering, the generated regions, includes, image and link targets |
+| `doit spec_check` | Validates the specifications (`docs/specs/`) — structure, identifiers, status, links (also one of the `doit verify` gates) |
+| `doit trace` | Writes the traceability report (criteria against tests) into `build/trace/` |
 | `doit diagrams` | Renders `diagrams/*.puml` to `images/*.svg`; skips up-to-date renders, `--force` re-renders |
 | `python3 tools/new_adr.py "Title"` | Creates an ADR and regenerates the Section 9 regions; `--regenerate` rewrites the regions alone |
 | `python3 tools/render_arc42_pages.py` | Converts `docs/arc42/sections/` into the Doxygen pages under `build/docs/api-pages/` (run by `doit docs`) |
@@ -102,6 +106,7 @@ CI runs `doit docs_check` and `doit docs` in the workflow job *Documentation*; t
 | New or changed public entity | Doxygen comment block per [Documentation (Doxygen)](style/documentation.md) |
 | A diagram changes | Edit the `.puml` source; `doit diagrams`; commit the source only |
 | The architecture narrative changes | The owning section file; update the ADR references it carries |
+| A feature is specified, replanned or advanced | The specifications (`docs/specs/NNN-<slug>/`): statuses and criteria per [Process](process.md) |
 | A convention changes | The document under `docs/development/conventions/` that owns it; the artifact that stated it before changes in the same commit |
 
 ## Toolchain state
@@ -119,6 +124,7 @@ The toolchain is Asciidoctor.js (npm `@asciidoctor/cli`), pandoc and a user-loca
 - Editing an accepted ADR's Context, Drivers, Options, Outcome or Consequences — supersede it with a new record.
 - Renaming or renumbering a section file or an ADR file by hand; creating an ADR without the generator.
 - A statement duplicated across arc42, an ADR and a Doxygen block instead of cross-linked.
+- Requirement text copied between `docs/specs/`, the arc42 sections and the Doxygen blocks instead of referencing identifiers (`FR-NNN-ii`, `AC-NNN-ii`).
 - Markdown under `docs/arc42/` — the AsciiDoc sources are the contract.
 - Placeholder text left in a section declared filled, or `:arc42help:` removed while placeholders remain.
 - Referencing an image that neither exists in `images/` nor has a `.puml` source behind it.

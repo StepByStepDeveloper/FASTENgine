@@ -2,10 +2,11 @@
 
 How the documentation of this repository is written and maintained. The binding rules are the [Documentation System](../conventions/docs.md) — these pages are the working guides around it, and where they disagree, the convention wins.
 
-## The three sources of truth
+## The sources of truth
 
 | Source | Format | Built by | Guide |
 |:--|:--|:--|:--|
+| Specifications | AsciiDoc (`docs/specs/`) | — (plain sources; gated by `doit spec_check`) | [Specifications](specs.md) |
 | Architecture document | AsciiDoc (`docs/arc42/`) | `doit docs` | [The arc42 document](arc42.md) |
 | Decisions | AsciiDoc ADRs (`docs/arc42/adr/`) | `doit docs` | [Architecture decisions](adr.md) |
 | API reference and architecture pages | Doxygen (`docs/api/`, `src/`) | `doit docs` | [The API site](api.md) |
@@ -13,6 +14,8 @@ How the documentation of this repository is written and maintained. The binding 
 ## The build in one look
 
 ```bash
+doit spec_check    # the specifications (docs/specs)
+doit trace         # acceptance criteria ↔ tests (build/trace/)
 doit diagrams      # .puml -> .svg
 doit docs_check    # tree consistency (ADRs, regions, includes, links, images)
 doit docs          # everything -> build/docs/ (arc42, ADRs, pages, API site)
