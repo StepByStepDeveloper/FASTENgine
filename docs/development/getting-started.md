@@ -18,7 +18,7 @@ Then look around without changing anything:
 
 ```bash
 doit list        # every task this repository defines
-doit verify      # the gates: fenced snippets compile, links resolve, layout holds
+doit verify      # the gates: snippets compile, links resolve, layout holds; the specifications validate
 ```
 
 `doit verify` is green on a fresh clone, and it is the command you will run most. The build and test tasks know the repository's current state — `src/` is empty today, so they report that state instead of failing:
@@ -46,7 +46,7 @@ doit docs
 | `.agents/` | the agent context — skills, policies, hooks, evals |
 | `tools/`, `dodo.py` | the tooling and the task runner |
 
-One level deeper — the three documentation classes, and why the split is binding — is [The repository](repository.md).
+One level deeper — the four documentation classes, and why the split is binding — is [The repository](repository.md).
 
 ## 4. The first change you will make
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-High-performance C++ Engine. The repository carries the specification layer, not engine code: the agent context lives in `.agents/`, `src/` waits empty, and the developer-facing documentation starts at the repository [`README.md`](README.md). Repository knowledge — workflows, toolchain facts, conventions — lives in the development manual: [`docs/development/`](docs/development/README.md).
+High-performance C++ Engine. The repository carries its documentation and context, not engine code: the agent context lives in `.agents/`, `src/` waits empty, and the developer-facing documentation starts at the repository [`README.md`](README.md). Repository knowledge — workflows, toolchain facts, conventions — lives in the development manual: [`docs/development/`](docs/development/README.md).
 
 ## Core Rules
 

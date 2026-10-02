@@ -4,14 +4,14 @@ This chapter is the guided tour of how a change happens in FASTENgine: the path 
 
 ## Why a process at all
 
-The process here is deliberately small: three documents and one loop. It exists because this repository is built by a maintainer working with AI agents, and the failure modes of that setup are known:
+The process here is deliberately small: four documents and one loop. It exists because this repository is built by a maintainer working with AI agents, and the failure modes of that setup are known:
 
 - code written faster than it is understood — the *why* evaporates;
 - tests written after the code — they verify what is, not what should be;
 - decisions argued twice, because the first argument left no record;
 - agents given a task without a contract — they fill the gaps with invention.
 
-The three documents are the contract (a **specification**), the record (**ADRs**) and the work plan (**tasks**); the loop is **red-green-refactor**. Everything below is those four things, applied to one feature.
+The four documents are the contract (a **specification**), the record (**ADRs**), the plan (`plan.adoc`) and the work breakdown (`tasks.adoc`); the loop is **red-green-refactor**. Everything below is those five things, applied to one feature.
 
 ## The example: a byte ring buffer
 
@@ -66,7 +66,7 @@ neither call allocates after construction.
 | Event-driven | When `<trigger>`, the `<system>` shall `<response>` | When `push` is called with free capacity, the buffer shall store the byte. |
 | State-driven | While `<state>`, the `<system>` shall `<response>` | While the buffer is full, `push` shall reject the byte and change nothing. |
 | Unwanted behavior | If `<condition>`, then the `<system>` shall `<response>` | If `pop` is called on an empty buffer, then no state shall change. |
-| Optional feature | Where `<feature>`, the `<system>` shall `<response>` | Where the buffer is full, `push` shall return `false` without blocking. |
+| Optional feature | Where `<feature>`, the `<system>` shall `<response>` | Where the debug poison mode is enabled, the buffer shall overwrite vacated slots with a fixed pattern. |
 
 Non-functional requirements must be measurable, with the conditions and the configuration they are measured on:
 
@@ -87,8 +87,12 @@ Non-functional requirements must be measurable, with the conditions and the conf
   then it returns true, the size is 1, and pop() returns 0xAB.
 * AC-001-02 (FR-001-02): Given a full buffer, when push(0xCD) runs, then it returns
   false and the size is unchanged.
-* AC-001-03 (NFR-001-01): Given the TSan concurrency test, when the producers and
-  consumers run, then TSan reports no data races.
+* AC-001-03 (FR-001-03): Given an empty buffer, when pop() runs, then it returns
+  nothing and the size stays zero.
+* AC-001-04 (FR-001-04): Given a capacity of zero, when the buffer is constructed,
+  then the request is rejected — a precondition violation, asserted in debug builds.
+* AC-001-05 (NFR-001-01): Given the TSan concurrency test, when the producer and
+  the consumer run, then TSan reports no data races.
 ```
 
 **Open questions** — every open point is spelled `NEEDS CLARIFICATION` in place; that marker is what gates approval. Everything else in the file is written as if it were already true.

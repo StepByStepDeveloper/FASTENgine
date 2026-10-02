@@ -16,7 +16,7 @@ What lives where, and why. One sentence per design goal: the product documentati
 | `MODULE.bazel`, `.bazelrc`, `.bazelversion` | The Bazel workspace: dependencies, the pinned version, compiler and warning flags |
 | `dodo.py` | The task runner — one command set for a developer and CI |
 | `.githooks/` | The pre-commit gate: a blocking secret scan plus advisory tree checks |
-| `.github/workflows/` | CI: the specification gate, build/test, the documentation job |
+| `.github/workflows/` | CI: the context-tree gate, build/test, the documentation job |
 
 ## The documentation classes
 
@@ -27,7 +27,7 @@ What lives where, and why. One sentence per design goal: the product documentati
 | Product documentation | `docs/arc42/`, `docs/api/` (built into `build/docs/`) | readers of the product | architecture, decisions, API reference, the converted architecture pages |
 | Specifications | `docs/specs/` | the author and the reviewer of a feature | what is being built and how it will be verified, before it exists |
 
-The split is binding ([ADR-0002](../arc42/adr/0002-decompose-documentation-by-audience.adoc)): a fact lives in exactly one class, and the other classes link to it. When unsure where a new document belongs, ask *who reads it* — an agent, a contributor, a consumer of the engine, or the implementer of a feature.
+The split is binding ([ADR-0002](../arc42/adr/0002-decompose-documentation-by-audience.adoc); the specifications joined as the fourth class with [ADR-0005](../arc42/adr/0005-adopt-sdd-adr-tdd-as-the-feature-development-process.adoc)): a fact lives in exactly one class, and the other classes link to it. When unsure where a new document belongs, ask *who reads it* — an agent, a contributor, a consumer of the engine, or the implementer of a feature.
 
 ## Where to go next
 

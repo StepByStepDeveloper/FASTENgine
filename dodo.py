@@ -7,7 +7,7 @@ the same commands.
 Usage:
     doit                 # verify + build + test (the CI set)
     doit list            # every task, one line each
-    doit verify          # the specification gates only (context tree + conventions + specs)
+    doit verify          # the verification gates (context tree + specifications)
     doit build           # bazel build //...
     doit test            # bazel test //...
     doit format          # clang-format -i over the engine sources
@@ -59,7 +59,7 @@ def _has_bazel_targets():
 
 
 def task_verify():
-    """Run the specification gates: snippets compile, links, anchors and layout resolve; the specifications validate."""
+    """Run the verification gates: snippets compile, links, anchors and layout resolve; the specifications validate."""
     return {
         "actions": [
             ["python3", str(GATE_DIR / "verify_rule_docs.py"), ".agents", "docs/development",

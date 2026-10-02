@@ -11,7 +11,7 @@ action: the gate below, in order
 mode:   blocking
 ```
 
-1. **Context tree** — `doit verify` exits 0 (conventions compile, links resolve, anchors and layout hold). *Runs in `.githooks/pre-commit` and in CI.*
+1. **Context tree** — `doit verify` exits 0 (conventions compile, links resolve, anchors and layout hold; the specifications validate). *Runs in `.githooks/pre-commit` and in CI.*
 2. **Documentation** — `doit docs_check` exits 0 and `doit docs` builds (arc42, ADRs, API reference, Doxygen architecture pages — see [`docs/development/conventions/docs.md`](../../docs/development/conventions/docs.md)). *CI runs both in the Documentation job; `.githooks/pre-commit` runs the check for staged `docs/` or `tools/` changes (advisory).*
 3. **Formatting** — `doit format_check` (`clang-format --dry-run --Werror` over the changed sources, per `.clang-format`). *Available today; nothing to check until `src/` carries sources.*
 4. **Build** — `doit build` (Bazel, see [`../../docs/development/toolchain.md`](../../docs/development/toolchain.md)). *Available today; no targets until the first `BUILD.bazel`.*

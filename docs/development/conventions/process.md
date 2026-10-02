@@ -6,15 +6,16 @@ How a change becomes a merged, verified state in FASTENgine: the specification-d
 
 ## The workflow
 
-Every non-trivial change walks five stages; each stage leaves one artifact behind:
+Every non-trivial change walks six stages; the table names each stage's artifact and its gate:
 
 | Stage | Artifact | Home | Gate |
 |:--|:--|:--|:--|
-| 1. Specify | `spec.adoc` | `docs/specs/NNN-<slug>/` | `doit spec_check`; *Approved* by the owner |
+| 1. Specify | `spec.adoc` | `docs/specs/NNN-<slug>/` | `doit spec_check` — the draft shape |
 | 2. Decide | ADR, when a decision is at stake | `docs/arc42/adr/` | `doit docs_check`; created through `tools/new_adr.py` |
-| 3. Plan | `plan.adoc` | the spec directory | reviewed together with its ADRs |
-| 4. Slice | `tasks.adoc` | the spec directory | every task covers at least one criterion |
-| 5. Implement | code and tests | `src/` | the TDD loop below; `doit trace` |
+| 3. Approve | the status *Approved* | the spec directory | the owner: requirements, criteria and ADRs settled; from here `spec_check` treats open points as failures |
+| 4. Plan | `plan.adoc` | the spec directory | reviewed together with its ADRs |
+| 5. Slice | `tasks.adoc` | the spec directory | every task covers at least one criterion |
+| 6. Implement | code and tests | `src/` | the TDD loop below; `doit trace` |
 
 A change may skip a stage only by the proportionality table at the end of this document; skipping is a decision, never an accident.
 
@@ -88,7 +89,7 @@ A feature is done when every line holds:
 | `doit` and `doit docs` | before every pull request | local; CI |
 | The PR checklist | every pull request | `.github/pull_request_template.md` |
 
-A red gate stops the change: fix the artifact, not the gate.
+A red gate stops the change: fix the artifact, not the gate. The blocking checkpoint is CI (and the secret scan locally); the pre-commit tree checks are advisory for now — they warn, and `--no-verify` bypasses them entirely — so a local red is an early failure, never a lighter one.
 
 ## Roles
 

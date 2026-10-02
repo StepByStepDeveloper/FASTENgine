@@ -1,11 +1,11 @@
 ---
 name: verify-rules
-description: "Verify the specification tree — snippets compile, links and anchors resolve. Use before any commit that touches .agents/ or docs/development/."
+description: "Verify the context tree — snippets compile, links and anchors resolve. Use before any commit that touches .agents/ or docs/development/."
 ---
 
-# Verify the Specification Tree
+# Verify the Context Tree
 
-Mechanical gate for the specification tree — the agent context and the development conventions: every fenced C++ block is compiled, every relative link is resolved, every numbered heading and in-page anchor is checked. The conventions are binding text, and a fragment that does not compile teaches the wrong thing silently — so a change under `.agents/` or `docs/development/` is verified by running code, not by reading it twice.
+Mechanical gate for the context tree — the agent context and the development conventions: every fenced C++ block is compiled, every relative link is resolved, every numbered heading and in-page anchor is checked. The conventions are binding text, and a fragment that does not compile teaches the wrong thing silently — so a change under `.agents/` or `docs/development/` is verified by running code, not by reading it twice.
 
 **Status**: active scaffold — which fenced languages are compiled by the script is a choice of the script, not of this document.
 
@@ -14,7 +14,7 @@ Mechanical gate for the specification tree — the agent context and the develop
 - Before committing any change under `.agents/` or `docs/development/` (conventions, manual, policies, skills, commands).
 - After editing a fenced example, a heading, an anchor or a cross-reference anywhere in the two trees.
 - For a change under `docs/specs/`: `doit spec_check` (one of the `doit verify` gates) and, for traceability, `doit trace`.
-- When the owner asks whether the specification tree is still green.
+- When the owner asks whether the context tree is still green.
 
 ## Scripts
 
@@ -51,13 +51,13 @@ for c in clang++ g++ g++-16; do for std in c++17 c++20 c++23; do
 done; done
 ```
 
-Links across the whole specification tree, not only the conventions subtree:
+Links across the whole context tree, not only the conventions subtree:
 
 ```bash
 python3 .agents/skills/verify-rules/scripts/verify_rule_docs.py .agents docs/development --group block
 ```
 
-The three runs above are wrapped as `doit verify` (`dodo.py`) — the entry point `.githooks/pre-commit` and `.github/workflows/context-tree.yml` call.
+`doit verify` (`dodo.py`) wraps the checks above, the layout check and `spec_check`; it is the entry point `.githooks/pre-commit` and `.github/workflows/context-tree.yml` call.
 
 Layout conformance of the tree itself — run it after adding, renaming or removing a layer:
 
