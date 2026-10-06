@@ -1,17 +1,17 @@
 # The development process
 
-This chapter is the guided tour of how a change happens in FASTENgine: the path from an idea to merged, verified code, walked end to end on one small feature. The binding rules live in [Process (SDD + ADR + TDD)](conventions/process.md); this chapter shows them in action, in the order you meet them. Read it once before your first feature, then come back to the step you are on. If you just need to get the repository building, start with [Getting started](getting-started.md) and return here when you pick up a real feature.
+This chapter is the guided tour of how a change happens in FASTENgine: the path from an idea to merged, verified code, walked end to end on one small feature — and through the two halves of a feature's life that may be far apart in time: planning (the package is written and agreed) and implementation (the package becomes code). The binding rules live in [Process (SDD + ADR + TDD)](conventions/process.md); this chapter shows them in action, in the order you meet them. Read it once before your first feature, then come back to the step you are on. If you just need to get the repository building, start with [Getting started](getting-started.md) and return here when you pick up a real feature.
 
 ## Why a process at all
 
-The process here is deliberately small: four documents and one loop. It exists because this repository is built by a maintainer working with AI agents, and the failure modes of that setup are known:
+The process here is deliberately small: four documents and one loop. It exists because features here are built by developers — with AI agents as an optional accelerator — and the failure modes of moving fast are known:
 
 - code written faster than it is understood — the *why* evaporates;
 - tests written after the code — they verify what is, not what should be;
 - decisions argued twice, because the first argument left no record;
-- agents given a task without a contract — they fill the gaps with invention.
+- a task — given to a person or to an agent — without a contract, so the gaps get filled with invention.
 
-The four documents are the contract (a **specification**), the record (**ADRs**), the plan (`plan.adoc`) and the work breakdown (`tasks.adoc`); the loop is **red-green-refactor**. Everything below is those five things, applied to one feature.
+The four documents are the contract (a **specification**), the record (**ADRs**), the plan (`plan.adoc`) and the work breakdown (`tasks.adoc`); the loop is **red-green-refactor**. Everything below is those five things, applied to one feature — and every step is a command or a document: the process runs identically with no agent in the room. The agent-side artifacts (`.agents/`) only mirror the steps — see [Working with agents](working-with-agents.md).
 
 ## The example: a byte ring buffer
 
@@ -21,7 +21,7 @@ To keep the walkthrough honest, we will follow one real-shaped feature — a fix
 docs/specs/001-byte-ring-buffer/spec.adoc      — status: Implemented
 docs/specs/001-byte-ring-buffer/plan.adoc
 docs/specs/001-byte-ring-buffer/tasks.adoc
-docs/arc42/adr/0006-byte-ring-buffer-spsc-only.adoc   — accepted
+docs/arc42/adr/0008-byte-ring-buffer-spsc-only.adoc   — accepted
 src/types/ring_buffer.hpp  src/types/ring_buffer.cpp
 src/types/ring_buffer_test.cpp  src/types/BUILD.bazel
 build/trace/report.md                          — no uncovered criteria
@@ -111,29 +111,19 @@ The “shape of green”: while the status is `Draft`, missing sections and temp
 
 ## 2. Decide
 
-Somewhere in the specification there is usually a decision hiding: a choice with alternatives and lasting consequences. Here it is obvious — the buffer is single-producer/single-consumer, and the rejected alternative (general thread-safety, a lock) has consequences for everything that will call it. That choice gets an **ADR**, before implementation starts:
+Somewhere in the specification there is usually a decision hiding: a choice with alternatives and lasting consequences. Here it is obvious — the buffer is single-producer/single-consumer, and the rejected alternative (general thread-safety, a lock) has consequences for everything that will call it. That choice gets an **ADR**, before the package goes to the review:
 
 ```bash
 python3 tools/new_adr.py "Byte ring buffer is single-producer/single-consumer"
 ```
 
-The generator assigns the next free number (call it `ADR-0006`), fills the template and updates the index in arc42 §9. The record is short: Context, Drivers, Options, Outcome, Consequences. An accepted ADR is immutable in substance — when the decision changes later, it is superseded, never rewritten. The full shape is in [Decision records](documentation/adr.md); who writes and who accepts is in [Process](conventions/process.md).
+The generator assigns the next free number (call it `ADR-0008`), fills the template and updates the index in arc42 §9. The record is short: Context, Drivers, Options, Outcome, Consequences. An accepted ADR is immutable in substance — when the decision changes later, it is superseded, never rewritten. The full shape is in [Decision records](documentation/adr.md); who writes and who accepts is in [Process](conventions/process.md).
 
-The `:adr:` attribute in the specification header now names `ADR-0006`, so the spec and the decision point at each other.
+The `:adr:` attribute in the specification header now names `ADR-0008`, so the spec and the decision point at each other.
 
-## 3. Approve
+## 3. Plan
 
-Approval is the moment the specification stops being prose and becomes a promise: requirements settled, criteria checkable, decisions accepted, no `NEEDS CLARIFICATION` left. Only the owner approves — the agent drafts, and never moves a specification across this line itself.
-
-```
-:status: Approved
-```
-
-The next `doit spec_check` is no longer patient: from here on, an incomplete section, an empty acceptance criterion or an open question is a failure, not a note. That is the point — the draft relaxed, the promise does not.
-
-## 4. Plan
-
-`plan.adoc` answers *how*: the approach, the affected arc42 building blocks, the public API sketch, the data and concurrency model, the test strategy. It is reviewed together with the ADRs it references, and it is where the contract becomes signatures:
+`plan.adoc` answers *how*: the approach, the affected arc42 building blocks, the public API sketch, the data and concurrency model, the test strategy. It is part of the planning package — written before the review, and reviewed together with the ADRs it references — and it is where the contract becomes signatures:
 
 ```C++
 #include <cstddef>
@@ -143,7 +133,7 @@ The next `doit spec_check` is no longer patient: from here on, an incomplete sec
 /**
  * @brief Fixed-capacity byte ring buffer for a single producer and a single consumer.
  * @details Backing storage is allocated once; after construction the buffer never
- *          allocates, and each operation is wait-free for its own side (see ADR-0006).
+ *          allocates, and each operation is wait-free for its own side (see ADR-0008).
  * @invariant The stored byte count never exceeds the capacity passed to the constructor.
  */
 class C_RingBuffer
@@ -165,7 +155,7 @@ public:
 
 The plan also names its test strategy — here: unit tests for the state machine, one concurrency test under ThreadSanitizer — and its risks. If the plan surfaces a decision it cannot settle, that decision goes back through step 2 as an ADR; it does not get buried in prose.
 
-## 5. Slice into tasks
+## 4. Slice into tasks
 
 `tasks.adoc` is the work breakdown: one row, one behavior, one test. The “Covers” column ties every task to an acceptance criterion, and the Bazel target names where its test will live:
 
@@ -182,11 +172,28 @@ The plan also names its test strategy — here: unit tests for the state machine
 |===
 ```
 
-With the specification approved and the tasks sliced, the feature moves to *Implementing* — that is the last status change before the work itself.
+The tasks are sliced *before* the review — feature planning reads them to place the work. The package is now complete: the specification, the decisions, the plan, the tasks; the next step agrees it.
+
+## 5. Agree at the review
+
+Approval is the moment the specification stops being prose and becomes a promise: requirements settled, criteria checkable, decisions accepted, no `NEEDS CLARIFICATION` left. It happens at the **architectural review and feature planning** — one event or two, and a whole batch of packages can cross it together:
+
+- the **architectural review** half reads the package as architecture: criteria a test can embody, ADRs that settle the decisions, contracts that hold together;
+- the **feature planning** half places it: priority, the team that will implement, and when.
+
+Only the owner approves — the author drafts, and never moves a specification across this line itself.
+
+```
+:status: Approved
+```
+
+The next `doit spec_check` is no longer patient: from here on, an incomplete section, an empty acceptance criterion, an open question — or a missing plan or task list — is a failure, not a note. That is the point — the draft relaxed, the promise does not.
+
+An *Approved* specification waits as the agreed backlog: implementation may start right away or much later, by its authors or by another team. Deferring is normal, not an exception — that is how planning runs ahead of implementation.
 
 ## 6. Implement: the TDD cycle
 
-Every task walks the same three-step loop; task T-001-02 shown in full. The test comes first, and it fails for the right reason — a behavioral expectation, not a missing symbol.
+The implementation phase begins when a team picks the package up — possibly long after the review; before the first task, walk the [Definition of Ready](conventions/process.md) once more and confirm the package is still current. Every task walks the same three-step loop; task T-001-02 shown in full. The test comes first, and it fails for the right reason — a behavioral expectation, not a missing symbol.
 
 **Red.** Write the test; show the failure. The test carries its specification anchor, so the report and `doit trace` can see it:
 
@@ -262,8 +269,8 @@ Periodically — at releases, and at the quarterly review named in the process c
 
 ## Where to next
 
+- [Working with agents](working-with-agents.md) — the same steps with an optional agent at your side.
 - [Process (SDD + ADR + TDD)](conventions/process.md) — the binding rules this chapter demonstrated.
 - [Specifications](documentation/specs.md) — the writing guide and the checklists for a specification, a plan and a task list.
 - [Decision records](documentation/adr.md) — how an ADR is created, accepted and superseded.
 - [Glossary](glossary.md) — every term and abbreviation this manual uses, in one place.
-- The agent-side commands mirror the steps above (`.agents/commands/`): `new-spec`, `implement-task` — same process, ready-made prompts.

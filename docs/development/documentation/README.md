@@ -26,3 +26,8 @@ doit docs          # everything -> build/docs/ (arc42, ADRs, pages, API site)
 ## The template manual
 
 The repository keeps the upstream arc42 template as the manual of *what each section must contain*: [arc42-template/](arc42-template/README.md) — the official English AsciiDoc sources, vendored under CC BY-SA 4.0. Read it when filling a section for the first time.
+
+## Where to next
+
+- [Conventions](../conventions/README.md) — the binding rules these guides orbit; the [Documentation System](../conventions/docs.md) is the one that owns them.
+- [Glossary](../glossary.md) — the terms, gathered in one place.

@@ -16,7 +16,7 @@ docs/specs/
   _templates/            the templates a new specification starts from
   NNN-<slug>/            one directory per specification, numbered from 001
     spec.adoc            what and why: requirements, acceptance criteria
-    plan.adoc            how: approach, contracts, test strategy (after approval)
+    plan.adoc            how: approach, contracts, test strategy (in the planning package)
     tasks.adoc           the work breakdown: one behavior per task
 ----
 
@@ -31,8 +31,9 @@ deleted.
 2. Fill `spec.adoc`; keep every open point spelled as `NEEDS CLARIFICATION`.
 3. Walk the statuses — Draft -> Approved -> Implementing -> Implemented; the
    process link above tells who approves and when.
-4. Once Approved, write `plan.adoc`; then slice `tasks.adoc` and implement
-   task by task under the TDD cycle.
+4. Draft `plan.adoc` and slice `tasks.adoc` — the package goes to architectural
+   review and feature planning as a whole; implementation follows, task by
+   task under the TDD cycle, when a team picks the package up.
 
 == Gates
 
@@ -40,5 +41,7 @@ deleted.
   (part of `doit verify`).
 * `doit trace` — the traceability report: acceptance criteria against tests.
 
-The directory is valid while empty: the first specification arrives with the pilot
-feature, and ADR-0005 records the decision that put this process in place.
+The directory is valid while empty: the first specification arrives with the
+pilot feature; ADR-0005 records the decision that put this process in place,
+ADR-0006 splits planning from implementation, and ADR-0007 keeps the process
+developer-first.

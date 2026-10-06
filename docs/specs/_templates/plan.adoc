@@ -1,9 +1,10 @@
 = Plan NNN: <Title>
 
-// The implementation plan — written after the specification, reviewed together
-// with its ADRs; the tasks live in `tasks.adoc`. Keep it honest: the sections
-// "Decisions requiring an ADR" and "Risks" are where a plan earns trust.
-// Implementation starts once the specification is Approved
+// The implementation plan — part of the planning package: drafted with the
+// specification, reviewed together with its ADRs; the tasks live in
+// `tasks.adoc`. Keep it honest: the sections "Decisions requiring an ADR"
+// and "Risks" are where a plan earns trust. Implementation starts once the
+// package is agreed at architectural review and feature planning
 // (docs/development/conventions/process.md).
 
 :spec: spec.adoc

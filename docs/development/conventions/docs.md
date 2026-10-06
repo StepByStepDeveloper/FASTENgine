@@ -108,6 +108,8 @@ CI runs `doit docs_check` and `doit docs` in the workflow job *Documentation*; t
 | The architecture narrative changes | The owning section file; update the ADR references it carries |
 | A feature is specified, replanned or advanced | The specifications (`docs/specs/NNN-<slug>/`): statuses and criteria per [Process](process.md) |
 | A convention changes | The document under `docs/development/conventions/` that owns it; the artifact that stated it before changes in the same commit |
+| A tool, task or gate is added or changes | Its facts grow in the [Toolchain](../toolchain.md) tables and the command tables of [Workflows](../workflows.md) — the manual is a living document, and `dodo.py` stays the source of truth for the tasks |
+| A directory appears, moves or changes purpose | The map in [The repository](../repository.md) |
 
 ## Toolchain state
 

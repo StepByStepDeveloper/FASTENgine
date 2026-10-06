@@ -48,4 +48,10 @@ The build is Bazel 9 through Bazelisk; the version is pinned in `.bazelversion`.
 
 ## Local documentation builds
 
-`doit docs` needs `asciidoctor`, `pandoc`, `plantuml` and `doxygen` on `PATH` — install notes in the [toolchain facts](toolchain.md). The output lands in `build/docs/`: the architecture document at `build/docs/arc42/arc42.html`, the standalone API site at `build/docs/api/html/index.html`. Nothing under `build/` is ever committed.
+`doit docs` needs `asciidoctor`, `pandoc`, `plantuml` and `doxygen` on `PATH` — versions and paths in the [toolchain facts](toolchain.md). The output lands in `build/docs/`: the architecture document at `build/docs/arc42/arc42.html`, the standalone API site at `build/docs/api/html/index.html`. Nothing under `build/` is ever committed.
+
+## Where to next
+
+- [The development process](process.md) — the walkthrough of a feature behind these commands.
+- [Working with agents](working-with-agents.md) — the optional layer that mirrors the same steps.
+- [Documentation guides](documentation/README.md) — when the change touches `docs/`.

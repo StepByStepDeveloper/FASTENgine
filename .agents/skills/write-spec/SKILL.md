@@ -11,8 +11,8 @@ How a feature becomes three reviewable artifacts under `docs/specs/NNN-<slug>/`.
 
 ## When to Use
 
-- A new feature is requested: draft `spec.adoc` and stop at *Draft*.
-- An approved specification needs its `plan.adoc`, or the plan needs slicing into `tasks.adoc`.
+- A new feature is requested: draft the planning package — `spec.adoc`, then `plan.adoc` and `tasks.adoc`.
+- An approved package is picked up for implementation and needs re-planning, or its tasks must follow a change.
 - Requirements changed and the specification must follow — in the same change as the code.
 - Don't use for: bug fixes and refactors that restore intended behaviour — those are test-first, no specification.
 
@@ -24,10 +24,10 @@ How a feature becomes three reviewable artifacts under `docs/specs/NNN-<slug>/`.
    ```
 2. **Draft `spec.adoc` top to bottom.** Goal, Context, Non-goals, Requirements, Acceptance criteria, Constraints, Open questions, Links. Requirements in EARS form (`FR-NNN-ii`, `NFR-NNN-ii`); criteria given/when/then, each naming its requirement (`AC-NNN-ii`). Do not write code.
 3. **Ask before assuming.** Anything unclear becomes a question to the owner, and every unresolved point stays written as `NEEDS CLARIFICATION` in place. Check `AGENTS.md`, the ADR set and arc42 sections 1–3 and 5 for constraints; link, never copy.
-4. **Stop at approval.** Only the owner moves the status to *Approved*. Ask for it only when: no `NEEDS CLARIFICATION` remains, every criterion is checkable, and the decisions the feature needs are settled as ADRs (prepare drafts with the `write-adr` skill; never accept them yourself).
-5. **Write `plan.adoc`** after approval: approach, affected building blocks, public API sketch, data and concurrency model, performance considerations, test strategy (criteria to tests mapping), risks — and every decision that still needs an ADR, drafted but not accepted.
+4. **Stop at the review.** Only the owner moves the status to *Approved*, at architectural review and feature planning — you present the whole package, never approve it. Ask for it only when: no `NEEDS CLARIFICATION` remains, every criterion is checkable, the decisions the feature needs are settled as ADRs (prepare drafts with the `write-adr` skill; never accept them yourself), and the plan and the tasks are drafted.
+5. **Write `plan.adoc`** before the review: approach, affected building blocks, public API sketch, data and concurrency model, performance considerations, test strategy (criteria to tests mapping), risks — and every decision that still needs an ADR, drafted but not accepted.
 6. **Slice `tasks.adoc`**: one row, one behavior, one test, its `Covers` criterion and its Bazel target. The status column is `todo` / `doing` / `done` / `withdrawn`; keep it current while implementing.
-7. **Gate after every edit:** `doit spec_check`. From *Approved* onward it enforces completeness; from *Implemented* onward the coverage side is `doit trace`.
+7. **Gate after every edit:** `doit spec_check`. From *Approved* onward it enforces completeness and requires the plan and the tasks; the coverage side is `doit trace` once tests exist.
 
 ## Pitfalls
 

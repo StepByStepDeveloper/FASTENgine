@@ -13,3 +13,5 @@ The binding conventions of this repository: how code, tests, commits, features a
 | [Process (SDD + ADR + TDD)](process.md) | the feature lifecycle: specification, decisions, plan, tasks, the red-green-refactor cycle and the gates |
 
 How these documents are read and maintained — the workflows around them, the toolchain facts and the template manual — lives in the [development manual](../README.md).
+
+**Where to next**: the [Glossary](../glossary.md) — every term these documents use, in one place; the [manual index](../README.md) is the way back to the reading order.

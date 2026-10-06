@@ -2,8 +2,9 @@
 
 // One row — one behavior — one test. Status vocabulary: todo | doing | done |
 // withdrawn. "Covers" names the acceptance criterion the task verifies; the
-// Bazel target is where that test lives. Work through the list with the TDD
-// cycle (docs/development/conventions/process.md).
+// Bazel target is where that test lives. The list is sliced before the review
+// and worked through with the TDD cycle once implementation starts — possibly
+// much later (docs/development/conventions/process.md).
 
 :spec: spec.adoc
 :plan: plan.adoc

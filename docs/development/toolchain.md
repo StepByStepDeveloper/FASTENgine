@@ -43,14 +43,10 @@ Commands and their pitfalls live in the [`verify-rules` skill](../../.agents/ski
 
 ## Layout
 
-| Path | What it will hold | State |
-|:--|:--|:--|
-| `src/algorithms/` | Algorithm implementations | empty (`.gitkeep`) |
-| `src/patterns/` | Static-polymorphism implementations, per `style/patterns.md` | empty (`.gitkeep`) |
-| `src/types/` | Core types | empty (`.gitkeep`) |
-| `docs/` | arc42 AsciiDoc sources, ADRs, diagram sources, the Doxygen input, the specifications under `docs/specs/` and the development manual under `docs/development/` — the system is [Documentation system](conventions/docs.md) | active |
-| `MODULE.bazel`, `.bazelversion`, `.bazelrc` | Bazel workspace: module dependencies, the pinned version, the compiler and warning flags | active |
-| `dodo.py` | doit tasks — the commands a developer and CI run | active |
-| `tools/` | Tooling: the ADR generator, the documentation tree checker, the specification validator (`spec_check.py`), the traceability reporter (`trace.py`), the diagram renderer | active |
-| `.clang-format`, `docs/api/Doxyfile` | The configuration the formatting and documentation rules are checked with | active |
-| `.agents/` | Agent context architecture — agent-only artifacts, linking into the development manual; the entry point is the repository `AGENTS.md` | active |
+The repository map — every directory with its purpose, including the agent-context tree — lives in [The repository](repository.md).
+
+## Where to next
+
+- [Workflows](workflows.md) — the day-to-day commands these tools run.
+- [The development process](process.md) — where a change travels, start to finish.
+- [Conventions](conventions/README.md) — the rules that assume this toolchain.

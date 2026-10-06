@@ -4,7 +4,7 @@ How to write and maintain the artifacts under `docs/specs/`. This is the writing
 
 ## What a specification is — and is not
 
-A specification is the **contract of intent** for one feature: what is being built, for whom, and how the result will be verified. It is written before the code, approved before the code, and kept current after the code — it is the one document that stays true across the feature's whole life.
+A specification is the **contract of intent** for one feature: what is being built, for whom, and how the result will be verified. It is written and agreed before any code — the review sees the whole planning package — and kept current after the code: it is the one document that stays true across the feature's whole life.
 
 It is *not*:
 
@@ -19,9 +19,9 @@ One feature, one specification, one to three pages. A specification that outgrow
 
 | File | Answers | Written |
 |:--|:--|:--|
-| `spec.adoc` | What are we building, and how will we know it works? | first, before approval |
-| `plan.adoc` | How will we build it? | after approval, before implementation |
-| `tasks.adoc` | In what order, one behavior at a time? | after the plan, before the loop |
+| `spec.adoc` | What are we building, and how will we know it works? | first, in the planning phase |
+| `plan.adoc` | How will we build it? | with the specification, before the review |
+| `tasks.adoc` | In what order, one behavior at a time? | after the plan, still before the review |
 
 They live together in `docs/specs/NNN-<slug>/` and are copied from `docs/specs/_templates/`. The identifiers inside them — `FR-NNN-ii`, `NFR-NNN-ii`, `AC-NNN-ii`, `T-NNN-ii` — are permanent addresses: tests and code point at them, `doit trace` counts them, and they are never reused, even after the requirement is withdrawn.
 

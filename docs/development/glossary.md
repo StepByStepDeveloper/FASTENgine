@@ -8,8 +8,9 @@ The terms and abbreviations used across this manual and in the process artifacts
 | ADR | Architecture Decision Record | One decision, its alternatives and its consequences, in one immutable file under `docs/arc42/adr/` — see [Decision records](documentation/adr.md). |
 | Agent | — | An AI collaborator working in this repository: drafts specifications and ADRs, writes tests and code, never approves its own work. |
 | arc42 | — | The fixed twelve-section architecture document template this repository uses under `docs/arc42/`. |
+| Architectural review and feature planning | — | The moment a planning package is agreed — architecture first, then placement; the owner sets the specification to *Approved* — see [Process](conventions/process.md). |
 | ASan | Address Sanitizer | Runtime checker for memory errors; one of the sanitizer configurations of the build. |
-| Author | — | Whoever drives a feature: writes the specification, walks the statuses, implements under TDD. |
+| Author | — | Whoever drives a feature: authors its planning package, walks the statuses, implements under TDD; the planning author and the implementing team may differ. |
 | Bazel | — | The build system; targets are addressed as `//path:name`. |
 | Bazelisk | — | The launcher that reads `.bazelversion` and runs the pinned Bazel — the only supported way to call Bazel here. |
 | BUILD file | — | `BUILD.bazel`: the file declaring a directory's Bazel targets. |
@@ -28,6 +29,7 @@ The terms and abbreviations used across this manual and in the process artifacts
 | `NEEDS CLARIFICATION` | — | The literal marker for an open point in a specification; approval is blocked while one remains. |
 | Owner | — | The human authority in the loop: approves specifications, accepts ADRs, approves changes to existing tests. |
 | Plan | — | `plan.adoc`: how the feature will be built — approach, contracts, test strategy. |
+| Planning package | — | A feature's planning artifacts as one set — `spec.adoc`, `plan.adoc`, `tasks.adoc` and the ADRs the decisions need; agreed at architectural review and feature planning. |
 | PlantUML | — | The diagram source format under `docs/arc42/diagrams/`; renders are built by `doit diagrams`. |
 | Red / Green / Refactor | — | The three steps of the TDD cycle: a failing test, the smallest change that passes it, then structure under green. |
 | SDD | Specification-Driven Development | The method: the specification is written and approved before implementation, and stays the contract of intent afterward. |
@@ -40,3 +42,7 @@ The terms and abbreviations used across this manual and in the process artifacts
 | Traceability | — | The link chain specification -> test -> code, carried by `@covers{AC-NNN-ii}` and `@implements{FR-NNN-ii}` and verified by `doit trace`. |
 | TSan | Thread Sanitizer | Runtime checker for data races; one of the sanitizer configurations of the build. |
 | UBSan | Undefined Behavior Sanitizer | Runtime checker for undefined behavior; one of the sanitizer configurations of the build. |
+
+## Where to next
+
+The reading order ends here — the [manual index](README.md) is the way back to it. The chapters you will come back to most: [Getting started](getting-started.md) and [The development process](process.md).

@@ -48,6 +48,8 @@ disk.
 | <<adr-0003,ADR-0003>> | Convert the arc42 document into Doxygen pages | accepted | 2026-09-30
 | <<adr-0004,ADR-0004>> | Reserve .agents/rules as an admission-tested placeholder | accepted | 2026-09-30
 | <<adr-0005,ADR-0005>> | Adopt SDD + ADR + TDD as the feature development process | accepted | 2026-10-02
+| <<adr-0006,ADR-0006>> | Separate architectural planning from implementation in the feature process | proposed | 2026-10-06
+| <<adr-0007,ADR-0007>> | Keep the process developer-first, with agents optional | proposed | 2026-10-06
 |===
 // adr-index-end
 
@@ -63,6 +65,10 @@ include::../adr/0003-convert-the-arc42-document-into-doxygen-pages.adoc[]
 include::../adr/0004-reserve-agents-rules-as-an-admission-tested-placeholder.adoc[]
 
 include::../adr/0005-adopt-sdd-adr-tdd-as-the-feature-development-process.adoc[]
+
+include::../adr/0006-separate-architectural-planning-from-implementation-in-the-feature-process.adoc[]
+
+include::../adr/0007-keep-the-process-developer-first-with-agents-optional.adoc[]
 // adr-include-end
 
 :leveloffset: -2

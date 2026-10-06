@@ -1,0 +1,75 @@
+[[adr-0006]]
+= ADR-0006: Separate architectural planning from implementation in the feature process
+
+Status: proposed (2026-10-06).
+
+== Context and Problem Statement
+
+The feature process (ADR-0005) moves a feature through its artifacts in one
+motion: specification, approval, plan, tasks, implementation — one author, one
+pass. That couples two activities that do not have to move together. The
+repository wants a different mode: several architects preparing many planning
+packages in parallel, the packages agreed at architectural review and feature
+planning, and implementation deferred — possibly to other teams, possibly much
+later — so that architecture phases can run ahead of implementation phases.
+The mechanical half still assumes the coupling: `doit spec_check` requires
+`plan.adoc` and `tasks.adoc` only from *Implementing* onward.
+
+== Decision Drivers
+
+* Planning must be able to run ahead of implementation — logically and in
+  time — without waiting for code.
+* Several authors (architects included) must be able to prepare packages in
+  parallel, and one review must be able to agree a batch of them.
+* Implementation must be deferrable, and open to a team other than the one
+  that planned the feature.
+* The agreement moment — architectural review and feature planning — must be
+  explicit in the rules and in the mechanics.
+* The process stays small: no new artifact types, no new statuses — the
+  existing three files and five statuses carry the change.
+
+== Considered Options
+
+* Keep the single pass: approve the specification, then plan and tasks, then
+  implement — the ADR-0005 lifecycle unchanged.
+* Move planning into a pipeline of its own with a separate tracker, and hand
+  finished packages across a boundary.
+* Make planning and implementation two phases of one process: the planning
+  package is `spec.adoc`, `plan.adoc`, `tasks.adoc` and the ADRs the decisions
+  need; it is authored during planning, agreed at architectural review and
+  feature planning, and *Approved* is the agreed backlog; implementation is a
+  separate phase that may start long after, possibly by a different team.
+
+== Decision Outcome
+
+Chosen option: "planning and implementation as two phases", because it buys
+parallel planning and deferrable implementation at the price of one rule: the
+plan and the tasks become part of the review package, so `doit spec_check`
+requires them from *Approved* onward (previously from *Implementing*). The
+status vocabulary is unchanged: *Approved* means "agreed at the review,
+waiting for a team"; *Implementing* means "picked up".
+
+=== Consequences
+
+* Good, because planning waves and batched reviews become possible:
+  architecture can lead implementation by as much as the project needs.
+* Good, because the review covers the whole package — feature planning sees
+  the real work breakdown, not a promise of one.
+* Bad, because an approved package can go stale before it is picked up; the
+  Definition of Ready re-checks currency when implementation starts, and a
+  stale package goes back through the review.
+* Neutral, because identifiers and gates are unchanged; what changes is when
+  the plan and the tasks are due.
+
+== Confirmation
+
+The rules in `docs/development/conventions/process.md` state the two phases
+and the review; `tools/spec_check.py` treats a missing `plan.adoc` or
+`tasks.adoc` as a problem from *Approved* onward; the first planning wave —
+packages agreed ahead of their implementation — exercises the model.
+
+== More Information
+
+* The rules: `docs/development/conventions/process.md`; the walkthrough:
+  `docs/development/process.md`; the tree: `docs/specs/README.adoc`.
+* Related decisions: ADR-0005 (the process this one refines).

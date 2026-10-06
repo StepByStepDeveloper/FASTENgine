@@ -2,7 +2,8 @@
 
 // The specification template: copy this directory (`docs/specs/_templates/`)
 // into a new `NNN-<slug>/` and fill every placeholder. One feature per
-// specification, one to three pages. The binding rules live in
+// specification, one to three pages; the plan and the tasks are part of the
+// same package and go to the review with it. The binding rules live in
 // docs/development/conventions/process.md; the writing guide — in
 // docs/development/documentation/specs.md.
 

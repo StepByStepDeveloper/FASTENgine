@@ -2,8 +2,9 @@
 """Validate the specifications under ``docs/specs/``.
 
 The process artifacts live in ``docs/specs/``: one directory per specification,
-``NNN-<slug>/``, carrying ``spec.adoc`` and — once implementation starts —
-``plan.adoc`` and ``tasks.adoc``. The binding rules are
+``NNN-<slug>/``, carrying the planning package — ``spec.adoc``,
+``plan.adoc`` and ``tasks.adoc``, all drafted before the review. The binding
+rules are
 ``docs/development/conventions/process.md``; the templates are
 ``docs/specs/_templates/``.
 
@@ -17,9 +18,9 @@ The script checks what is mechanical about a specification set:
                acceptance criterion names a requirement that exists;
   coverage     past *Draft*, every requirement is covered by at least one
                acceptance criterion, and no ``NEEDS CLARIFICATION`` remains;
-  lifecycle    *Implementing* and *Implemented* specifications carry a plan
-               and a task list, and the plan and the task list belong to their
-               specification;
+  lifecycle    *Approved* and later specifications carry a plan and a task
+               list — the review agrees the whole package — and the plan and
+               the task list belong to their specification;
   links        every ADR named in ``:adr:`` exists under ``docs/arc42/adr/``.
 
 Findings that break the template are *problems* (exit 1); a draft that is
@@ -49,8 +50,9 @@ TEMPLATES = ("spec.adoc", "plan.adoc", "tasks.adoc")
 STATUSES = ("Draft", "Approved", "Implementing", "Implemented", "Superseded")
 # Statuses at which the specification is a promise: completeness is enforced.
 ENFORCED_STATUSES = ("Approved", "Implementing", "Implemented")
-# Statuses that cannot exist without a plan and a task list.
-IMPLEMENTATION_STATUSES = ("Implementing", "Implemented")
+# Statuses that cannot exist without a plan and a task list: the planning
+# package is complete once the review agrees it, at *Approved*.
+PACKAGE_STATUSES = ("Approved", "Implementing", "Implemented")
 
 TASK_STATUSES = ("todo", "doing", "done", "withdrawn")
 
@@ -216,7 +218,7 @@ def check_criteria(label: str, text: str, number: str, requirements: dict[str, s
 def check_plan_and_tasks(label: str, spec_dir: Path, number: str,
                          status: str) -> None:
     """``plan.adoc`` and ``tasks.adoc`` exist when the status demands them."""
-    required_now = status in IMPLEMENTATION_STATUSES
+    required_now = status in PACKAGE_STATUSES
 
     plan_path = spec_dir / "plan.adoc"
     if plan_path.is_file():

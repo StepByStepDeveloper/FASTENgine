@@ -1,0 +1,69 @@
+[[adr-0007]]
+= ADR-0007: Keep the process developer-first, with agents optional
+
+Status: proposed (2026-10-06).
+
+== Context and Problem Statement
+
+The process (ADR-0005) and parts of the manual describe this repository as one
+built by a maintainer working with AI agents, and a dedicated layer
+(`.agents/`) exists for agent work. That framing risks turning the agent into
+an implicit requirement: a team without AI access would read the process as
+not-for-them, and agent conveniences could quietly become the only written
+path. The repository must remain developable by developers alone — an agent is
+an accelerator, never a condition.
+
+== Decision Drivers
+
+* Development must proceed with no AI access at all; the absence of an agent
+  must never stop the process or become its bottleneck.
+* The process and its documentation must be understandable and operable by
+  developers first.
+* Agent assistance stays first-class wherever it is available.
+* One description, not two: a human edition and an agent edition of the
+  process would drift apart.
+
+== Considered Options
+
+* Agent-centric process: the agent is the assumed executor, a developer
+  supervises.
+* Two parallel descriptions: the process written once for developers and once
+  for agents.
+* Developer-first process with an optional agent layer: every stage is a plain
+  command or document a developer carries alone; `.agents/` carries the
+  accelerators; the manual addresses developers first and agents second.
+
+== Decision Outcome
+
+Chosen option: "developer-first, agents optional", because it keeps the
+process honest: no stage may require an AI. The development manual gains a
+chapter on working with agents (`docs/development/working-with-agents.md`); the process
+rules state that an agent is an assistant under the same rules; and the agent
+context stays an accelerator layer that links out — nothing in the build, the
+gates or CI reads it.
+
+=== Consequences
+
+* Good, because development never stops when AI access stops: a team with no
+  agent loses drafting speed, not a single step of the process.
+* Good, because the description stays single — developers read one process,
+  agents read the same one plus `.agents/`.
+* Bad, because automation may not assume an agent: anything an agent does must
+  also be doable by hand, which keeps every stage documented as commands.
+* Neutral, because the agent context remains first-class where present: its
+  skills, commands and guardrails are unaffected — they are now explicitly
+  optional.
+
+== Confirmation
+
+The manual describes every stage as commands a developer runs (`doit`,
+`bazel`, `python3 tools/...`); the gates and CI run with no agent in the
+loop; a reading check over `docs/development/process.md` finds no stage that
+names an AI tool as its prerequisite.
+
+== More Information
+
+* The guide: `docs/development/working-with-agents.md`; the rules:
+  `docs/development/conventions/process.md`; the adapter table:
+  `.agents/adapters/README.md`.
+* Related decisions: ADR-0002 (classes of documentation), ADR-0005.

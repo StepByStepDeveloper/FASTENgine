@@ -1,39 +1,71 @@
 # The repository
 
-What lives where, and why. One sentence per design goal: the product documentation describes the product, the development manual describes how the repository is worked on, the specifications describe what is being built before it exists, and the agent context carries only what an agent reads.
+Where everything lives, why it is there, and what to touch when. The classes of documentation — specifications, the manual, product documentation, the agent context — are defined in [Documentation system](conventions/docs.md); this chapter is their map, one level deeper.
 
-## Top level
+```
+fastengine/
+├── .agents/                 the agent context — optional accelerators, read by agents alone
+│   ├── adapters/            how this tree maps onto another agent harness
+│   ├── agents/              reviewer personas for delegation
+│   ├── commands/            ready-made prompts for the manual's procedures
+│   ├── evals/               scenarios the agent context is tested against
+│   ├── hooks/               automation specs (the git hooks realize parts of them)
+│   ├── policies/            guardrails, and the ignore list — what an agent must not do or read
+│   ├── rules/               (placeholder) standing agent-only rules
+│   ├── skills/              on-demand procedures — verify-rules, write-spec, write-adr, write-arc42-docs, build-api-docs, tdd-cycle
+│   └── state/               scratchpad.md (one task) and memory.md (durable facts)
+├── .github/                 CI and the pull-request checklist
+│   └── workflows/           one workflow, three jobs: the context-tree gate, the build, the documentation build
+├── .githooks/               the git hooks: the secret scan first, the advisory tree checks after
+├── docs/
+│   ├── api/                 the Doxygen configuration and the site pages
+│   ├── arc42/               product documentation — the architecture, the decisions, the diagrams
+│   │   ├── adr/             the decision records: the template and ADR-0001 onward
+│   │   ├── diagrams/        PlantUML sources
+│   │   ├── images/          rendered diagrams (generated, not committed)
+│   │   └── sections/        the twelve arc42 sections
+│   ├── development/         the development manual — start at its README
+│   └── specs/               the specifications: _templates/ and NNN-<slug>/ per feature
+├── src/                     the implementation — algorithms/, patterns/, types/
+├── tools/                   repository scripts: new_adr.py, spec_check.py, check_docs.py, trace.py, the renderers
+├── AGENTS.md                the entry point for AI agents — the project rules and where the context lives
+├── dodo.py                  the doit task definitions: the commands a developer and CI run
+├── MODULE.bazel             the Bazel module: the dependencies — rules_cc, GoogleTest
+├── .bazelversion            the pinned Bazel version
+└── .bazelrc                 the build configurations: clang (default) and gcc16
+```
 
-| Path | Holds |
+## The source tree
+
+The layout of `src/` is fixed; adding a directory is a decision, not a convenience:
+
+| Path | What it holds |
 |:--|:--|
-| `src/` | The engine sources — `algorithms/`, `patterns/`, `types/`; empty until the first modules and their `BUILD.bazel` |
-| `docs/arc42/` | The arc42 architecture document (AsciiDoc), the ADR set, the diagram sources |
-| `docs/api/` | The Doxygen configuration, the main page and the module group map |
-| `docs/specs/` | The specifications — one directory per feature (`spec.adoc`, `plan.adoc`, `tasks.adoc`) plus the templates they start from |
-| `docs/development/` | This manual — workflows, toolchain facts, documentation guides, the conventions, the arc42 template copy |
-| `.agents/` | The agent context — skills, policies, hooks, evals, state; no developer prose, only links out |
-| `tools/` | Tooling: the ADR generator, the documentation tree checker, the specification validator, the traceability reporter, the diagram renderer, the pages converter |
-| `MODULE.bazel`, `.bazelrc`, `.bazelversion` | The Bazel workspace: dependencies, the pinned version, compiler and warning flags |
-| `dodo.py` | The task runner — one command set for a developer and CI |
-| `.githooks/` | The pre-commit gate: a blocking secret scan plus advisory tree checks |
-| `.github/workflows/` | CI: the context-tree gate, build/test, the documentation job |
+| `src/algorithms/` | Algorithm implementations. |
+| `src/patterns/` | Static-polymorphism implementations, per [Build patterns](conventions/style/patterns.md). |
+| `src/types/` | Core types. |
 
-## The documentation classes
+Every directory carries a `BUILD.bazel` naming it a Bazel package; the target and test naming comes from [Build patterns](conventions/style/patterns.md). The directories sit empty (`.gitkeep`) until the first feature lands.
 
-| Class | Home | Read by | Carries |
-|:--|:--|:--|:--|
-| Agent context | `AGENTS.md`, `.agents/` | the agent | only artifacts an agent reads; links out for everything repository-facing |
-| Development manual | `README.md`, `docs/development/` | anyone working on the repository | how to work here: workflows, toolchain, conventions, templates |
-| Product documentation | `docs/arc42/`, `docs/api/` (built into `build/docs/`) | readers of the product | architecture, decisions, API reference, the converted architecture pages |
-| Specifications | `docs/specs/` | the author and the reviewer of a feature | what is being built and how it will be verified, before it exists |
+## The agent context (`.agents/`)
 
-The split is binding ([ADR-0002](../arc42/adr/0002-decompose-documentation-by-audience.adoc); the specifications joined as the fourth class with [ADR-0005](../arc42/adr/0005-adopt-sdd-adr-tdd-as-the-feature-development-process.adoc)): a fact lives in exactly one class, and the other classes link to it. When unsure where a new document belongs, ask *who reads it* — an agent, a contributor, a consumer of the engine, or the implementer of a feature.
+The one directory that is not the project proper: a layer of optional accelerators for working with AI agents. Nothing in the build, the gates or CI reads it — with the directory removed, every stage of the process still runs by hand (ADR-0007). How to use it is [Working with agents](working-with-agents.md); its design, file by file, is the adapter table (`.agents/adapters/README.md`).
 
-## Where to go next
+| Directory | Purpose |
+|:--|:--|
+| `skills/` | On-demand procedures — one `SKILL.md` per procedure, with the scripts and templates it needs; loaded when the task matches. |
+| `commands/` | Ready-made prompts for the manual's procedures: `new-spec`, `implement-task`, `verify-rules`, `add-rule`, `commit`. |
+| `policies/` | The guardrails — commit discipline, test integrity, ambiguity handling — and the `ignore` list of paths an agent never reads. |
+| `rules/` | (placeholder) Standing agent-only rules; empty by design until one passes the admission test (ADR-0004). |
+| `hooks/` | The automation specs; the git hooks implement parts of them. |
+| `agents/` | Reviewer personas for delegation: naming, tests, documentation, rule-documentation. |
+| `evals/` | Scenarios with mechanical criteria — they test the agent context itself. |
+| `state/` | Two working notes: `scratchpad.md` (one task, cleared when it ends) and `memory.md` (durable facts about the project). |
+| `adapters/` | The mapping of this tree onto another agent harness — what to port, what to drop. |
+| `mcp.json` | MCP server registrations; none configured yet. |
 
-- The process end to end: [The development process](process.md); its binding rules: [Process (SDD + ADR + TDD)](conventions/process.md).
-- How the repository is worked on: [Workflows](workflows.md).
-- The toolchain facts: [Toolchain](toolchain.md).
-- The documentation system in detail: [Documentation guides](documentation/README.md).
-- The binding rules: [Conventions](conventions/README.md).
-- The terms used everywhere: [Glossary](glossary.md).
+## Where to next
+
+- [Toolchain](toolchain.md) — what is installed on this machine, with versions and paths.
+- [Workflows](workflows.md) — the day-to-day commands and the automatic gates.
+- [Conventions](conventions/README.md) — the binding rules behind the layout.
