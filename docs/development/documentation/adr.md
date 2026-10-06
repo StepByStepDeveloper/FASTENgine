@@ -20,7 +20,7 @@ The generator numbers the file `NNNN-slug.adoc`, fills the template and rewrites
 
 - Title line `= ADR-NNNN: <Title>`; anchor `[[adr-NNNN]]`; the Status line `Status: <status> (<YYYY-MM-DD>).` directly under it.
 - Statuses: `proposed`, `accepted`, `rejected`, `deprecated`, `superseded by ADR-NNNN`.
-- Sections: Context and Problem Statement, Decision Drivers, Considered Options, Decision Outcome (with Consequences), Confirmation, More Information. The shipped examples are ADR-0001, ADR-0002 and ADR-0003.
+- Sections: Context and Problem Statement, Decision Drivers, Considered Options, Decision Outcome (with Consequences), Confirmation, More Information. The shipped records are ADR-0001 onward.
 
 ## Immutability
 

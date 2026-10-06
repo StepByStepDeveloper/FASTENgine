@@ -31,7 +31,7 @@ This table is the router: nothing attaches a rule to a path automatically, so an
 | [`policies/`](.agents/policies/guardrails.md) + [`ignore`](.agents/ignore) | Prohibitions, and the paths never to read |
 | [`rules/`](.agents/rules/README.md) | Placeholder — standing agent-only rules; empty by design until one passes the admission test |
 | [`commands/`](.agents/commands/verify-rules.md) | Ready prompts — `verify-rules`, `add-rule`, `commit`, `new-spec`, `implement-task` |
-| [`state/`](.agents/state/scratchpad.md) | `scratchpad.md` (one task), `memory.md` (durable) |
+| [`state/`](.agents/state/memory.md) | `scratchpad.md` (one task, local), `memory.md` (durable) |
 | [`hooks/`](.agents/hooks/pre-commit-gate.md) | Automation specs — the git hooks realize parts of them |
 | [`agents/`](.agents/agents/naming-auditor.md) | Reviewer personas for delegation |
 | [`evals/`](.agents/evals/naming-compliance.md) | Agent-test scenarios with mechanical criteria |

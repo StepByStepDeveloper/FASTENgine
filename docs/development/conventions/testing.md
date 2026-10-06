@@ -12,7 +12,7 @@ Ensuring stability and correctness through automated testing in FASTENgine.
 ## Testing Principles
 
 - **Unit Tests**: Test individual components in isolation. Use mocks for external dependencies.
-- **Integration Tests**: Test the interaction between major modules (e.g., Renderer + Window System).
+- **Integration Tests**: Test the interaction between major modules (e.g., an algorithm against a core type).
 - **Regression Testing**: Ensure new changes do not break existing functionality.
 
 ## Test-Driven Development
@@ -22,7 +22,7 @@ Implementation is written test-first; the binding process is [Process](process.m
 - **Red first, for the right reason**: add an API stub so the test compiles and fails on the unfulfilled expectation, not on a missing symbol; the failing output belongs in the report or the PR.
 - **One test, one behavior**: Arrange-Act-Assert; the name states the behavior, `@brief` the expected outcome.
 - **Traceability**: a test that verifies a specification criterion carries `@covers{AC-NNN-ii}`; implementation names its requirement with `@implements{FR-NNN-ii}` where the link is not obvious from its group — see [Process](process.md).
-- **Existing tests change only with the developer's explicit approval**; weakening a test to make a change pass hides a defect — the opposite of a finished task.
+- **Existing tests change only with the owner's explicit approval**; weakening a test to make a change pass hides a defect — the opposite of a finished task.
 - **State-based assertions**; mock only at the boundary to the outside world.
 - **Concurrency code** runs repeatedly and under ThreadSanitizer; **performance requirements** are verified by benchmarks with documented conditions.
 

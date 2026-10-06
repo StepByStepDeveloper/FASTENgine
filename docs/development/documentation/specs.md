@@ -88,7 +88,7 @@ One row, one behavior, one test. A task that needs the word "and" in its descrip
 | The task list as a diary | rows for "investigate", "clean up" | tasks are behaviors; investigation is a spike, recorded in the plan |
 | Late anchors | `@covers` added after the feature ships | the anchor is written with the test, in the red step — see [Testing](../conventions/testing.md) |
 
-## Where next
+## Where to next
 
 - [Process (SDD + ADR + TDD)](../conventions/process.md) — statuses, approval, the gates.
 - [Decision records](adr.md) — the companion artifact for decisions.

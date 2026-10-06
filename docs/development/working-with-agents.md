@@ -6,7 +6,7 @@ How this repository is developed with AI agents — and why nothing in it is req
 
 ## The agent context
 
-`.agents/` is a layer of optional accelerators — skills, commands, guardrails, personas, state. A person reads it as documentation; an agent loads it as behavior; nothing in the build, the gates or CI reads it at all ([The repository](repository.md) maps it entry by entry). The design file by file is the adapter table (`.agents/adapters/README.md`).
+`.agents/` is a layer of optional accelerators — skills, commands, guardrails, personas, state. A person reads it as documentation; an agent loads it as behavior; nothing in the build or the tests reads it; the gates only check that it stays consistent ([The repository](repository.md) maps it entry by entry). The design file by file is the adapter table (`.agents/adapters/README.md`).
 
 ## The loop, with and without an agent
 
@@ -40,7 +40,7 @@ The `ignore` list (`.agents/ignore`) names the paths an agent never reads.
 
 ## The agent's state
 
-Two working notes live in `.agents/state/`: `scratchpad.md` — one task, written and reread while the agent works, cleared when it ends — and `memory.md` — durable facts about the project. They are working notes, not documentation: read them when you want to know what the agent believes, and correct them when they are wrong.
+Two working notes live in `.agents/state/`: `scratchpad.md` — one task, written and reread while the agent works, cleared when it ends, local per clone and git-ignored — and `memory.md` — durable facts about the project, committed with the tree. They are working notes, not documentation: read them when you want to know what the agent believes, and correct them when they are wrong.
 
 ## When there is no agent
 

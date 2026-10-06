@@ -9,7 +9,7 @@ The terms and abbreviations used across this manual and in the process artifacts
 | Agent | — | An AI collaborator working in this repository: drafts specifications and ADRs, writes tests and code, never approves its own work. |
 | arc42 | — | The fixed twelve-section architecture document template this repository uses under `docs/arc42/`. |
 | Architectural review and feature planning | — | The moment a planning package is agreed — architecture first, then placement; the owner sets the specification to *Approved* — see [Process](conventions/process.md). |
-| ASan | Address Sanitizer | Runtime checker for memory errors; one of the sanitizer configurations of the build. |
+| ASan | Address Sanitizer | Runtime checker for memory errors; one of the sanitizer configurations that arrive with the first sources. |
 | Author | — | Whoever drives a feature: authors its planning package, walks the statuses, implements under TDD; the planning author and the implementing team may differ. |
 | Bazel | — | The build system; targets are addressed as `//path:name`. |
 | Bazelisk | — | The launcher that reads `.bazelversion` and runs the pinned Bazel — the only supported way to call Bazel here. |
@@ -40,8 +40,8 @@ The terms and abbreviations used across this manual and in the process artifacts
 | T | Task | A work item `T-NNN-ii` in `tasks.adoc`: one behavior, one test, one passing commit. |
 | TDD | Test-Driven Development | The implementation loop: tests before code, red before green — see [Testing](conventions/testing.md). |
 | Traceability | — | The link chain specification -> test -> code, carried by `@covers{AC-NNN-ii}` and `@implements{FR-NNN-ii}` and verified by `doit trace`. |
-| TSan | Thread Sanitizer | Runtime checker for data races; one of the sanitizer configurations of the build. |
-| UBSan | Undefined Behavior Sanitizer | Runtime checker for undefined behavior; one of the sanitizer configurations of the build. |
+| TSan | Thread Sanitizer | Runtime checker for data races; one of the sanitizer configurations that arrive with the first sources. |
+| UBSan | Undefined Behavior Sanitizer | Runtime checker for undefined behavior; one of the sanitizer configurations that arrive with the first sources. |
 
 ## Where to next
 

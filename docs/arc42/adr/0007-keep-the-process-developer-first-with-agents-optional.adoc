@@ -1,7 +1,7 @@
 [[adr-0007]]
 = ADR-0007: Keep the process developer-first, with agents optional
 
-Status: proposed (2026-10-06).
+Status: accepted (2026-10-06).
 
 == Context and Problem Statement
 
@@ -39,8 +39,8 @@ Chosen option: "developer-first, agents optional", because it keeps the
 process honest: no stage may require an AI. The development manual gains a
 chapter on working with agents (`docs/development/working-with-agents.md`); the process
 rules state that an agent is an assistant under the same rules; and the agent
-context stays an accelerator layer that links out — nothing in the build, the
-gates or CI reads it.
+context stays an accelerator layer that links out — nothing in the build or the
+tests reads it; the gates only check that it stays consistent.
 
 === Consequences
 

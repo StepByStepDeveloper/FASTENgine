@@ -2,7 +2,7 @@
 
 Guidelines for maintaining high-quality, consistent C++ code in FASTENgine.
 
-Part of the development conventions; the sibling documents are [Testing](testing.md), [Git & PR workflow](git.md) and the [Documentation System](docs.md), all indexed in the [conventions index](README.md).
+Part of the development conventions; the sibling documents are [Testing](testing.md), [Git & PR workflow](git.md), the [Documentation System](docs.md) and [Process](process.md), all indexed in the [conventions index](README.md).
 
 ## Detailed Guidelines
 

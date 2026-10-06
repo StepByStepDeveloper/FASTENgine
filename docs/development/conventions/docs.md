@@ -33,7 +33,7 @@ The split is binding: the agent context does not carry developer prose it can li
 | `docs/arc42/about-arc42.adoc` | Provenance block: template version, template license, adaptation note | active |
 | `docs/arc42/sections/01…12_*.adoc` | One file per arc42 section; names and anchors are stable | template state (help texts on) |
 | `docs/arc42/adr/adr-template.adoc` | The ADR template — the shape `tools/new_adr.py` fills | active |
-| `docs/arc42/adr/NNNN-*.adoc` | One file per architecture decision record | active (ADR-0001 accepted) |
+| `docs/arc42/adr/NNNN-*.adoc` | One file per architecture decision record | active (ADR-0001 onward) |
 | `docs/arc42/diagrams/*.puml` | PlantUML diagram sources — the only editable form of a diagram | scaffold |
 | `docs/arc42/images/` | Diagram renders (`*.svg`, generated) and committed static images | active |
 | `docs/api/Doxyfile`, `docs/api/mainpage.md`, `docs/api/groups.dox` | Doxygen configuration, main page and the module group map | active |

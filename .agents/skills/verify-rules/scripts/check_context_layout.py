@@ -20,7 +20,7 @@ Checks, per the layout's own sections:
               an admission test; opening the layer is a conscious change
   skills/     <kebab-name>/SKILL.md with a name and a description that says what and when
   commands/   one file per command, described in frontmatter and in the body's first line
-  state/      the scratchpad's four blocks; the memory's three topic sections
+  state/      the scratchpad's four blocks (when present — local, git-ignored); the memory's three topic sections
   mcp.json    an mcpServers object
   hooks/      on / match / action / mode from the reference vocabulary
   agents/     name + description, Role & Mindset / Checklist / Output Format
@@ -200,10 +200,16 @@ def check_commands(ag: str) -> None:
 
 
 def check_state(ag: str) -> None:
-    scratchpad = open(os.path.join(ag, "state", "scratchpad.md"), encoding="utf-8").read()
-    check("state", "scratchpad: Objective -> Status -> Discovered Issues -> Next action",
-          all(h in scratchpad for h in
-              ["## Objective", "## Status", "## Discovered Issues", "## Next action"]))
+    """The scratchpad is local per-clone state (git-ignored): checked when present."""
+    scratchpad_path = os.path.join(ag, "state", "scratchpad.md")
+    if os.path.exists(scratchpad_path):
+        scratchpad = open(scratchpad_path, encoding="utf-8").read()
+        check("state", "scratchpad: Objective -> Status -> Discovered Issues -> Next action",
+              all(h in scratchpad for h in
+                  ["## Objective", "## Status", "## Discovered Issues", "## Next action"]))
+    else:
+        check("state", "scratchpad (local): four blocks when present", False,
+              "absent — no active task", strict=False)
     memory = open(os.path.join(ag, "state", "memory.md"), encoding="utf-8").read()
     check("state", "memory: topic sections",
           all(h in memory for h in

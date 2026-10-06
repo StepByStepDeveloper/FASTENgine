@@ -13,7 +13,7 @@ fastengine/
 │   ├── policies/            guardrails, and the ignore list — what an agent must not do or read
 │   ├── rules/               (placeholder) standing agent-only rules
 │   ├── skills/              on-demand procedures — verify-rules, write-spec, write-adr, write-arc42-docs, build-api-docs, tdd-cycle
-│   └── state/               scratchpad.md (one task) and memory.md (durable facts)
+│   └── state/               scratchpad.md (one task, local) and memory.md (durable facts)
 ├── .github/                 CI and the pull-request checklist
 │   └── workflows/           one workflow, three jobs: the context-tree gate, the build, the documentation build
 ├── .githooks/               the git hooks: the secret scan first, the advisory tree checks after
@@ -45,11 +45,11 @@ The layout of `src/` is fixed; adding a directory is a decision, not a convenien
 | `src/patterns/` | Static-polymorphism implementations, per [Build patterns](conventions/style/patterns.md). |
 | `src/types/` | Core types. |
 
-Every directory carries a `BUILD.bazel` naming it a Bazel package; the target and test naming comes from [Build patterns](conventions/style/patterns.md). The directories sit empty (`.gitkeep`) until the first feature lands.
+Every directory will carry a `BUILD.bazel` naming it a Bazel package; the target and test naming comes from [Build patterns](conventions/style/patterns.md). The directories sit empty (`.gitkeep`) until the first feature lands.
 
 ## The agent context (`.agents/`)
 
-The one directory that is not the project proper: a layer of optional accelerators for working with AI agents. Nothing in the build, the gates or CI reads it — with the directory removed, every stage of the process still runs by hand (ADR-0007). How to use it is [Working with agents](working-with-agents.md); its design, file by file, is the adapter table (`.agents/adapters/README.md`).
+The one directory that is not the project proper: a layer of optional accelerators for working with AI agents. Nothing in the build or the tests reads it; the gates only check that it stays consistent — and every stage of the process runs by hand (ADR-0007). How to use it is [Working with agents](working-with-agents.md); its design, file by file, is the adapter table (`.agents/adapters/README.md`).
 
 | Directory | Purpose |
 |:--|:--|
@@ -60,7 +60,7 @@ The one directory that is not the project proper: a layer of optional accelerato
 | `hooks/` | The automation specs; the git hooks implement parts of them. |
 | `agents/` | Reviewer personas for delegation: naming, tests, documentation, rule-documentation. |
 | `evals/` | Scenarios with mechanical criteria — they test the agent context itself. |
-| `state/` | Two working notes: `scratchpad.md` (one task, cleared when it ends) and `memory.md` (durable facts about the project). |
+| `state/` | Two working notes: `scratchpad.md` (one task, cleared when it ends — local, git-ignored) and `memory.md` (durable facts about the project, committed). |
 | `adapters/` | The mapping of this tree onto another agent harness — what to port, what to drop. |
 | `mcp.json` | MCP server registrations; none configured yet. |
 

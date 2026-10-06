@@ -8,9 +8,8 @@
 
 ## Branching Model
 
-- **main/master**: Production-ready code.
-- **develop**: Integration branch for features.
-- **feature/* | fix/* | refactor/***: Temporary branches for specific tasks.
+- **main**: Production-ready code.
+- **develop/***: Temporary branches for specific tasks — development is done on them; they merge into `main` through a pull request.
 
 ## Pull Request Process
 

@@ -85,3 +85,6 @@ docs/arc42/images/*.svg
 
 # Obsidian vault
 .obsidian/
+
+# Agent session state (per-clone working note — the committed counterpart is .agents/state/memory.md)
+.agents/state/scratchpad.md
