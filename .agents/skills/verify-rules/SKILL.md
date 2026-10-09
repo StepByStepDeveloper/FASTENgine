@@ -51,6 +51,8 @@ for c in clang++ g++ g++-16; do for std in c++17 c++20 c++23; do
 done; done
 ```
 
+Callers: `clang++` is the reference front end — the pair CI and `doit verify` compile with — while the two GCC front ends are the portability check ([toolchain facts](../../../docs/development/toolchain.md)). Re-run the sweep before a release and after a compiler upgrade; not on every edit. Measured as of 2026-10-10: all nine pairs exit 0 — clang++ 23.1.2 with 14 warnings, g++ 12.4.0 and g++-16 16.2.0 with 7 each (`-Wall -Wextra -Wpedantic`; see the Pitfalls).
+
 Links across the whole context tree, not only the conventions subtree:
 
 ```bash

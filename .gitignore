@@ -75,6 +75,11 @@ Testing/
 # Bazel (bazel-out/, bazel-bin/, bazel-testlogs/ convenience symlinks)
 bazel-*
 
+# Bazel user rc files — per-developer overrides imported by .bazelrc
+user.bazelrc
+.bazelrc.user
+bazelrc.user
+
 # doit task-runner state and Python caches
 .doit.db*
 __pycache__/

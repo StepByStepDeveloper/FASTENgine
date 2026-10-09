@@ -1,0 +1,7 @@
+# Platform-specific settings, imported by `.bazelrc` last. This tracked file is
+# intentionally empty: it exists so the import always resolves, and it is where a
+# genuinely shared platform fact lands when one appears — a runner toolchain, a
+# platform-only flag — because its content belongs to the repository, not to a
+# developer. A per-developer override goes to a user rc instead (user.bazelrc and
+# the variants), which is ignored by git; never put secrets in either.
+# `build:clang` / `build:gcc16` in `.bazelrc` are the shared entry points.

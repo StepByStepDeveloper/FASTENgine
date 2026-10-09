@@ -15,6 +15,18 @@ The build is **Bazel 9**, installed through Bazelisk and pinned by `.bazelversio
 | `g++-16` | 16.2.0 | `/usr/local/gcc-16.2.0` | the newest GCC on this machine; the second front end of `.bazelrc` (`--config=gcc16`) |
 | `gcc` | 13.3.0 | `/usr/bin/gcc` | **no C++ front end**: `cc1plus` is not installed for gcc-13, so nothing may auto-detect the system compiler — Bazel names one explicitly |
 
+### Compiler roles
+
+`clang++` is the **reference front end**: the warning claims of the conventions were measured on it, the formatting and language services (`clang-format`, `clangd`) belong to it, and both gate runs — `doit verify` and CI — compile with it. Its build is **warning-free with `-Werror`** (`.bazelrc`, `--config=clang`): a warning anywhere in the engine fails the build. The one deliberate exception is the illustrative fragments of `docs/development/conventions/**` — they declare entities nothing reads by design, so the tree's gate compiles them without `-Werror`; the exemption itself is stated in `style/documentation.md`.
+
+`g++-16` is the **portability front end**: it exists so that code touching a compiler's unspecified details (undefined behavior, floating-point contraction) is caught here rather than in a consumer's build, and Linux consumers build with GCC. Its contract is weaker on purpose — the code must compile and every test must pass under it, but `-Werror` is off there: the warning sets of the two compilers are not held equal, and a warning only GCC emits stays a warning.
+
+### Selecting the front end
+
+The two front ends are registered as Bazel configs in `.bazelrc` — `clang` and `gcc16` — and **the caller picks one; there is no rc-level default**. `doit build` and `doit test` pass `--config=clang`; the portability path is an explicit `bazel build //... --config=gcc16`. A bare `bazel build` with no flag falls back to Bazel's compiler autodetection (the PATH `cc`), which on this machine picks the C-less system `gcc` and fails by definition. The rc keeps no default because an `rc`-level `--config` expands for every command and the flags of stacked configs only accumulate — a default there would drag `-Werror` into the `gcc16` build. Two boards exist for local deviations: a git-ignored user rc (`user.bazelrc` and variants) for a developer's own overrides, and the tracked `.platform.bazelrc` for a platform fact that genuinely belongs to the repository; neither is in use today.
+
+Measured as of 2026-10-10: the full sweep of the `verify-rules` skill is green on all three front ends (clang++ 23.1.2, g++ 12.4.0 through the shim, g++-16 16.2.0 — hence on both GCC versions this machine carries) × C++17/20/23.
+
 ## Other tools
 
 | Tool | Version | Path | Notes |

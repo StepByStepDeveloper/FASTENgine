@@ -9,10 +9,20 @@ test --test_output=errors
 
 # The distro `gcc` on this machine has no C++ front end (`cc1plus` is missing for
 # gcc-13), so a compiler is named explicitly instead of being auto-detected.
-# clang is the default; `--config=gcc16` switches to the second front end the
-# warning claims of the rules were measured on.
-build --config=clang
+# Two configs are registered: `clang` (below) and `gcc16`. There is deliberately
+# no rc-level default — a `--config` directive in an rc expands for every
+# command and its flags accumulate, so a default there would leak `-Werror` into
+# `--config=gcc16`. The caller picks the front end: `doit build` / `doit test`
+# pass `--config=clang`; the second front end is `bazel build //... --config=gcc16`.
+# A bare `bazel build` falls back to Bazel's autodetection (PATH `cc`), which
+# fails on this machine by definition.
+try-import %workspace%/user.bazelrc
+try-import %workspace%/.bazelrc.user
+try-import %workspace%/bazelrc.user
+try-import %workspace%/.platform.bazelrc
+
 build:clang --repo_env=CC=clang
 build:clang --repo_env=CXX=clang++
+build:clang --cxxopt=-Werror  # the reference contract: every warning is an error; GCC-only warnings stay warnings
 build:gcc16 --repo_env=CC=gcc-16
 build:gcc16 --repo_env=CXX=g++-16

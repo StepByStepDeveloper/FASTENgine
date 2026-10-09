@@ -86,7 +86,7 @@ def task_build():
             print("no Bazel targets yet: the first BUILD.bazel brings them; "
                   "resolving the module graph instead")
             return subprocess.call(["bazel", "mod", "deps"]) == 0
-        return subprocess.call(["bazel", "build", "//..."]) == 0
+        return subprocess.call(["bazel", "build", "//...", "--config=clang"]) == 0
 
     return {"actions": [build]}
 
@@ -97,7 +97,7 @@ def task_test():
         if not _has_bazel_targets():
             print("no Bazel targets yet: the first BUILD.bazel brings them")
             return True
-        return subprocess.call(["bazel", "test", "//..."]) == 0
+        return subprocess.call(["bazel", "test", "//...", "--config=clang"]) == 0
 
     return {"actions": [run_tests]}
 
